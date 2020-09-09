@@ -1,7 +1,13 @@
+<<<<<<< HEAD
+=======
+import requests
+import json
+>>>>>>> 8d7cf96... north carolina done; florida init
 from bs4 import BeautifulSoup 
 import re 
 import json 
 import pandas as pd
+<<<<<<< HEAD
 import usaddress
 import sys
 sys.path.append('../../ElectionSaver')
@@ -56,10 +62,23 @@ def renameKey(src, dest):
     for element in all_elems_js:
         element[dest] = element[src]
         element.pop(src)
+=======
+
+URL = "https://vt.ncsbe.gov/BOEInfo/PrintableVersion/"
+r = requests.get(URL)
+soup = BeautifulSoup(r.content, 'html5lib')
+all_elems = soup.find_all('script')
+test = all_elems[16].text.split("var data = ")[1].split("// initialize")[0]
+json.loads(test)
+all_elems_js = json.loads(test)
+
+to_del = ['Coordinates', 'CountyId', 'DirectorName', 'MapLink', 'OfficeName', 'OfficePhoneNumExt', 'MailingAddr1', 'MailingAddr2', 'MailingAddrCSZ']
+>>>>>>> 8d7cf96... north carolina done; florida init
 
 for element in all_elems_js: 
     [element.pop(key) for key in to_del] 
     newAddy = element['PhysicalAddr1'] + ' ' + element['PhysicalAddr2'] + element['PhysicalAddrCSZ']
+<<<<<<< HEAD
     cleanedData = formatAddressData(newAddy, element['Name'])
     element['newAddress'] = cleanedData
 
@@ -77,3 +96,12 @@ for element in all_elems_js:
 
 with open('north_carolina.json', 'w') as f:
     json.dump(all_elems_js, f)
+=======
+    element['newAddress'] = newAddy
+
+addr_del = ['PhysicalAddr1', 'PhysicalAddr2', 'PhysicalAddrCSZ']
+for element in all_elems_js: 
+    [element.pop(key) for key in addr_del]
+
+print(all_elems_js)
+>>>>>>> 8d7cf96... north carolina done; florida init

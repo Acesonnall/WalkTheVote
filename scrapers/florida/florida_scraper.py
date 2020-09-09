@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 import asyncio
 import os
 import time
@@ -162,3 +163,9 @@ if __name__ == "__main__":
     asyncio.get_event_loop().run_until_complete(get_election_offices())
     end = time.time()
     print(f"{bcolors.OKBLUE}Completed in {end - start} seconds.{bcolors.ENDC}")
+=======
+import logging
+
+from bs4 import BeautifulSoup
+
+>>>>>>> 8d7cf96... north carolina done; florida init
