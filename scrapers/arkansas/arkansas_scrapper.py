@@ -79,6 +79,8 @@ def establish_uniformity(
         else:
             # slice in repaired string in place of range of malformed strings
             strings_list[start:end] = [repaired_line]
+    # remove unnecessary empty index
+    strings_list.pop()
     return strings_list
 
 
@@ -143,9 +145,6 @@ def navigate_pages(doc: PDFDocument, viewer: SimplePDFViewer):
         page_strings = establish_uniformity(
             strings_list=page_strings, line_range_list=merge_ranges
         )
-
-        # remove unnecessary empty index
-        page_strings.pop()
 
         get_county_election_office_info(strings_list=page_strings)
 
