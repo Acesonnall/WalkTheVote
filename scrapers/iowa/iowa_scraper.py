@@ -1,6 +1,8 @@
 """Iowa scraper
 """
 import logging
+import unicodedata
+from pprint import pprint
 
 from bs4 import BeautifulSoup
 from selenium import webdriver
@@ -33,6 +35,7 @@ class IowaScraper(BaseScraper):
         self.root_url = (
             "https://sos.iowa.gov/elections/auditors/auditor.asp?CountyID=00"
         )
+        self.data = []
 
     def scrape(self) -> int:
         """ TODO: Write documentation once purpose of method is further defined.
@@ -49,17 +52,51 @@ class IowaScraper(BaseScraper):
         try:
             LOG.info("Starting webdriver...")
             driver = webdriver.Edge(webdriver_path)
-
             # Execute GET request
             LOG.info(f"Fetching {self.root_url}...")
             driver.get(self.root_url)
-
             # Convert the response into an easily parsable object
             soup = BeautifulSoup(driver.page_source, "html.parser")
+            # Extract list of county names
+            county_name_list = soup.article.find_all("h2")
+            # Extract tables where address and phone numbers are stored
+            tables = soup.article.find_all("table")
+            # Prep helper vars
+            county_addr, phone = ("", "")
+            # Process county name and tables in parallel. Each table is uniform so we
+            # can use a modulus operator too look up exact info.
+            for county, table in zip(county_name_list, tables):
+                # Decode into format humans can read
+                county_name = unicodedata.normalize("NFKD", county.text)
+                # Extract table body
+                table_body = table.find("tbody")
+                # Extract table rows
+                rows = table_body.find_all("tr")
+                # Iterate through rows
+                for idx, tr in enumerate(rows):
+                    # Extract columns of rows
+                    cols = tr.find_all("td")
+                    # List column elements
+                    cols = [
+                        unicodedata.normalize("NFKD", ele.text.strip()) for ele in cols
+                    ]
+                    # Get phone number
+                    if idx % 12 == 1:
+                        phone = cols[0]
+                    # Get address
+                    if idx % 12 == 11:
+                        county_addr = " ".join(cols[0].split())
+                        # append to data buffer
+                        self.data.append(
+                            {
+                                "county_name": county_name,
+                                "county_addr": county_addr,
+                                "phone": phone,
+                            }
+                        )
 
-            # Print out results for testing
-            LOG.info(f"Test parse:\n{soup.article.table}")
-
+            # print that shit
+            pprint(self.data)
             # Close browser driver
             driver.close()
         except Exception as e:
