@@ -43,7 +43,7 @@ def scrapeOneCounty(countyCode, countyName):
     example = {"\t": None, "\n": " ", "\r": None}
     table = countyInfo.maketrans(example)
     cleaned = countyInfo.translate(table)
-
+    
     return cleaned, hexEmail
 
 def formatDataIntoSchema(cleanedData, hexEmail, countyName):
@@ -142,4 +142,3 @@ if __name__ == "__main__":
 
     with open('florida.json', 'w') as f:
         json.dump(masterList, f)
-

@@ -49,7 +49,7 @@ def formatDataIntoSchema(countyName, postResponseData):
 
     phoneRegex = re.search('Phone:(.*)  Fax:', cleanedData)
     phone = 'None' if phoneRegex is None else phoneRegex[1]
-
+    
     emailRegex = re.search(r'[a-zA-Z0-9_.+-]+@[a-zA-Z0-9-]+\.[a-zA-Z0-9-.]+', cleanedData)
     email = 'None' if emailRegex is None else emailRegex[0]
 
