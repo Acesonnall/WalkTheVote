@@ -2,64 +2,144 @@ import cloudscraper
 from bs4 import BeautifulSoup as bs
 import re
 import json
+import usaddress
+import sys
+from string import printable
+sys.path.append('../../ElectionSaver')
+
+import electionsaver
 
 BASE_URL = "https://dos.elections.myflorida.com/supervisors/"
 
 scraper = cloudscraper.create_scraper()
 
-r = scraper.get(BASE_URL)
-soup = bs(r.content, 'html.parser')
+def getCountyCodesAndNames(soup):
+    urlElems = soup.find_all('li')
+    res = []
+    for url in urlElems:
+        a = url.find('a')
+        href = a['href']
+        if ('county' in href):
+            countyData = {
+                "countyCode": href.split('=')[1],
+                "countyName": a.text
+            }
+            res.append(countyData)
+    return res
 
-urlElems = soup.find_all('li')
-
-countyCodes = []
-countyNames = []
-
-for url in urlElems:
-    a = url.find('a')
-    href = a['href']
-    if ('county' in href):
-        countyCodes.append(href.split('=')[-1])
-        countyNames.append(a.text)
-
-#countyCodes.sort()
-#countyNames.sort()
-
-# Given a three-letter county code, scrape that specific county webpage's data.
-# Returns a tuple of the format (address, phone)
-def scrapeOneCounty(code):
-    URL = BASE_URL + "countyInfo.asp?county=" + code
-    t = scraper.get(URL)
-    soup = bs(t.content, 'html.parser')
+# function to decode hexadecimal email strings
+# lifted this off some stackoverflow post lol
+    
+def scrapeOneCounty(countyCode, countyName):
+    URL = BASE_URL + "countyInfo.asp?county=" + countyCode
+    s = scraper.get(URL)
+    soup = bs(s.content, 'html.parser')
     
     # relevant info is in a random <p> with no classes
     countyInfo = soup.find('p', attrs={'class': None}).text
+    hexEmail = soup.find('span', class_="__cf_email__")['data-cfemail']
 
     # clean up \t \r \n tags from string
     example = {"\t": None, "\n": " ", "\r": None}
     table = countyInfo.maketrans(example)
     cleaned = countyInfo.translate(table)
 
-    #extract address info which is always between supervisor and phone
-    address = re.search('Supervisor(.*)Phone:', cleaned)
-    phone = re.search('Phone: (.*)Fax:', cleaned)
+    return cleaned, hexEmail
+
+def formatDataIntoSchema(cleanedData, hexEmail, countyName):
+    officeSupervisor = cleanedData.split(", Supervisor")[0].strip()
+    officeSupervisor = re.sub("[^{}]+".format(printable), " ", officeSupervisor)
+
+    # extract address info which is always between supervisor and phone
+    address = re.search('Supervisor(.*)Phone:', cleanedData)
     addressResult = 'None' if address is None else address.group(1)
-    phoneResult = 'None' if phone is None else phone.group(1)
-    return addressResult, phoneResult
+    physicalAddress = ""
+
+    # similar setup for phone 
+    phone = re.search('Phone: (.*)Fax:', cleanedData)
+    phoneResult = 'None' if phone is None else phone.group(1).strip()
+
+    # grab website
+    website = re.search('Web Address: (.*)', cleanedData)
+    websiteResult = 'None' if phone is None else website.group(1).strip()
+
+    # extract and decode email
+    email = electionsaver.decodeEmail(hexEmail)
+
+    schema = {
+        "countyName": countyName,
+        "phone": phoneResult,
+        "email": email,
+        "officeSupervisor": officeSupervisor,
+        "website": websiteResult,
+        "supervisorTitle": "Supervisor"
+    }
     
-masterList = []
+    if addressResult.count('FL') > 1: # there are two addresses listed
+        splitAddresses = addressResult.split("     ")
+        mailingAddress = " ".join(splitAddresses[1:])
+        schema['mailingAddress'] = formatAddressData(mailingAddress, countyName)
+        physicalAddress = formatAddressData(splitAddresses[0], countyName)
+    else:
+        physicalAddress = formatAddressData(addressResult, countyName)
 
-for index, county in enumerate(countyNames):
-    code = countyCodes[index]
-    print(code, county)
-    address, phone = scrapeOneCounty(code)
-    result = {'address': address, 'phone': phone}
-    masterResult = {'county': county, 'data': result}
-    masterList.append(masterResult)
+    schema['physicalAddress'] = physicalAddress
 
-print(masterList)
+    return schema
+    
+def formatAddressData(addressData, countyName):
+    mapping = electionsaver.addressSchemaMapping
+    # parsedDataDict = usaddress.tag(addressData, tag_mapping=mapping)[0]
 
+    # edge cases
 
+    # lol doctor and drive have the same abbreviation
+    if countyName == "Collier":
+        addressData = addressData.replace('Rev Dr', 'Reverend Doctor')
+    
+    # this county only has a PO Box, and I happened to click on the website
+    # and find out there's an actual physical location lol.. got lucky
+    if countyName == "Citrus":
+        addressData = "1500 N. Meadowcrest Blvd. Crystal River, FL 34429"
+    
+    try:
+        parsedDataDict = usaddress.tag(addressData, tag_mapping=mapping)[0]
+    except:
+        print(f'Error with data for {countyName} county, data is {parsedDataDict}')
 
+    finalAddress = {
+        "city": parsedDataDict['city'],
+        "state": parsedDataDict['state'],
+        "zipCode": parsedDataDict['zipCode'],
+    }
+    if 'streetNumberName' in parsedDataDict:
+        finalAddress['streetNumberName'] = parsedDataDict['streetNumberName']
+    if 'poBox' in parsedDataDict:
+        finalAddress['poBox'] = parsedDataDict['poBox']
+    if 'locationName' in parsedDataDict:
+        finalAddress['locationName'] = parsedDataDict['locationName']
+    if 'aptNumber' in parsedDataDict:
+        finalAddress['aptNumber'] = parsedDataDict['aptNumber']
+    return finalAddress
 
+if __name__ == "__main__":
+
+    s = scraper.get(BASE_URL)
+    soup = bs(s.content, 'html.parser')
+
+    testCountyData = getCountyCodesAndNames(soup)
+    countyData = sorted(testCountyData, key = lambda k: k['countyName'])
+    numScraped = 0
+    masterList = []
+    for county in countyData:
+        code = county['countyCode']
+        name = county['countyName']
+        cleandStringAndEmail = scrapeOneCounty(code, name)
+        schema = formatDataIntoSchema(cleandStringAndEmail[0], cleandStringAndEmail[1], name)
+        masterList.append(schema)
+        numScraped += 1
+        print(f'[Florida] Scraped {name} county: #{numScraped} of {len(countyData)} .... [{round((numScraped/len(countyData)) * 100, 2)}%]')
+
+    with open('florida.json', 'w') as f:
+        json.dump(masterList, f)
 
