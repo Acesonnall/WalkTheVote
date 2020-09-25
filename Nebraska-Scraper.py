@@ -52,7 +52,7 @@ for e in elems:
         "physicalAddress": {
             "streetNumberName": streetNumberName,
             "city": City,
-            "state": 'Michigan',
+            "state": 'Nebraska',
             "county": County,
             "zipCode": zipCode,
         },
