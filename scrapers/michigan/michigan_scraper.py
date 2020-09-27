@@ -6,8 +6,6 @@ import random
 import usaddress
 from string import printable
 
-requests.packages.urllib3.disable_warnings() 
-
 BASE_URL = "https://mvic.sos.state.mi.us/Clerk"
 
 # found via Network tab in developer tools
@@ -51,8 +49,8 @@ def formatDataIntoSchema(countyName, postResponseData):
 
     phoneRegex = re.search('Phone:(.*)  Fax:', cleanedData)
     phone = 'None' if phoneRegex is None else phoneRegex[1]
-
-    emailRegex = re.search('[a-zA-Z0-9_.+-]+@[a-zA-Z0-9-]+\.[a-zA-Z0-9-.]+', cleanedData)
+    
+    emailRegex = re.search(r'[a-zA-Z0-9_.+-]+@[a-zA-Z0-9-]+\.[a-zA-Z0-9-.]+', cleanedData)
     email = 'None' if emailRegex is None else emailRegex[0]
 
     # janky as fuck, but search stops after first match
