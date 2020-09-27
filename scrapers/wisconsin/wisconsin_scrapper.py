@@ -5,7 +5,8 @@ import requests
 from pdfreader import SimplePDFViewer, PDFDocument
 
 r = requests.get(
-    "https://elections.wi.gov/sites/elections.wi.gov/files/2020-08/WI%20County%20Clerks%20Updated%208-7-20.pdf"
+    "https://elections.wi.gov/sites/elections.wi.gov/files/2020-08/WI%20County"
+    "%20Clerks%20Updated%208-7-20.pdf "
 )
 
 doc = PDFDocument(r.content)
