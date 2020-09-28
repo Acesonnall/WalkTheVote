@@ -99,7 +99,7 @@ class ZipCode(MongoModel):
 
 def main():
     print(f"Start: {time.time()}")
-    df = pd.read_csv("./zip_county_mapping/out.csv")
+    df = pd.read_csv("../scrapers/zip_county_mapping/out.csv")
 
     connect(os.environ.get('MONGO_DB_TEST_URI'), alias=os.environ.get("MONGO_DB_TEST_ALIAS"))
 
