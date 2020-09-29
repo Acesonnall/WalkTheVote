@@ -11,7 +11,7 @@ from aiocfscrape import CloudflareScraper
 from string import printable
 
 from ElectionSaver import electionsaver
-from definitions import ROOT_DIR
+from definitions import ROOT_DIR, bcolors
 
 BASE_URL = "https://dos.elections.myflorida.com/supervisors/"
 
@@ -161,4 +161,4 @@ if __name__ == "__main__":
     start = time.time()
     asyncio.get_event_loop().run_until_complete(get_election_offices())
     end = time.time()
-    print(end - start)
+    print(f"{bcolors.OKBLUE}Completed in {end - start} seconds.{bcolors.ENDC}")

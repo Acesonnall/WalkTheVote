@@ -12,7 +12,7 @@ import usaddress
 from aiohttp import ClientSession
 from bs4 import BeautifulSoup as bS
 
-from definitions import ROOT_DIR
+from definitions import ROOT_DIR, bcolors
 
 BASE_URL = "https://mvic.sos.state.mi.us/Clerk"
 
@@ -220,4 +220,4 @@ if __name__ == '__main__':
     start = time.time()
     asyncio.get_event_loop().run_until_complete(get_election_offices())
     end = time.time()
-    print(end - start)
+    print(f"{bcolors.OKBLUE}Completed in {end - start} seconds.{bcolors.ENDC}")
