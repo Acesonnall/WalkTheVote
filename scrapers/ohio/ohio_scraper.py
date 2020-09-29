@@ -1,8 +1,9 @@
-import json
-import re
+from typing import List
 
 import requests
 from bs4 import BeautifulSoup
+import re
+import json
 
 URL = (
     "https://www.sos.state.oh.us/elections/elections-officials/county-boards-of"
@@ -27,12 +28,14 @@ for i in office_elems:
 
 phone = []
 addies = []
-ohours = []
+ohours: List[str] = []
+zipcode = []
 
 for i in all_elems:
     office_hours = re.search("Office Hours: (.*) Telephone", i)
     phone_num = re.search("Telephone: (.*) Fax", i)
     address = re.search("\nGet Directions {2}(.*) Office", i)
+    zip = re.search("OH (.*) Office", i)
     if office_hours is None:
         ohours.append("None")
     else:
@@ -45,11 +48,22 @@ for i in all_elems:
         addies.append("None")
     else:
         addies.append(address.group(1))
+    if zip is None:
+        zipcode.append("None")
+    else:
+        zipcode.append(zip.group(1))
 
-output = {
-    "county": county_names,
-    "address": addies,
-    "phone number": phone,
-    "hours": ohours,
+schema = {
+    "countyName": county_names,
+    "physicalAddress": {
+        "streetNumberName": addies,
+        "state": "Ohio",
+        "county": county_names,
+        "Zip Code": zipcode,
+    },
+    "phone": phone,
+    "OfficeHours": ohours,
+    "Link": "https://www.sos.state.oh.us/elections/elections-officials/county-boards"
+    "-of-elections-directory/",
 }
-output_json = json.dumps(output)
+print(schema)

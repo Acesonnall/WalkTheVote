@@ -1,26 +1,26 @@
+import asyncio
 import json
+import os
 import re
+import time
 from string import printable
 from typing import Dict
 
+import aiohttp as aiohttp
 import requests
 import usaddress
+from aiohttp import ClientSession
 from bs4 import BeautifulSoup as bS
 
-requests.packages.urllib3.disable_warnings()
+from definitions import ROOT_DIR, bcolors
 
 BASE_URL = "https://mvic.sos.state.mi.us/Clerk"
 
 # found via Network tab in developer tools
 NEW_URL = "https://mvic.sos.state.mi.us/Voter/SearchByCounty"
 
-r = requests.get(BASE_URL, verify=False)
-soup = bS(r.content, "html.parser")
 
-countyData = []
-
-
-def get_county_names():
+def get_county_names(soup, county_data):
     options = soup.find_all("option")
     for option in options:
         if "County" in option.text or "COUNTY" in option.text:
@@ -28,17 +28,16 @@ def get_county_names():
             if "IRON" in option.text:
                 this_county_name = "Iron"
             this_county_id = option["value"]
-            countyData.append(
+            county_data.append(
                 {"CountyName": this_county_name, "CountyID": this_county_id}
             )
 
 
-get_county_names()
-
-
-def request_data_for_one_county(county_data):
-    req = requests.post(NEW_URL, county_data, verify=False)
-    _soup = bS(req.content, "html.parser")
+async def request_data_for_one_county(session: ClientSession, county_data):
+    # req = requests.post(NEW_URL, county_data, verify=False)
+    async with session.post(NEW_URL, data=county_data) as req:
+        text = await req.read()
+        _soup = bS(text.decode("utf-8"), "html.parser")
 
     office_data = _soup.find(id="pnlClerk").find(class_="card-body").text
     example = {"\t": None, "\n": " ", "\r": None}
@@ -187,18 +186,38 @@ def format_address_data(address_data, county_name):
     return final_address
 
 
-masterList = []
-# do stuff to all counties
-numScraped = 0
-for county in countyData:
-    data = request_data_for_one_county(county)
-    masterList.append(data)
-    numScraped += 1
-    print(
-        f'[Michigan] Scraped {data["countyName"]} county: #{numScraped} of '
-        f"{len(countyData)} .... [{round((numScraped / len(countyData)) * 100, 2)}%]"
-    )
+async def get_election_offices():
+    async with aiohttp.ClientSession() as session:
+        soup = None
+        async with session.get(BASE_URL) as r:
+            # r = requests.get(BASE_URL, verify=False)
+            text = await r.read()
+            soup = bS(text.decode("utf-8"), "html.parser")
 
-# output to JSON
-with open("michigan.json", "w") as f:
-    json.dump(masterList, f)
+        county_data = []
+
+        get_county_names(soup, county_data)
+
+        master_list = []
+        # do stuff to all counties
+        num_scraped = 0
+        for county in county_data:
+            data = await request_data_for_one_county(session, county)
+            master_list.append(data)
+            num_scraped += 1
+            print(
+                f'[Michigan] Scraped {data["countyName"]} county: #{num_scraped} of '
+                f"{len(county_data)} .... [{round((num_scraped / len(county_data)) * 100, 2)}%]"
+            )
+
+        # output to JSON
+        with open(os.path.join(ROOT_DIR, r"scrapers\florida\florida.json"), "w") as f:
+            json.dump(master_list, f)
+            return master_list
+
+
+if __name__ == '__main__':
+    start = time.time()
+    asyncio.get_event_loop().run_until_complete(get_election_offices())
+    end = time.time()
+    print(f"{bcolors.OKBLUE}Completed in {end - start} seconds.{bcolors.ENDC}")
