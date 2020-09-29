@@ -131,3 +131,6 @@ dmypy.json
 # Any JSON files
 *.json
 .json
+
+# For thoe who use PyCharm
+*.idea
