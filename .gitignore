@@ -134,3 +134,6 @@ dmypy.json
 
 # For thoe who use PyCharm
 *.idea
+*.DS_Store
+.DS_Store
+
