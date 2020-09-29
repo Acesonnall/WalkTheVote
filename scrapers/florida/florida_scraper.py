@@ -1,13 +1,17 @@
+import asyncio
+import os
+import time
+
 import cloudscraper
 from bs4 import BeautifulSoup as bs
 import re
 import json
 import usaddress
-import sys
+from aiocfscrape import CloudflareScraper
 from string import printable
-sys.path.append('../../ElectionSaver')
 
-import electionsaver
+from ElectionSaver import electionsaver
+from definitions import ROOT_DIR
 
 BASE_URL = "https://dos.elections.myflorida.com/supervisors/"
 
@@ -30,10 +34,13 @@ def getCountyCodesAndNames(soup):
 # function to decode hexadecimal email strings
 # lifted this off some stackoverflow post lol
     
-def scrapeOneCounty(countyCode, countyName):
+async def scrapeOneCounty(countyCode, countyName):
     URL = BASE_URL + "countyInfo.asp?county=" + countyCode
-    s = scraper.get(URL)
-    soup = bs(s.content, 'html.parser')
+    # s = scraper.get(URL)
+    async with CloudflareScraper() as session:
+        async with session.get(URL) as s:
+            text = await s.read()
+            soup = bs(text.decode("utf-8"), 'html.parser')
     
     # relevant info is in a random <p> with no classes
     countyInfo = soup.find('p', attrs={'class': None}).text
@@ -101,7 +108,8 @@ def formatAddressData(addressData, countyName):
     # and find out there's an actual physical location lol.. got lucky
     if countyName == "Citrus":
         addressData = "1500 N. Meadowcrest Blvd. Crystal River, FL 34429"
-    
+
+    parsedDataDict = {}
     try:
         parsedDataDict = usaddress.tag(addressData, tag_mapping=mapping)[0]
     except:
@@ -122,23 +130,35 @@ def formatAddressData(addressData, countyName):
         finalAddress['aptNumber'] = parsedDataDict['aptNumber']
     return finalAddress
 
-if __name__ == "__main__":
 
-    s = scraper.get(BASE_URL)
-    soup = bs(s.content, 'html.parser')
+async def get_election_offices():
+    # s = scraper.get(BASE_URL)
+    async with CloudflareScraper() as session:
+        async with session.get(BASE_URL) as s:
+            text = await s.read()
+            soup = bs(text.decode("utf-8"), 'html.parser')
 
     testCountyData = getCountyCodesAndNames(soup)
-    countyData = sorted(testCountyData, key = lambda k: k['countyName'])
+    countyData = sorted(testCountyData, key=lambda k: k['countyName'])
     numScraped = 0
     masterList = []
     for county in countyData:
         code = county['countyCode']
         name = county['countyName']
-        cleandStringAndEmail = scrapeOneCounty(code, name)
-        schema = formatDataIntoSchema(cleandStringAndEmail[0], cleandStringAndEmail[1], name)
+        cleandStringAndEmail = await scrapeOneCounty(code, name)
+        schema = formatDataIntoSchema(cleandStringAndEmail[0], cleandStringAndEmail[1],
+                                      name)
         masterList.append(schema)
         numScraped += 1
-        print(f'[Florida] Scraped {name} county: #{numScraped} of {len(countyData)} .... [{round((numScraped/len(countyData)) * 100, 2)}%]')
+        print(
+            f'[Florida] Scraped {name} county: #{numScraped} of {len(countyData)} .... [{round((numScraped / len(countyData)) * 100, 2)}%]')
 
-    with open('florida.json', 'w') as f:
+    with open(os.path.join(ROOT_DIR, r"scrapers\florida\florida.json"), 'w') as f:
         json.dump(masterList, f)
+
+
+if __name__ == "__main__":
+    start = time.time()
+    asyncio.get_event_loop().run_until_complete(get_election_offices())
+    end = time.time()
+    print(end - start)
