@@ -1,6 +1,6 @@
 """Generic scraper
 
-The scraper class with all other scapers will inhereit from.
+The scraper class with all other scrapers will inherit from.
 """
 from abc import ABC, abstractmethod
 
