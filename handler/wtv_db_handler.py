@@ -45,8 +45,11 @@ class Scraper:
 class WtvDbHandler:
     """Walk The Vote database handler.
     
-    @param self.mapping_df table of zip code, state, county, and city mappings
-    @param self.scrapper_funcs [state_name] -> scraper_function dictionary mapping
+    @param self.preloaded boolean variable to help determine whether database was
+    already with loaded with zip -> city -> county -> state mapping. Helps improve
+    run time.
+    @param self.scrapers list of state scraper objects each containing their own
+    information needed to load database with election office information
     """
 
     def __init__(self, db_uri, db_alias):
