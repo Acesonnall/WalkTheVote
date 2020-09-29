@@ -1,10 +1,3 @@
-import requests
-from bs4 import BeautifulSoup 
-import re 
-import json 
-import csv
-import io
-import urllib3
 import pandas as pd
 import usaddress
 import sys
@@ -12,16 +5,18 @@ sys.path.append('../../ElectionSaver')
 
 import electionsaver
 
-t_file = "https://www.maine.gov/tools/whatsnew/index.php?topic=cec_clerks_registrars&v=text"
+t_file = (
+    "https://www.maine.gov/tools/whatsnew/index.php?topic=cec_clerks_registrars&v=text"
+)
 
-url_data = pd.read_table(t_file, sep = '|')
+url_data = pd.read_table(t_file, sep="|")
 
 county_info = pd.DataFrame(url_data)
 
-init_info = county_info.columns.tolist() 
+init_info = county_info.columns.tolist()
 new_init_info = []
 
-for string in init_info: 
+for string in init_info:
     new_string = string.replace("<plaintext>Abbot", "Abbot")
     new_init_info.append(new_string)
 
