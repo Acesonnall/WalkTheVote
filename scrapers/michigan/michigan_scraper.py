@@ -5,6 +5,10 @@ import json
 import random
 import usaddress
 from string import printable
+import sys
+sys.path.append('../../ElectionSaver')
+
+import electionsaver
 
 BASE_URL = "https://mvic.sos.state.mi.us/Clerk"
 
@@ -108,34 +112,8 @@ def formatDataIntoSchema(countyName, postResponseData):
     return schema
 
 def formatAddressData(addressData, countyName):
-    addressSchemaMapping = {
-        'BuildingName': 'locationName',
-        'CornerOf': 'locationName',
-        'IntersectionSeparator':'locationName',
-        'LandmarkName': 'locationName',
-        'NotAddress': 'locationName',
-        'SubaddressType': 'aptNumber',
-        'SubaddressIdentifier': 'aptNumber',
-        'AddressNumber': 'streetNumberName',
-        'StreetName': 'streetNumberName',
-        'StreetNamePreDirectional': 'streetNumberName',
-        'StreetNamePreModifier': 'streetNumberName',
-        'StreetNamePreType': 'streetNumberName',
-        'StreetNamePostDirectional': 'streetNumberName',
-        'StreetNamePostModifier': 'streetNumberName',
-        'StreetNamePostType': 'streetNumberName',
-        'OccupancyType': 'aptNumber',
-        'OccupancyIdentifier': 'aptNumber',
-        'Recipient': 'locationName',
-        'PlaceName': 'city',
-        'USPSBoxGroupID': 'poBox',
-        'USPSBoxGroupType': 'poBox',
-        'USPSBoxID': 'poBox',
-        'USPSBoxType': 'poBox',
-        'StateName': 'state',
-        'ZipCode': 'zipCode'
-    }
-    parsedDataDict = usaddress.tag(addressData, tag_mapping=addressSchemaMapping)[0]
+    mapping = electionsaver.addressSchemaMapping
+    parsedDataDict = usaddress.tag(addressData, tag_mapping=mapping)[0]
     
     try:
         finalAddress = {
