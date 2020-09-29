@@ -4,6 +4,7 @@ import os
 import re
 import time
 from string import printable
+
 from typing import Dict
 
 import aiohttp as aiohttp
@@ -125,7 +126,6 @@ def format_data_into_schema(county_name, post_response_data):
 
     # print(schema)
     return schema
-
 
 def format_address_data(address_data, county_name):
     address_schema_mapping = {
