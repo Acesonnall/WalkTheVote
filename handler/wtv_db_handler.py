@@ -170,8 +170,8 @@ class WtvDbHandler:
         """
         scraper.data = await scraper.get_election_office()
 
-    # TODO: Implement code to handle loading of select states rather than ALL (useful
-    #  for if we need to issue updates without reloading the entire db)
+    # TODO: Implement code to handle loading of select states rather than all of them
+    #  (useful for if we need to issue targeted updates)
     async def get_election_office_info(self, states=None):
         """ Dynamically acquire data from scrapers in a non-IO blocking fashion
         """
