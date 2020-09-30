@@ -118,7 +118,9 @@ def formatStreetNumber(streetNumberName, countyName):
 
     parsedDataDict = usaddress.tag(streetNumberName, tag_mapping=mapping)[0]
 
-    finalAddress = {}
+    finalAddress = {
+        "locationName": f'{countyName} County Election Office'
+    }
 
     if 'aptNumber' in parsedDataDict:
         finalAddress['aptNumber'] = parsedDataDict['aptNumber']
@@ -151,7 +153,7 @@ for i in range(len(county_names)):
         addressSchema['locationName'] = streetSubSchema['locationName']
     schema = {
         "countyName": county_names[i],
-        "streetNumberName": addressSchema,
+        "physicalAddress": addressSchema,
         "phone": phone[i],
         "officeSupervisor": clerk_name[i],
         "supervisorTitle": clerk_position[i],
