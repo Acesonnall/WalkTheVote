@@ -1,4 +1,5 @@
 from bs4 import BeautifulSoup 
+import requests
 import re 
 import json 
 import pandas as pd
@@ -27,7 +28,7 @@ def formatAddressData(addressData, countyName):
 
     finalAddress = {
         "city": parsedDataDict['city'],
-        "state": parsedDataDict['state'],
+        "state": "North Carolina",
         "zipCode": parsedDataDict['zipCode']
     }
 
