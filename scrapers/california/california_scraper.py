@@ -102,7 +102,7 @@ def formatAddressData(address, countyName):
     try:
         finalAddress = {
             "city": parsedDataDict["city"],
-            "state": parsedDataDict['state'],
+            "state": "California",
             "zipCode": parsedDataDict['zipCode'],
         }
     except:
@@ -166,5 +166,5 @@ for i in range(len(county_names)):
 
 #print(masterList)
 
-with open('_california.json', 'w') as f:
+with open('california.json', 'w') as f:
     json.dump(masterList, f)

@@ -81,8 +81,6 @@ def formatStreetNumber(streetNumberName, countyName):
     if 'aptNumber' in parsedDataDict:
         finalAddress['aptNumber'] = parsedDataDict['aptNumber']
 
-    print(f'Error with data for {countyName} county, data is {parsedDataDict}')
-
     return finalAddress
 
 
@@ -101,7 +99,5 @@ for i in range(len(county_names)):
         }
     masterList.append(schema)
 
-print(masterList)
-
-with open('_arizona.json', 'w') as f:
+with open('arizona.json', 'w') as f:
     json.dump(masterList, f)
