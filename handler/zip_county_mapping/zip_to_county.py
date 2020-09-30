@@ -22,7 +22,7 @@ def get_state_zip_info(scraper, url, name):
     return info_df
 
 
-if __name__ == "__main__":
+def create_mapping():
     c_scraper = cloudscraper.create_scraper()
     html_obj = c_scraper.get(
         "https://www.unitedstateszipcodes.org/printable-zip-code-maps/"
@@ -47,4 +47,11 @@ if __name__ == "__main__":
 
         zip_info_df = zip_info_df.append(state_info_df, ignore_index=True)
 
-    zip_info_df.to_csv("out2.csv", sep="\t", encoding="utf-8", index=False)
+    if __name__ == "__main__":
+        zip_info_df.to_csv(path_or_buf="../mapping.csv", encoding="utf-8", index=False)
+    else:
+        return zip_info_df
+
+
+if __name__ == "__main__":
+    create_mapping()

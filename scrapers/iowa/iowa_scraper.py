@@ -105,7 +105,7 @@ class IowaScraper(BaseScraper):
         return exit_code
 
 
-def main() -> int:
+def get_election_offices() -> int:
     iowa_scraper = IowaScraper()
     exit_code = iowa_scraper.scrape()
 
@@ -113,4 +113,4 @@ def main() -> int:
 
 
 if __name__ == "__main__":
-    exit(main())
+    exit(get_election_offices())
