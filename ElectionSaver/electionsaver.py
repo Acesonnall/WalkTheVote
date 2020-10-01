@@ -25,6 +25,7 @@ addressSchemaMapping = {
     'StreetNamePostDirectional': 'streetNumberName',
     'StreetNamePostModifier': 'streetNumberName',
     'StreetNamePostType': 'streetNumberName',
+    'AddressNumberSuffix': 'streetNumberName',
     'OccupancyType': 'aptNumber',
     'OccupancyIdentifier': 'aptNumber',
     'Recipient': 'locationName',
