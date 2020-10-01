@@ -3,12 +3,12 @@ import json
 import os
 import re
 import time
+from asyncio import Task, Future
 from string import printable
 
-from typing import Dict
+from typing import Dict, List
 
 import aiohttp as aiohttp
-import requests
 import usaddress
 from aiohttp import ClientSession
 from bs4 import BeautifulSoup as bS
@@ -35,10 +35,9 @@ def get_county_names(soup, county_data):
 
 
 async def request_data_for_one_county(session: ClientSession, county_data):
-    # req = requests.post(NEW_URL, county_data, verify=False)
     async with session.post(NEW_URL, data=county_data) as req:
         text = await req.read()
-        _soup = bS(text.decode("utf-8"), "html.parser")
+    _soup = bS(text.decode("utf-8"), "html.parser")
 
     office_data = _soup.find(id="pnlClerk").find(class_="card-body").text
     example = {"\t": None, "\n": " ", "\r": None}
@@ -127,6 +126,7 @@ def format_data_into_schema(county_name, post_response_data):
     # print(schema)
     return schema
 
+
 def format_address_data(address_data, county_name):
     address_schema_mapping = {
         "BuildingName": "locationName",
@@ -192,7 +192,7 @@ async def get_election_offices():
         async with session.get(BASE_URL) as r:
             # r = requests.get(BASE_URL, verify=False)
             text = await r.read()
-            soup = bS(text.decode("utf-8"), "html.parser")
+        soup = bS(text.decode("utf-8"), "html.parser")
 
         county_data = []
 
@@ -201,13 +201,27 @@ async def get_election_offices():
         master_list = []
         # do stuff to all counties
         num_scraped = 0
+
+        # Create list that will store asyncio tasks
+        tasks: List[Task] = []
         for county in county_data:
-            data = await request_data_for_one_county(session, county)
+            # Create task for a future asynchronous operation and store it in task list
+            tasks.append(
+                asyncio.create_task(request_data_for_one_county(session, county))
+            )
+
+        # Run the coroutines and iterate over the yielded results as they complete
+        # (out-of-order). Use asyncio.gather() with a couple code modifications to
+        # preserve list order
+        future: Future[Dict]
+        for future in asyncio.as_completed(tasks):
+            data = await future
             master_list.append(data)
             num_scraped += 1
             print(
                 f'[Michigan] Scraped {data["countyName"]} county: #{num_scraped} of '
-                f"{len(county_data)} .... [{round((num_scraped / len(county_data)) * 100, 2)}%]"
+                f"{len(county_data)} .... "
+                f"[{round((num_scraped / len(county_data)) * 100, 2)}%]"
             )
 
         # output to JSON
@@ -216,7 +230,7 @@ async def get_election_offices():
             return master_list
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     start = time.time()
     asyncio.get_event_loop().run_until_complete(get_election_offices())
     end = time.time()
