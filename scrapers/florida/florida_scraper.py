@@ -3,7 +3,7 @@ import os
 import time
 from asyncio import Task
 from asyncio.futures import Future
-from typing import List, Any, Tuple
+from typing import List, Tuple
 
 import cloudscraper
 from bs4 import BeautifulSoup as bS
