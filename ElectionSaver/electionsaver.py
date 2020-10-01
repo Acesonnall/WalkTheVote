@@ -17,6 +17,7 @@ addressSchemaMapping = {
     'SubaddressType': 'aptNumber',
     'SubaddressIdentifier': 'aptNumber',
     'AddressNumber': 'streetNumberName',
+    'AddressNumberSuffix': 'streetNumberName',
     'StreetName': 'streetNumberName',
     'StreetNamePreDirectional': 'streetNumberName',
     'StreetNamePreModifier': 'streetNumberName',
