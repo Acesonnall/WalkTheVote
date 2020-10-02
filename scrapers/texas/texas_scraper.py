@@ -5,12 +5,14 @@ import usaddress
 import requests
 from bs4 import BeautifulSoup
 import re
+
 sys.path.append('../../ElectionSaver')
 
 import electionsaver
 
 r = requests.get("https://www.sos.state.tx.us/elections/forms/election-duties-1.xlsx")
 texas_boe = pd.read_excel(r.content)
+
 texas_boe = texas_boe.drop(['Mailing Address', 'Secondary Email', 'Fax', 'County Email Addresses', 'Primary Email '], axis = 1)
 
 county_names = []
@@ -50,7 +52,7 @@ def formatAddressData(address, countyName):
         address = address + ' 78364'
     if countyName == 'Stephens':
         address = address.replace('Courthouse', '')
-
+        
     parsedDataDict = usaddress.tag(address, tag_mapping=mapping)[0]
 
     finalAddress = {

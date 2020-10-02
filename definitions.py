@@ -13,6 +13,7 @@ class bcolors:
     BOLD = '\033[1m'
     UNDERLINE = '\033[4m'
 
+
 ROOT_DIR = os.path.dirname(os.path.abspath(__file__))
 
 TEST_DB_URI = os.environ.get("MONGO_DB_TEST_URI")
