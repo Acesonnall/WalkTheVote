@@ -38,7 +38,7 @@ phone = [i.strip() for i in county_info if '(' in i
 ind_LA = county_names.index('Los Angeles')
 phone.insert(ind_LA, '(800) 815-2666')
 
-phone_nums = [i[:14] for i in phone]
+phone_num = [i[:14] for i in phone]
 
 hours = [i.strip('Hours: ').strip('(707) 263-2742 FaxHours:').strip('\n\t') for i in county_info if 'Hours: ' in i]
 
@@ -153,7 +153,7 @@ for i in range(len(county_names)):
     schema = {
         "countyName": county_names[i],
         "physicalAddress": addressSchema,
-        "phone": phone_nums[i],
+        "phone": phone_num[i],
         "officeSupervisor": clerk_name[i],
         "supervisorTitle": clerk_position[i],
         "email": emails[i]
