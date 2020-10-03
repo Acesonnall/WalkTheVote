@@ -1,7 +1,13 @@
 import re
 from string import printable
 
+import json
 import requests
+import sys
+sys.path.append('../../ElectionSaver')
+
+import electionsaver
+import usaddress
 from bs4 import BeautifulSoup as bS
 
 # emailRegex = re.search('[a-zA-Z0-9_.+-]+@[a-zA-Z0-9-]+\.[a-zA-Z0-9-.]+', cleanedData)
@@ -12,6 +18,36 @@ r = requests.get(BASE_URL)
 soup = bS(r.content, "html.parser")
 
 elems = soup.find_all(class_="col-sm-6")
+
+masterList = []
+
+def formatAddressData(addressData, countyName):
+    mapping = electionsaver.addressSchemaMapping
+    
+    locationName = f'{countyName} County Election Office'
+
+    if countyName == "Banner":
+        addressData = "204 State St, PO Box 67"
+        locationName = "Banner County Courthouse"
+    if countyName == "Box Butte":
+        addressData = "515 Box Butte Avenue #203, PO Box 678"
+
+    parsedDataDict = usaddress.tag(addressData, tag_mapping=mapping)[0]
+
+    finalAddress = {
+        "locationName": locationName
+    }
+
+    if 'aptNumber' in parsedDataDict:
+        finalAddress['aptNumber'] = parsedDataDict['aptNumber']
+    if 'streetNumberName' in parsedDataDict:
+        finalAddress['streetNumberName'] = parsedDataDict['streetNumberName']
+    if 'locationName' in parsedDataDict:
+        finalAddress['locationName'] = parsedDataDict['locationName']
+    if 'poBox' in parsedDataDict:
+        finalAddress['poBox'] = parsedDataDict['poBox']
+
+    return finalAddress
 
 for e in elems:
     cleanedData = re.sub("[^{}]+".format(printable), "", e.text)
@@ -43,22 +79,35 @@ for e in elems:
     ph = "None" if phoRegex is None else phoRegex[1]
     Phone: str = ph.strip()
 
-    emRegex = re.search("Email Address:(.*)County", cleanedData)
+    emRegex = re.search("Email Address: (.*)", cleanedData)
     e = "None" if emRegex is None else emRegex[1]
     Email: str = e.strip()
 
-    schema = {
-        "countyName": County,
-        "physicalAddress": {
-            "streetNumberName": streetNumberName,
-            "city": City,
-            "state": "Nebraska",
-            "county": County,
-            "zipCode": zipCode,
-        },
-        "phone": Phone,
-        "officeSupervisor": Names,
-        "Link": "https://sos.nebraska.gov/elections/election-officials-contact"
-        "-information",
-    }
-    print(schema)
+    if County != 'None':
+        subschema = formatAddressData(streetNumberName, County)
+        schema = {
+            "countyName": County,
+            "physicalAddress": {
+                "city": City,
+                "state": "Nebraska",
+                "zipCode": zipCode,
+                "locationName": subschema['locationName']
+            },
+            "phone": Phone,
+            "email": Email,
+            "officeSupervisor": Names,
+            "Link": "https://sos.nebraska.gov/elections/election-officials-contact"
+            "-information",
+        }
+
+        if 'poBox' in subschema:
+            schema['physicalAddress']['poBox'] = subschema['poBox']
+        if 'aptNumber' in subschema:
+            schema['physicalAddress']['aptNumber'] = subschema['aptNumber']
+        if 'streetNumberName' in subschema:
+            schema['physicalAddress']['streetNumberName'] = subschema['streetNumberName']
+
+        masterList.append(schema)
+
+with open("nebraska.json", "w") as f:
+    json.dump(masterList, f)
