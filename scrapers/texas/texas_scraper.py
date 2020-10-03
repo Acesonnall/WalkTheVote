@@ -52,6 +52,8 @@ def formatAddressData(address, countyName):
         address = address + ' 78364'
     if countyName == 'Stephens':
         address = address.replace('Courthouse', '')
+    if countyName == 'Borden':
+        address = '117 Wasson Rd, Gail, TX 79738'
         
     parsedDataDict = usaddress.tag(address, tag_mapping=mapping)[0]
 
