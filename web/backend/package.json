@@ -1,0 +1,16 @@
+{
+  "name": "electionsaverbackend",
+  "version": "1.0.0",
+  "description": "Backend processes for ElectionSaver/WalkTheVote. Includes MongoDB Database handling & Express.js middleware.",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "Paulo Nascimento",
+  "license": "ISC",
+  "dependencies": {
+    "chalk": "^4.1.0",
+    "express": "^4.17.1",
+    "mongoose": "^5.10.7"
+  }
+}

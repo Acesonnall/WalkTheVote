@@ -128,9 +128,8 @@ dmypy.json
 # Pyre type checker
 .pyre/
 
-# Any JSON files
-*.json
-.json
+# Any JSON files in scraper
+scrapers/*/*.json
 
 # For thoe who use PyCharm
 *.idea
@@ -139,3 +138,7 @@ dmypy.json
 
 # Document files
 *.csv
+
+# Node modules
+node_modules/
+
