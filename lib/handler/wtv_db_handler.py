@@ -17,10 +17,9 @@ import pandas as pd
 from pymodm import connect
 from tqdm import tqdm
 
-from definitions import ROOT_DIR, LOCAL_DB_URI, LOCAL_DB_ALIAS, LOCAL_DB_NAME, bcolors
-from errors.wtv_errors import WalkTheVoteError
-from handler.wtv_db_schema import State, County, City, ZipCode, ElectionOffice, Address
-from handler.zip_county_mapping.zip_to_county import create_mapping
+from lib.definitions import ROOT_DIR, LOCAL_DB_URI, LOCAL_DB_ALIAS, LOCAL_DB_NAME, bcolors
+from lib.errors.wtv_errors import WalkTheVoteError
+from lib.handler.wtv_db_schema import State, County, City, ZipCode, ElectionOffice, Address
 
 # Using the same naming scheme, import more scrapers here as they are ready and
 # formatted

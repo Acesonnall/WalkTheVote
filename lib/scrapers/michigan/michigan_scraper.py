@@ -13,7 +13,7 @@ import usaddress
 from aiohttp import ClientSession
 from bs4 import BeautifulSoup as bS
 
-from definitions import ROOT_DIR, bcolors
+from lib.definitions import ROOT_DIR, bcolors
 
 BASE_URL = "https://mvic.sos.state.mi.us/Clerk"
 

@@ -11,7 +11,7 @@ import usaddress
 
 
 from ElectionSaver import electionsaver
-from definitions import bcolors
+from lib.definitions import bcolors
 
 
 def formatAddressData(addressData, countyName):
