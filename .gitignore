@@ -4,7 +4,7 @@ __pycache__/
 *$py.class
 
 # C extensions
-*.sof
+*.so
 
 # Distribution / packaging
 .Python
@@ -14,6 +14,7 @@ dist/
 downloads/
 eggs/
 .eggs/
+lib/
 lib64/
 parts/
 sdist/
@@ -127,7 +128,7 @@ dmypy.json
 # Pyre type checker
 .pyre/
 
-# Any JSON files
+# Any JSON files in scraper
 scrapers/*/*.json
 
 # For those who use PyCharm
@@ -138,25 +139,8 @@ scrapers/*/*.json
 # Document files
 *.csv
 
-# === Rule for dotfiles ===
-# Ignore all dotfiles.
-.*
-# Exclude specific dotfiles that we want to track.
-!deps/**/.*
-!test/fixtures/**/.*
-!.clang-format
-!.editorconfig
-!.eslintignore
-!.eslintrc.js
-!.flake8
-!.gitattributes
-!.github
-!.gitignore
-!.gitkeep
-!.mailmap
-!.nycrc
-!.eslintrc.yaml
-!.cpplint
+# Node modules
+node_modules/
 
 # === Rules for root dir ===
 /core
