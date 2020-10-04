@@ -3,7 +3,7 @@ import os
 import time
 from asyncio import Task
 from asyncio.futures import Future
-from typing import List, Any, Tuple
+from typing import List, Tuple
 
 import cloudscraper
 from bs4 import BeautifulSoup as bS
@@ -14,8 +14,8 @@ from aiocfscrape import CloudflareScraper
 from string import printable
 
 from ElectionSaver import electionsaver
-from definitions import ROOT_DIR, bcolors
-from errors.wtv_errors import WalkTheVoteError
+from lib.definitions import ROOT_DIR, bcolors
+from lib.errors.wtv_errors import WalkTheVoteError
 
 BASE_URL = "https://dos.elections.myflorida.com/supervisors/"
 
