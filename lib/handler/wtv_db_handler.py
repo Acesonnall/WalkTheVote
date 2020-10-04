@@ -15,22 +15,41 @@ from typing import Iterable, Callable, Dict, List
 
 import pandas as pd
 from pymodm import connect
+from pymongo.errors import WriteError
 from tqdm import tqdm
 
-from definitions import ROOT_DIR, LOCAL_DB_URI, LOCAL_DB_ALIAS, LOCAL_DB_NAME, bcolors
-from errors.wtv_errors import WalkTheVoteError
-from handler.wtv_db_schema import State, County, City, ZipCode, ElectionOffice, Address
-from handler.zip_county_mapping.zip_to_county import create_mapping
+from lib.definitions import (
+    ROOT_DIR,
+    bcolors,
+    TEST_DB_URI,
+    TEST_DB_ALIAS,
+    TEST_DB_NAME,
+    LOCAL_DB_URI,
+    LOCAL_DB_NAME,
+    LOCAL_DB_ALIAS,
+)
+from lib.errors.wtv_errors import WalkTheVoteError
+from lib.handler.wtv_db_schema import (
+    State,
+    County,
+    City,
+    ZipCode,
+    ElectionOffice,
+    Address,
+)
+from lib.handler.zip_county_mapping.zip_to_county import create_mapping
 
 # Using the same naming scheme, import more scrapers here as they are ready and
 # formatted
-from scrapers.michigan import michigan_scraper
-from scrapers.florida import florida_scraper
+from lib.scrapers.michigan import michigan_scraper
+from lib.scrapers.florida import florida_scraper
+from lib.scrapers.north_carolina import north_carolina_scraper
+from lib.scrapers.texas import texas_scraper
 
 
 @dataclass
 class Scraper:
-    """ Scraper data unit
+    """Scraper data unit
 
     @param state_name name of state being scraped
     @param get_election_office Callable function to run scraper
@@ -42,9 +61,15 @@ class Scraper:
     data: Dict = field(default_factory=dict)
 
 
+@dataclass
+class CountyLoadFailure:
+    county: str
+    reason: str
+
+
 class WtvDbHandler:
     """Walk The Vote database handler.
-    
+
     @param self.preloaded boolean variable to help determine whether database was
     already with loaded with zip -> city -> county -> state mapping. Helps improve
     run time.
@@ -55,6 +80,7 @@ class WtvDbHandler:
     def __init__(self, db_uri, db_alias):
         self.preloaded = self._is_db_preloaded()
         self.scrapers = []
+        self.failures: List[CountyLoadFailure] = []
 
         try:
             connect(db_uri, alias=db_alias)
@@ -64,27 +90,26 @@ class WtvDbHandler:
         # Map get_election_office() function of scrapers to corresponding state name
         for imported_scraper_module in self._get_imported_scrapers():
             state_name = re.search(
-                r"(?<=\.)([a-z]+_*)+(?=\.)", imported_scraper_module.__name__
+                r"[a-z_]+(?=\.[a-z_]+scraper)", imported_scraper_module.__name__
             ).group()
             module = getattr(imported_scraper_module, "get_election_offices")
             self.scrapers.append(Scraper(state_name, module))
 
     @staticmethod
     def _get_imported_scrapers() -> Iterable:
-        """ Yields list of imported scraper modules
-        """
+        """Yields list of imported scraper modules"""
 
         # Iterate through imported modules and yield only scraper modules. Dependent on
         # path naming scheme being named
         # "scrapers.[LOWER_CASE_STATE_NAME].[LOWER_CASE_STATE_NAME]_scraper"
         for name, val in globals().items():
             if isinstance(val, types.ModuleType) and (
-                re.match("scraper.*", val.__name__)
+                re.match("lib.scraper.*", val.__name__)
             ):
                 yield val
 
     def _get_mapping(self):
-        """ Loads zip, state, county, city mapping from file or directly from funcition
+        """Loads zip, state, county, city mapping from file or directly from funcition
 
         @return: DataFrame loaded with the mapping information
         """
@@ -96,7 +121,9 @@ class WtvDbHandler:
                 print(
                     f"{bcolors.OKBLUE}Attempt {tries}: Loading mapping data.{bcolors.ENDC}"
                 )
-                mapping_df = pd.read_csv(os.path.join(ROOT_DIR, r"handler\mapping.csv"))
+                mapping_df = pd.read_csv(
+                    os.path.join(ROOT_DIR, r"handler\zip_county_mapping\mapping.csv")
+                )
                 print(f"{bcolors.OKBLUE}Mapping data loaded.{bcolors.ENDC}")
             except FileNotFoundError as e:
                 if tries <= 3:
@@ -104,7 +131,7 @@ class WtvDbHandler:
                         f"{bcolors.OKBLUE}Attempt {tries}: Mapping data file not "
                         f"found. Creaing mapping.{bcolors.ENDC} "
                     )
-                    create_mapping()
+                    mapping_df = create_mapping()
                     tries += 1
                     print(
                         f"{bcolors.OKBLUE}Retrying in {wait_seconds} seconds.{bcolors.ENDC}"
@@ -120,18 +147,17 @@ class WtvDbHandler:
 
     @staticmethod
     def _is_db_preloaded():
-        """ Weak checking to see if database is already preloaded with data
+        """Weak checking to see if database is already preloaded with data
         @rtype: bool
         """
         from pymongo import MongoClient
 
-        client = MongoClient(LOCAL_DB_URI)
-        db = client[LOCAL_DB_NAME]
+        client = MongoClient(TEST_DB_URI)
+        db = client[TEST_DB_NAME]
         return not len(db.list_collection_names()) < 4
 
     async def preload_db(self):
-        """ Preload the database with the zip, city, county, state mapping
-        """
+        """Preload the database with the zip, city, county, state mapping"""
         if not self.preloaded:
             print(
                 f"{bcolors.OKBLUE}Database is not yet preloaded. Creating zip code to "
@@ -165,7 +191,7 @@ class WtvDbHandler:
 
     @staticmethod
     async def _get_scraper_data(scraper):
-        """ Run scraper function and assign results to data variable of scraper
+        """Run scraper function and assign results to data variable of scraper
         object
         """
         scraper.data = await scraper.get_election_office()
@@ -173,8 +199,7 @@ class WtvDbHandler:
     # TODO: Implement code to handle loading of select states rather than all of them
     #  (useful for if we need to issue targeted updates)
     async def get_election_office_info(self, states=None):
-        """ Dynamically acquire data from scrapers in a non-IO blocking fashion
-        """
+        """Dynamically acquire data from scrapers in a non-IO blocking fashion"""
         if not self.preloaded:
             await self.preload_db()
         else:
@@ -199,8 +224,8 @@ class WtvDbHandler:
                 except FileNotFoundError as e:
                     print(
                         f"{bcolors.OKBLUE}Pre-existing data file not found for "
-                        f"{scraper.state_name.capitalize()}. Loading from scraper."
-                        f"{bcolors.ENDC}\n"
+                        f'{" ".join(s.capitalize() for s in scraper.state_name.split(sep="_"))}'
+                        f". Loading from scraper.{bcolors.ENDC}\n"
                     )
                     tasks.append(asyncio.create_task(self._get_scraper_data(scraper)))
             if tasks:
@@ -208,51 +233,64 @@ class WtvDbHandler:
             print(f"{bcolors.OKBLUE}Scraper data loaded into memory{bcolors.ENDC}")
 
     def load_election_office_info(self):
-        """ Insert election office information gathered from scrapers into the database
-        """
-        for scraper in tqdm(self.scrapers, desc="loading office info"):
+        """Insert election office information gathered from scrapers into the database"""
+        for scraper in tqdm(self.scrapers, desc="Loading office info into database"):
             s_data: Dict
             for s_data in scraper.data:
                 address = s_data.get("physicalAddress")
-                is_mailing = False
-                if not address:
-                    address = s_data.get("mailingAddress")
-                    is_mailing = True
-
-                # TODO: Add support for county names (dependent on eventual schema)
-                if "countyName" in s_data:
+                county_name = s_data.get("countyName")
+                city_name = address.get("city")
+                try:
+                    zip_code = address.get("zipCode")[:5]
+                    zip_code_doc = ZipCode.objects.get({"_id": zip_code})
                     election_office = ElectionOffice(
-                        county_name=f'{s_data.get("countyName")} County',
                         address=Address(
                             location_name=address.get("locationName"),
                             street=address.get("streetNumberName"),
                             apt_unit=address.get("aptNumber"),
                             po_box=address.get("poBox"),
+                            city=city_name,
                             state=address.get("state"),
-                            zip_code=address.get("zipCode")[:5],
-                            is_mailing=is_mailing,
+                            zip_code=zip_code,
+                            is_mailing=address.get("is_mailing"),
                         ),
                         phone_number=s_data.get("phone"),
-                        email_address=s_data.get("email"),
+                        email_address=s_data.get("email", ""),
                         office_supervisor=s_data.get("officeSupervisor"),
                         supervisor_title=s_data.get("supervisorTitle"),
                         website=s_data.get("website"),
                     )
-                    zip_code_doc = ZipCode.objects.raw(
-                        {"_id": election_office.address.zip_code}
-                    )[0]
-                    county_id = zip_code_doc.parent_city.parent_county.county_name
-                    County.objects.raw({"_id": county_id}).update(
-                        {"$set": {"election_office": election_office.to_son()}},
-                        upsert=True,
+                    if county_name:
+                        election_office.county_name = county_name
+                        county_id = zip_code_doc.parent_city.parent_county.county_name
+                        County.objects.raw({"_id": county_id}).update(
+                            {"$set": {"election_office": election_office.to_son()}},
+                            upsert=True,
+                        )
+                    else:
+                        city_id = zip_code_doc.parent_city.city_name
+                        City.objects.raw({"_id": city_id}).update(
+                            {"$set": {"election_office": election_office.to_son()}},
+                            upsert=True,
+                        )
+                except ZipCode.DoesNotExist as e:
+                    print(
+                        f'{bcolors.OKBLUE}\nCould not load {county_name if not None else city_name}, {address.get("state")} data: {type(e).__name__}{bcolors.ENDC}'
+                    )
+                except (WriteError, TypeError) as e:
+                    print(
+                        f'{bcolors.OKBLUE}\nCould not load {county_name if not None else city_name}, {address.get("state")} data: {e}{bcolors.ENDC}'
                     )
 
 
 async def main():
-    wtv_db = WtvDbHandler(LOCAL_DB_URI, LOCAL_DB_ALIAS)
+    wtv_db = WtvDbHandler(TEST_DB_URI, TEST_DB_ALIAS)
     await wtv_db.preload_db()
     await wtv_db.get_election_office_info()
-    wtv_db.load_election_office_info()
+    try:
+        wtv_db.load_election_office_info()
+    except WalkTheVoteError as wtv_e:
+        print(wtv_e)
 
 
 if __name__ == "__main__":

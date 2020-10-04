@@ -1,6 +1,10 @@
+import os
+
 import cloudscraper
 import pandas as pd
 from bs4 import BeautifulSoup
+
+from lib.definitions import ROOT_DIR
 
 
 def get_state_zip_info(scraper, url, name):
@@ -47,10 +51,10 @@ def create_mapping():
 
         zip_info_df = zip_info_df.append(state_info_df, ignore_index=True)
 
-    if __name__ == "__main__":
-        zip_info_df.to_csv(path_or_buf="../mapping.csv", encoding="utf-8", index=False)
-    else:
-        return zip_info_df
+    zip_info_df.to_csv(
+        path_or_buf=os.path.join(ROOT_DIR, r"handler\zip_county_mapping\mapping.csv"),
+        encoding="utf-8", index=False)
+    return zip_info_df
 
 
 if __name__ == "__main__":

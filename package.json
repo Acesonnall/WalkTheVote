@@ -1,0 +1,30 @@
+{
+  "name": "walkthevote",
+  "version": "1.0.0",
+  "description": "An app that returns the address for the SOE office when given a zip-code.",
+  "main": "server.js",
+  "directories": {
+    "lib": "lib"
+  },
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Acesonnall/WalkTheVote.git"
+  },
+  "authors": [
+    "Paulo Nascimento",
+    "Omar Taylor"
+  ],
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/Acesonnall/WalkTheVote/issues"
+  },
+  "homepage": "https://github.com/Acesonnall/WalkTheVote#readme",
+  "dependencies": {
+    "express": "^4.17.1",
+    "find-process": "^1.4.3",
+    "mongoose": "^5.10.7"
+  }
+}

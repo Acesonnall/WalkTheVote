@@ -13,7 +13,7 @@ import usaddress
 from aiohttp import ClientSession
 from bs4 import BeautifulSoup as bS
 
-from definitions import ROOT_DIR, bcolors
+from lib.definitions import ROOT_DIR, bcolors
 
 BASE_URL = "https://mvic.sos.state.mi.us/Clerk"
 
@@ -188,9 +188,7 @@ def format_address_data(address_data, county_name):
 
 async def get_election_offices():
     async with aiohttp.ClientSession() as session:
-        soup = None
         async with session.get(BASE_URL) as r:
-            # r = requests.get(BASE_URL, verify=False)
             text = await r.read()
         soup = bS(text.decode("utf-8"), "html.parser")
 
@@ -225,9 +223,9 @@ async def get_election_offices():
             )
 
         # output to JSON
-        with open(os.path.join(ROOT_DIR, r"scrapers\florida\florida.json"), "w") as f:
+        with open(os.path.join(ROOT_DIR, r"scrapers\michigan\michigan.json"), "w") as f:
             json.dump(master_list, f)
-            return master_list
+        return master_list
 
 
 if __name__ == "__main__":
