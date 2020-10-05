@@ -174,6 +174,8 @@ for pos, i in enumerate(clerk_names_real):
     elif i == 'Ms. ':
         clerk_names_real[pos] = 'Ms. Macy Rudock'
 
+loc_name = [i + ' County Election Office' for i in county_names]
+
 masterList = []
 
 def formatAddressData(address, countyName):
@@ -194,19 +196,31 @@ def formatAddressData(address, countyName):
         finalAddress['streetNumberName'] = parsedDataDict['streetNumberName']
         if countyName == "Monroe":
             finalAddress['streetNumberName'] = "One Quaker Plaza"
+        if countyName == 'Sullivan':
+            finalAddress['streetNumberName'] = "Main and Muncy Streets"
     else:
         if countyName == "Montgomery":
             finalAddress['streetNumberName'] = "425 Swede St."
+        if countyName == "Philadelphia":
+            finalAddress['streetNumberName'] = "1400 John F Kennedy Blvd"
         print(f'{countyName} County might be a mailing address...')
 
     if 'city' in parsedDataDict:
         finalAddress['city'] = parsedDataDict['city']
+        if countyName == 'Philadelphia':
+            finalAddress['city'] = 'Philadelphia'
     if 'poBox' in parsedDataDict:
         finalAddress['poBox'] = parsedDataDict['poBox']
     if 'locationName' in parsedDataDict:
         finalAddress['locationName'] = parsedDataDict['locationName']
+        if countyName == "Sullivan":
+            print(f'Sullivan county info is {parsedDataDict}')
+            finalAddress['locationName'] = 'Sullivan Co. Courthouse'
         if countyName == "Montgomery":
             finalAddress['locationName'] = 'Montgomery County Voter Services'
+    else:
+        if countyName == 'Philadelphia':
+            finalAddress['locationName'] = 'City Hall'
     if 'aptNumber' in parsedDataDict:
         finalAddress['aptNumber'] = parsedDataDict['aptNumber']
         if countyName == "Monroe":
@@ -217,6 +231,8 @@ def formatAddressData(address, countyName):
 
 for i in range(len(county_names)):
     real_address = formatAddressData(full_address[i], county_names[i])
+    if 'locationName' not in real_address:
+        real_address['locationName'] = loc_name[i]
     schema = {
         "countyName": county_names[i],
         "physicalAddress": real_address,
