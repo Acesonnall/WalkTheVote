@@ -1,15 +1,28 @@
 import asyncio
 import os
+<<<<<<< HEAD
 import time
 
 import aiohttp
+=======
+import sys
+import time
+
+import aiohttp
+import requests
+>>>>>>> 5600ab1... removed lib in git ignore and putting scrapers in lib...?
 from bs4 import BeautifulSoup
 import json
 import usaddress
 
 
+<<<<<<< HEAD
 from lib.ElectionSaver import electionsaver
 from lib.definitions import bcolors, ROOT_DIR
+=======
+from ElectionSaver import electionsaver
+from definitions import bcolors
+>>>>>>> 5600ab1... removed lib in git ignore and putting scrapers in lib...?
 
 
 def formatAddressData(addressData, countyName):
@@ -59,9 +72,19 @@ def renameKey(src, dest, all_elems_js):
 
 async def get_election_offices():
     async with aiohttp.ClientSession() as session:
+<<<<<<< HEAD
         async with session.get(URL) as r:
             text = await r.read()
     soup = BeautifulSoup(text.decode("utf-8"), "html.parser")
+=======
+        soup = None
+        async with session.get(URL) as r:
+            # r = requests.get(BASE_URL, verify=False)
+            text = await r.read()
+    soup = BeautifulSoup(text.decode("utf-8"), "html.parser")
+    # r = requests.get(URL)
+    # soup = BeautifulSoup(r.content, "html.parser")
+>>>>>>> 5600ab1... removed lib in git ignore and putting scrapers in lib...?
     all_elems = soup.find_all("script")
     test = str(all_elems[16]).split("var data = ")[1].split("// initialize")[0]
     json.loads(test)
@@ -79,10 +102,17 @@ async def get_election_offices():
     for element in all_elems_js:
         [element.pop(key) for key in to_del]
         newAddy = (
+<<<<<<< HEAD
             element["PhysicalAddr1"]
             + " "
             + element["PhysicalAddr2"]
             + element["PhysicalAddrCSZ"]
+=======
+                element["PhysicalAddr1"]
+                + " "
+                + element["PhysicalAddr2"]
+                + element["PhysicalAddrCSZ"]
+>>>>>>> 5600ab1... removed lib in git ignore and putting scrapers in lib...?
         )
         cleanedData = formatAddressData(newAddy, element["Name"])
         element["newAddress"] = cleanedData
@@ -96,9 +126,13 @@ async def get_election_offices():
     addr_del = ["PhysicalAddr1", "PhysicalAddr2", "PhysicalAddrCSZ", "FaxNum"]
     for element in all_elems_js:
         [element.pop(key) for key in addr_del]
+<<<<<<< HEAD
     with open(
         os.path.join(ROOT_DIR, r"scrapers\north_carolina\north_carolina.json"), "w"
     ) as f:
+=======
+    with open("north_carolina.json", "w") as f:
+>>>>>>> 5600ab1... removed lib in git ignore and putting scrapers in lib...?
         json.dump(all_elems_js, f)
     return all_elems_js
 
