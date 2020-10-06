@@ -3,7 +3,11 @@ import os
 import time
 from asyncio import Task
 from asyncio.futures import Future
+<<<<<<< HEAD
 from typing import List, Tuple
+=======
+from typing import List, Any, Tuple
+>>>>>>> 5600ab1... removed lib in git ignore and putting scrapers in lib...?
 
 import cloudscraper
 from bs4 import BeautifulSoup as bS
@@ -14,8 +18,13 @@ from aiocfscrape import CloudflareScraper
 from string import printable
 
 from ElectionSaver import electionsaver
+<<<<<<< HEAD
 from lib.definitions import ROOT_DIR, bcolors
 from lib.errors.wtv_errors import WalkTheVoteError
+=======
+from definitions import ROOT_DIR, bcolors
+from errors.wtv_errors import WalkTheVoteError
+>>>>>>> 5600ab1... removed lib in git ignore and putting scrapers in lib...?
 
 BASE_URL = "https://dos.elections.myflorida.com/supervisors/"
 
