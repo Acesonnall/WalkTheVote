@@ -61,6 +61,19 @@ for pos, i in enumerate(addies):
         addies[pos] = real_add[counter]
         counter += 1
 
+loc_name = [i + ' County Election Office' for i in name]
+
+#regex to find urls in strings
+def Find(string):
+    # findall() has been used
+    # with valid conditions for urls in string
+    regex = r"(?i)\b((?:https?://|www\d{0,3}[.]|[a-z0-9.\-]+[.][a-z]{2,4}/)(?:[^\s()<>]+|\(([^\s()<>]+|(\([^\s()<>]+\)))*\))+(?:\(([^\s()<>]+|(\([^\s()<>]+\)))*\)|[^\s`!()\[\]{};:'\".,<>?«»“”‘’]))"
+    url = re.findall(regex, string)
+    return [x[0] for x in url]
+
+websites = [Find(i) for i in county_info_text]
+websites = [item for sublist in websites for item in sublist]
+
 masterList = []
 
 def formatAddressData(address, countyName):
@@ -70,6 +83,10 @@ def formatAddressData(address, countyName):
         address = 'Historic Courthouse 326 Laurel St Ste 22 Brainerd, MN 56401'
     if countyName == "Saint Louis":
         address = address.replace('St. Louis', 'Saint Louis')
+    if countyName == 'Marshall':
+        address = '208 E Colvin Ave, Ste 11 Warren, MN 56762'
+    if countyName == 'Anoka':
+        address = '2100 3rd Ave, Suite W130 Anoka, MN 55303-5031'
 
     parsedDataDict = usaddress.tag(address, tag_mapping=mapping)[0]
 
@@ -79,24 +96,48 @@ def formatAddressData(address, countyName):
     }
     if 'streetNumberName' in parsedDataDict:
         finalAddress['streetNumberName'] = parsedDataDict['streetNumberName']
+        if countyName == 'Mower':
+            finalAddress['streetNumberName'] = '500 4th Ave NE'
+        if countyName == 'Sherburne':
+            finalAddress['streetNumberName'] = '13880 Business Center Drive NW'
+        if countyName == 'Watonwan':
+            finalAddress['streetNumberName'] = '710 2nd Ave S'
     if 'city' in parsedDataDict:
         finalAddress['city'] = parsedDataDict['city']
+        if countyName == 'Mower':
+            finalAddress['city'] = 'Austin'
+        if countyName == 'Watonwan':
+            finalAddress['city'] = 'Saint James'
+    else:
+        if countyName == 'Lincoln':
+            finalAddress['city'] = 'Ivanhoe'
     if 'poBox' in parsedDataDict:
         finalAddress['poBox'] = parsedDataDict['poBox']
+        if countyName == 'Lincoln':
+            finalAddress['poBox'] = 'PO Box 29'
     if 'locationName' in parsedDataDict:
         finalAddress['locationName'] = parsedDataDict['locationName']
+        if countyName == 'Marshall':
+            finalAddress['locationName'] = 'Marshall County Election Office'
+        if countyName == 'Sherburne':
+            finalAddress['locationName'] = 'Sherburne County Government Center'
+        if countyName == 'Watonwan':
+            finalAddress['locationName'] = 'Watonwan County Courthouse'
     if 'aptNumber' in parsedDataDict:
         finalAddress['aptNumber'] = parsedDataDict['aptNumber']
     return finalAddress
 
 for i in range(len(name)):
     real_address = formatAddressData(addies[i], name[i])
+    if 'locationName' not in real_address:
+        real_address['locationName'] = loc_name[i]
     schema = {
         "countyName": name[i],
         "physicalAddress": real_address,
         "phone": phone[i],
         "email": email_add[i],
         "officeSupervisor": off_name[i],
+        "website": websites[i]
         }
     masterList.append(schema)
 
