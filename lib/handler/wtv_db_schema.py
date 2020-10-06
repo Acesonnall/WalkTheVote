@@ -7,17 +7,17 @@ from pymodm import (
     MongoModel,
     EmbeddedDocumentField,
     EmailField,
-    ListField,
     ReferenceField,
     BooleanField,
 )
 from pymongo import WriteConcern
 
-from definitions import LOCAL_DB_ALIAS
+from lib.definitions import LOCAL_DB_ALIAS
 
 
 class Address(EmbeddedMongoModel):
     state = CharField(verbose_name="Name of state", required=True)
+    city = CharField(verbose_name="Name of city", required=True)
     zip_code = CharField(verbose_name="Name of zip code", required=True)
     location_name = CharField(verbose_name="Name of election office", required=True)
     street = CharField(verbose_name="Name of street", required=True)
