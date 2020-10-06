@@ -92,6 +92,23 @@ clerks = [i.replace('\xa0', '') for i in county_info if ',' in i and 'CA' not in
 clerk_name = [i.split(',')[0] for i in clerks]
 clerk_position = [i.split(',')[1].strip() for i in clerks]
 
+#regex to find urls
+def Find(string):
+    # findall() has been used
+    # with valid conditions for urls in string
+    regex = r"(?i)\b((?:https?://|www\d{0,3}[.]|[a-z0-9.\-]+[.][a-z]{2,4}/)(?:[^\s()<>]+|\(([^\s()<>]+|(\([^\s()<>]+\)))*\))+(?:\(([^\s()<>]+|(\([^\s()<>]+\)))*\)|[^\s`!()\[\]{};:'\".,<>?«»“”‘’]))"
+    url = re.findall(regex, string)
+    return [x[0] for x in url]
+
+websites = [Find(i) for i in county_info]
+websites = [item for sublist in websites for item in sublist]
+
+ind_orange = county_names.index('Orange')
+ind_placer = county_names.index('Placer')
+
+websites.insert(ind_orange, 'https://www.ocvote.com/')
+websites.insert(ind_placer, 'https://www.placerelections.com/')
+
 masterList = []
 
 def formatAddressData(address, countyName):
@@ -156,7 +173,8 @@ for i in range(len(county_names)):
         "phone": phone_num[i],
         "officeSupervisor": clerk_name[i],
         "supervisorTitle": clerk_position[i],
-        "email": emails[i]
+        "email": emails[i],
+        "website": websites[i]
         }
 
     noEmailsLocal = ["Merced", "Alameda", "Ventura", "Sutter"]
