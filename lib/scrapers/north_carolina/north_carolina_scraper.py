@@ -3,6 +3,7 @@ import os
 import time
 
 import aiohttp
+
 from bs4 import BeautifulSoup
 import json
 import usaddress
