@@ -3,7 +3,11 @@ import os
 import time
 from asyncio import Task
 from asyncio.futures import Future
+<<<<<<< HEAD
 from typing import List, Tuple
+=======
+from typing import List, Any, Tuple
+>>>>>>> 5600ab1... removed lib in git ignore and putting scrapers in lib...?
 
 import cloudscraper
 from bs4 import BeautifulSoup as bS
@@ -13,9 +17,15 @@ import usaddress
 from aiocfscrape import CloudflareScraper
 from string import printable
 
+<<<<<<< HEAD
 from lib.ElectionSaver import electionsaver
 from lib.definitions import ROOT_DIR, bcolors
 from lib.errors.wtv_errors import WalkTheVoteError
+=======
+from ElectionSaver import electionsaver
+from definitions import ROOT_DIR, bcolors
+from errors.wtv_errors import WalkTheVoteError
+>>>>>>> 5600ab1... removed lib in git ignore and putting scrapers in lib...?
 
 BASE_URL = "https://dos.elections.myflorida.com/supervisors/"
 
@@ -129,16 +139,25 @@ def format_address_data(address_data, county_name):
         final_address["streetNumberName"] = parsed_data_dict["streetNumberName"]
     if "poBox" in parsed_data_dict:
         final_address["poBox"] = parsed_data_dict["poBox"]
+<<<<<<< HEAD
     final_address["locationName"] = parsed_data_dict.get(
         "locationName", f"{county_name} County Election Office"
     )
+=======
+    if "locationName" in parsed_data_dict:
+        final_address["locationName"] = parsed_data_dict["locationName"]
+>>>>>>> 5600ab1... removed lib in git ignore and putting scrapers in lib...?
     if "aptNumber" in parsed_data_dict:
         final_address["aptNumber"] = parsed_data_dict["aptNumber"]
     return final_address
 
 
 async def get_election_offices():
+<<<<<<< HEAD
     """Starting point of the scraper program. Scrapes BASE_URL for election office
+=======
+    """ Starting point of the scraper program. Scrapes BASE_URL for election office
+>>>>>>> 5600ab1... removed lib in git ignore and putting scrapers in lib...?
     information and both dumps results to a .json file and returns the results as json.
 
     @return: list of scraped results as json.
