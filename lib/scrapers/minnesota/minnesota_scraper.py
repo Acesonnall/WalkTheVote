@@ -131,6 +131,7 @@ for i in range(len(name)):
     real_address = formatAddressData(addies[i], name[i])
     if 'locationName' not in real_address:
         real_address['locationName'] = loc_name[i]
+
     schema = {
         "countyName": name[i],
         "physicalAddress": real_address,

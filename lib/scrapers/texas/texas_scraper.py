@@ -26,11 +26,7 @@ def formatAddressData(address, countyName):
         address = address.replace('Courthouse', '')
     if countyName == 'Borden':
         address = '117 Wasson Rd, Gail, TX 79738'
-<<<<<<< HEAD
-        
-=======
 
->>>>>>> 5600ab1... removed lib in git ignore and putting scrapers in lib...?
     parsedDataDict = usaddress.tag(address, tag_mapping=mapping)[0]
 
     finalAddress = {
