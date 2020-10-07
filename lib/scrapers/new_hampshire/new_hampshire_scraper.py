@@ -80,9 +80,13 @@ def data_to_json_schema():
             "email": email_list[i],
             "officeSupervisor": clerk_list[i],
             "website": website_list[i],
-            "physicalAddress": address_list_formatted[i],
             "supervisorTitle": "Clerk"
         }
+
+        if "poBox" in address_list_formatted[i]:
+            schema["mailingAddress"] = address_list_formatted[i]
+        else:
+            schema["physicalAddress"] = address_list_formatted[i]
 
         master_list.append(schema)
 
