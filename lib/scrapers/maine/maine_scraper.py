@@ -70,7 +70,7 @@ def formatAddressData(addressData, countyName):
     try:
         finalAddress = {
             "city": parsedDataDict['city'],
-            "state": parsedDataDict['state'],
+            "state": "Maine",
             "zipCode": parsedDataDict['zipCode']
         }
     except:
@@ -88,19 +88,31 @@ def formatAddressData(addressData, countyName):
 
 
 masterList = []
+
+def isMailingAddress(addressSchema):
+    if 'poBox' in addressSchema and 'streetNumberName' not in addressSchema:
+        return True
+    else:
+        return False
+
 for i in range(len(county_names)):
     real_address = formatAddressData(address[i], county_names[i])
     if 'locationName' not in real_address:
         real_address['locationName'] = location_names[i]
 
     schema = {
-        "countyName": county_names[i],
         "physicalAddress": real_address,
         "phone": phone_num_real[i],
         "officeSupervisor": clerk_names[i],
         "supervisorTitle": clerk_positions[i],
         "website": websites[i]
     }
+
+    ismailing = isMailingAddress(real_address)
+    if ismailing:
+        schema['mailingAddress'] = schema['physicalAddress']
+        schema.pop('physicalAddress')
+
     masterList.append(schema)
 
 
