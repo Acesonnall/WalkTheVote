@@ -8,6 +8,7 @@ certifi
 chardet
 cloudscraper
 future
+html5lib
 idna
 Js2Py
 multidict

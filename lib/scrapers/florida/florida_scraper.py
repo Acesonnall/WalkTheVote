@@ -129,15 +129,16 @@ def format_address_data(address_data, county_name):
         final_address["streetNumberName"] = parsed_data_dict["streetNumberName"]
     if "poBox" in parsed_data_dict:
         final_address["poBox"] = parsed_data_dict["poBox"]
-    if "locationName" in parsed_data_dict:
-        final_address["locationName"] = parsed_data_dict["locationName"]
+    final_address["locationName"] = parsed_data_dict.get(
+        "locationName", f"{county_name} County Election Office"
+    )
     if "aptNumber" in parsed_data_dict:
         final_address["aptNumber"] = parsed_data_dict["aptNumber"]
     return final_address
 
 
 async def get_election_offices():
-    """ Starting point of the scraper program. Scrapes BASE_URL for election office
+    """Starting point of the scraper program. Scrapes BASE_URL for election office
     information and both dumps results to a .json file and returns the results as json.
 
     @return: list of scraped results as json.

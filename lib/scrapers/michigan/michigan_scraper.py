@@ -108,6 +108,7 @@ def format_data_into_schema(county_name, post_response_data):
         "email": email,
         "officeSupervisor": first_last,
         "supervisorTitle": clerk_title,
+        "website": "https://mvic.sos.state.mi.us/Clerk",
     }
 
     if len(split_addresses) > 1:  # there is a mailing address as well
@@ -175,8 +176,9 @@ def format_address_data(address_data, county_name):
             final_address["streetNumberName"] = (
                 final_address["streetNumberName"] + " M-32"
             )
-    if "locationName" in parsed_data_dict:
-        final_address["locationName"] = parsed_data_dict["locationName"]
+    final_address["locationName"] = parsed_data_dict.get(
+        "locationName", f"{county_name} County Election Office"
+    )
     if "aptNumber" in parsed_data_dict:
         final_address["aptNumber"] = parsed_data_dict["aptNumber"]
         if county_name == "Oakland":

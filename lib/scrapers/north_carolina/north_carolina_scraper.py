@@ -37,8 +37,10 @@ def formatAddressData(addressData, countyName):
 
     if "streetNumberName" in parsedDataDict:
         finalAddress["streetNumberName"] = parsedDataDict["streetNumberName"]
-    if "locationName" in parsedDataDict:
-        finalAddress["locationName"] = parsedDataDict["locationName"]
+
+    finalAddress["locationName"] = parsedDataDict.get(
+        "locationName", f"{countyName} County Election Office"
+    )
     if "aptNumber" in parsedDataDict:
         finalAddress["aptNumber"] = parsedDataDict["aptNumber"]
     if "poBox" in parsedDataDict:
