@@ -51,6 +51,9 @@ from lib.scrapers.minnesota import minnesota_scraper
 from lib.scrapers.arizona import arizona_scraper
 from lib.scrapers.maine import maine_scraper
 from lib.scrapers.nebraska import nebraska_scraper
+from lib.scrapers.georgia import georgia_scraper
+from lib.scrapers.california import california_scraper
+from lib.scrapers.new_hampshire import new_hampshire_scraper
 
 
 @dataclass
@@ -309,8 +312,8 @@ class WtvDbHandler:
                 except (WriteError, TypeError) as e:
                     print(
                         f"{bcolors.OKBLUE}\nCould not load "
-                        f"{county_name if not None else city_name}, {state_name} data: "
-                        f"{e}{bcolors.ENDC}"
+                        f"{county_name if county_name is not None else city_name}, "
+                        f"{state_name} data: {e}{bcolors.ENDC}"
                     )
                 except ValidationError as e:
                     print(

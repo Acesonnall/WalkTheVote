@@ -13,7 +13,7 @@ import usaddress
 from aiocfscrape import CloudflareScraper
 from string import printable
 
-from ElectionSaver import electionsaver
+from lib.ElectionSaver import electionsaver
 from lib.definitions import ROOT_DIR, bcolors
 from lib.errors.wtv_errors import WalkTheVoteError
 
