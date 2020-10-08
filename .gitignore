@@ -128,10 +128,9 @@ dmypy.json
 .pyre/
 
 # Any JSON files
-*.json
-.json
+scrapers/*/*.json
 
-# For thoe who use PyCharm
+# For those who use PyCharm
 *.idea
 *.DS_Store
 .DS_Store
@@ -241,6 +240,7 @@ _UpgradeReport_Files/
 /node_modules
 /tools/doc/node_modules
 /tools/clang-format/node_modules
+*/*/node_modules
 
 # === Rules for test artifacts ===
 /*.tap
