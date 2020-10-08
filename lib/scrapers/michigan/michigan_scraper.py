@@ -13,11 +13,7 @@ import usaddress
 from aiohttp import ClientSession
 from bs4 import BeautifulSoup as bS
 
-<<<<<<< HEAD
 from lib.definitions import ROOT_DIR, bcolors
-=======
-from definitions import ROOT_DIR, bcolors
->>>>>>> 5600ab1... removed lib in git ignore and putting scrapers in lib...?
 
 BASE_URL = "https://mvic.sos.state.mi.us/Clerk"
 
@@ -112,6 +108,7 @@ def format_data_into_schema(county_name, post_response_data):
         "email": email,
         "officeSupervisor": first_last,
         "supervisorTitle": clerk_title,
+        "website": "https://mvic.sos.state.mi.us/Clerk",
     }
 
     if len(split_addresses) > 1:  # there is a mailing address as well
@@ -179,8 +176,9 @@ def format_address_data(address_data, county_name):
             final_address["streetNumberName"] = (
                 final_address["streetNumberName"] + " M-32"
             )
-    if "locationName" in parsed_data_dict:
-        final_address["locationName"] = parsed_data_dict["locationName"]
+    final_address["locationName"] = parsed_data_dict.get(
+        "locationName", f"{county_name} County Election Office"
+    )
     if "aptNumber" in parsed_data_dict:
         final_address["aptNumber"] = parsed_data_dict["aptNumber"]
         if county_name == "Oakland":
@@ -192,13 +190,7 @@ def format_address_data(address_data, county_name):
 
 async def get_election_offices():
     async with aiohttp.ClientSession() as session:
-<<<<<<< HEAD
         async with session.get(BASE_URL) as r:
-=======
-        soup = None
-        async with session.get(BASE_URL) as r:
-            # r = requests.get(BASE_URL, verify=False)
->>>>>>> 5600ab1... removed lib in git ignore and putting scrapers in lib...?
             text = await r.read()
         soup = bS(text.decode("utf-8"), "html.parser")
 
@@ -233,15 +225,9 @@ async def get_election_offices():
             )
 
         # output to JSON
-<<<<<<< HEAD
         with open(os.path.join(ROOT_DIR, r"scrapers\michigan\michigan.json"), "w") as f:
             json.dump(master_list, f)
         return master_list
-=======
-        with open(os.path.join(ROOT_DIR, r"scrapers\florida\florida.json"), "w") as f:
-            json.dump(master_list, f)
-            return master_list
->>>>>>> 5600ab1... removed lib in git ignore and putting scrapers in lib...?
 
 
 if __name__ == "__main__":

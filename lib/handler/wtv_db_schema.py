@@ -8,30 +8,35 @@ from pymodm import (
     EmbeddedDocumentField,
     EmailField,
     ReferenceField,
-    BooleanField,
 )
 from pymongo import WriteConcern
 
 from lib.definitions import LOCAL_DB_ALIAS
 
 
-class Address(EmbeddedMongoModel):
+class PhysicalAddress(EmbeddedMongoModel):
     state = CharField(verbose_name="Name of state", required=True)
     city = CharField(verbose_name="Name of city", required=True)
-    zip_code = CharField(verbose_name="Name of zip code", required=True)
+    zip_code = CharField(
+        verbose_name="Name of zip code", min_length=5, max_length=5, required=True
+    )
     location_name = CharField(verbose_name="Name of election office", required=True)
     street = CharField(verbose_name="Name of street", required=True)
     apt_unit = CharField(verbose_name="Apartment or unit number")
     po_box = CharField(verbose_name="Name of PO Box")
-    is_mailing = BooleanField(
-        verbose_name="Whether the address is a mailing address " "or not", default=False
-    )
+
+
+class MailingAddress(PhysicalAddress):
+    street = CharField(verbose_name="Name of street")
 
 
 class ElectionOffice(EmbeddedMongoModel):
     county_name = CharField(verbose_name="Name of county", required=True)
-    address = EmbeddedDocumentField(
-        Address, verbose_name="Phyiscal address information", required=True
+    physical_address = EmbeddedDocumentField(
+        PhysicalAddress, verbose_name="Phyiscal address information"
+    )
+    mailing_address = EmbeddedDocumentField(
+        MailingAddress, verbose_name="Mailing address information"
     )
     phone_number = CharField(verbose_name="Office phone number", required=True)
     email_address = EmailField(verbose_name="Office email address")
