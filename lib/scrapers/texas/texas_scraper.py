@@ -6,6 +6,7 @@ import aiohttp
 import pandas as pd
 import json
 import usaddress
+from bs4 import BeautifulSoup as bs
 
 from lib.ElectionSaver import electionsaver
 from lib.definitions import bcolors, ROOT_DIR
@@ -14,12 +15,21 @@ BASE_URL = "https://www.sos.state.tx.us/elections/forms/election-duties-1.xlsx"
 
 EMAIL_URL = "https://www.sos.state.tx.us/elections/voter/county.shtml"
 
+emails = []
 async def getEmailAddresses():
     async with aiohttp.ClientSession() as session:
         async with session.get(EMAIL_URL) as r:
             text = await r.read()
+            soup = bs(text.decode("utf-8"), 'html.parser')
+        alinks = soup.findAll('a')
+        for a in alinks:
+            if "County Email Address" in a.text:
+                href = a['href']
+                href = href.replace('mailto:', '')
+                href = href.replace('maito:', '') # bc ofc this is necessary
+                href = href.split(";")[0].strip()
+                emails.append(href)
     
-
 def formatAddressData(address, countyName):
     mapping = electionsaver.addressSchemaMapping
 
@@ -94,10 +104,12 @@ async def get_election_offices():
         real_address = formatAddressData(real_add[i], county_names[i])
         if 'locationName' not in real_address:
             real_address['locationName'] = location_names[i]
+        #print(f'County Name: {county_names[i]} | Email: {emails[i]}')
         schema = {
             "countyName": county_names[i],
             "physicalAddress": real_address,
             "phone": texas_boe['Phone '][i],
+            "email": emails[i],
             "officeSupervisor": texas_boe['Name'][i],
             "supervisorTitle": texas_boe['Postion'][i],
             "website": websites[i]
@@ -113,6 +125,7 @@ if __name__ == "__main__":
     start = time.time()
     # Normally you'd start the event loop with asyncio.run() but there's a known issue
     # with aiohttp that causes the program to error at the end after completion
+    asyncio.get_event_loop().run_until_complete(getEmailAddresses())
     asyncio.get_event_loop().run_until_complete(get_election_offices())
     end = time.time()
     print(f"{bcolors.OKBLUE}Completed in {end - start} seconds.{bcolors.ENDC}")
