@@ -9,13 +9,14 @@ import os
 import re
 import time
 import types
-from asyncio import Task
+from asyncio import Task, Future
 from dataclasses import dataclass, field
 from typing import Iterable, Callable, Dict, List
 
 import pandas as pd
 from pymodm import connect
 from pymodm.errors import ValidationError
+from pymongo import MongoClient
 from pymongo.errors import WriteError
 from tqdm import tqdm
 
@@ -37,7 +38,7 @@ from lib.handler.wtv_db_schema import (
     ZipCode,
     ElectionOffice,
     MailingAddress,
-    PhysicalAddress,
+    PhysicalAddress, VALIDATION_RULES,
 )
 from lib.handler.zip_county_mapping.zip_to_county import create_mapping
 
@@ -54,6 +55,10 @@ from lib.scrapers.nebraska import nebraska_scraper
 from lib.scrapers.georgia import georgia_scraper
 from lib.scrapers.california import california_scraper
 from lib.scrapers.new_hampshire import new_hampshire_scraper
+from lib.scrapers.ohio import ohio_scraper
+from lib.scrapers.iowa import iowa_scraper
+from lib.scrapers.wisconsin import wisconsin_scraper
+from lib.scrapers.pennsylvania import pennsylvania_scraper
 
 
 @dataclass
@@ -133,7 +138,7 @@ class WtvDbHandler:
                 mapping_df = pd.read_csv(
                     os.path.join(ROOT_DIR, r"handler\zip_county_mapping\mapping.csv")
                 )
-                print(f"{bcolors.OKBLUE}Mapping data loaded.{bcolors.ENDC}")
+                print(f"{bcolors.OKBLUE}Mapping data loaded.{bcolors.ENDC}\n")
             except FileNotFoundError as e:
                 if tries <= 3:
                     print(
@@ -159,7 +164,6 @@ class WtvDbHandler:
         """Weak checking to see if database is already preloaded with data
         @rtype: bool
         """
-        from pymongo import MongoClient
 
         client = MongoClient(LOCAL_DB_URI)
         db = client[LOCAL_DB_NAME]
@@ -174,6 +178,7 @@ class WtvDbHandler:
             )
             mapping_df = self._get_mapping()
             total_rows = len(mapping_df.index)
+            self.set_validation_rules()
             # TODO: Only way to speed this up is with an async MongoDB driver
             for row in tqdm(
                 mapping_df.itertuples(), desc="preloading db", total=total_rows
@@ -240,12 +245,15 @@ class WtvDbHandler:
                     )
                     tasks.append(asyncio.create_task(self._get_scraper_data(scraper)))
             if tasks:
-                await asyncio.gather(*tasks)
+                future: Future
+                for future in asyncio.as_completed(tasks):
+                    await future
             print(f"{bcolors.OKBLUE}Scraper data loaded into memory{bcolors.ENDC}")
 
     def load_election_office_info(self):
         """Insert election office information gathered from scrapers into the
         database"""
+        issues = []
         for scraper in tqdm(self.scrapers, desc="Loading office info into database"):
             s_data: Dict
             for s_data in scraper.data:
@@ -257,6 +265,7 @@ class WtvDbHandler:
                 # Try to get city name from physical first, default to mailing
                 city_name = physical_address.get("city", mailing_address.get("city"))
                 state_name = physical_address.get("state", mailing_address.get("state"))
+                election_office = None
                 try:
                     # Try to get zip code from physical first, default to mailing
                     zip_code = physical_address.get(
@@ -309,18 +318,30 @@ class WtvDbHandler:
                         f"{county_name if not None else city_name}, {state_name} data: "
                         f"{type(e).__name__}{bcolors.ENDC}"
                     )
+                    issues.append({"county": county_name, "city": city_name, "election_office": s_data})
                 except (WriteError, TypeError) as e:
                     print(
                         f"{bcolors.OKBLUE}\nCould not load "
                         f"{county_name if county_name is not None else city_name}, "
                         f"{state_name} data: {e}{bcolors.ENDC}"
                     )
+                    issues.append({"county": county_name, "city": city_name, "election_office": s_data})
                 except ValidationError as e:
                     print(
                         f"{bcolors.OKBLUE}\nCould not load "
                         f"{county_name if not None else city_name}, {state_name} data: "
                         f"{e}{bcolors.ENDC}"
                     )
+                    issues.append({"county": county_name, "city": city_name, "election_office": s_data})
+        with open(os.path.join(ROOT_DIR, "issues.json"), 'w') as f:
+            json.dump(issues, f)
+
+    @staticmethod
+    def set_validation_rules():
+        client = MongoClient(LOCAL_DB_URI)
+        db = client[LOCAL_DB_NAME]
+        db.create_collection("county", validator=VALIDATION_RULES["county"]["validator"])
+        db.create_collection("city", validator=VALIDATION_RULES["city"]["validator"])
 
 
 async def main():
