@@ -91,6 +91,8 @@ def formatAddressData(address, countyName):
     else:
         if countyName == "Vinton":
             finalAddress["streetNumberName"] = "31935 OH-93"
+        if countyName == "Brown":
+            finalAddress["streetNumberName"] = "800 Mt. Orab Pike"
     if "city" in parsedDataDict:
         finalAddress["city"] = parsedDataDict["city"]
     if "poBox" in parsedDataDict:
@@ -99,6 +101,8 @@ def formatAddressData(address, countyName):
         finalAddress["locationName"] = parsedDataDict["locationName"]
         if countyName == "Vinton":
             finalAddress["locationName"] = "Community Building"
+        if countyName == "Brown":
+            finalAddress["locationName"] = "Administrative Building"
     if "aptNumber" in parsedDataDict:
         finalAddress["aptNumber"] = parsedDataDict["aptNumber"]
         if countyName == "Vinton":
