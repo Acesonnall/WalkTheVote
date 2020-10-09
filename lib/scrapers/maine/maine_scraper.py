@@ -19,8 +19,14 @@ T_FILE = (
 
 
 def formatAddressData(addressData, countyName):
+    if countyName == "Swans Island":
+        addressData = addressData.replace("Swan'S", "Swans")
+    if countyName == "Jackson":
+        addressData = "730 Moosehead Trail Hwy PO Box 393 Jackson, ME 04921"
+
     mapping = electionsaver.addressSchemaMapping
     parsedDataDict = usaddress.tag(addressData, tag_mapping=mapping)[0]
+    
     try:
         finalAddress = {
             "city": parsedDataDict["city"],
@@ -103,11 +109,12 @@ async def get_election_offices():
     clerk_names = county_info_t["Lorna Flint Marshall"].tolist()
     clerk_names.insert(0, "Lorna Flint Marshall")
     clerk_positions = ["Municipal Clerk"] * len(county_names)
-    location_names = [i + " City Election Office" for i in county_names]
+    location_names = [i + " Municipality Election Office" for i in county_names]
     websites = ["https://www.maine.gov/sos/cec/elec/munic.html"] * len(county_names)
 
     masterList = []
 
+    tmp = 0
     for i in range(len(county_names)):
         real_address = formatAddressData(address[i], county_names[i])
         if "locationName" not in real_address:
@@ -121,17 +128,41 @@ async def get_election_offices():
             "website": websites[i],
         }
 
+        p = percentSimilarity(county_names[i], real_address["city"])
+        if county_names[i] != real_address["city"]:
+            if p < 40.0:
+                print(f'Non-abbreviated mismatch detected: {county_names[i]} and {real_address["city"]} | adding {county_names[i]}')
+                schema['cityName'] = county_names[i]
+                tmp += 1
+
         ismailing = isMailingAddress(real_address)
         if ismailing:
             schema["mailingAddress"] = schema["physicalAddress"]
             schema.pop("physicalAddress")
-
+        if county_names[i] == "Jackson":
+            mailing = formatAddressData("Town of Jackson PO Box 393 Brooks, ME 04921", "Jackson Mailing")
+            schema["mailingAddress"] = mailing
+            schema["cityName"] = "Jackson"
         masterList.append(schema)
 
-    with open(os.path.join(ROOT_DIR, r"scrapers\maine\maine.json"), "w") as f:
+    print(f'Replaced {tmp} discrepancies out of {len(county_names)}')
+
+    with open(os.path.join(ROOT_DIR, "scrapers", "maine", "maine.json"), "w") as f:
         json.dump(masterList, f)
     return masterList
 
+def percentSimilarity(str1, str2):
+    if str1 == str2:
+        return 100
+    str1 = str1.replace('Saint', 'St.')
+    isStr1Longer = len(str1) <= len(str2)
+    strToCheck = str1 if isStr1Longer else str2
+    otherString = str2 if isStr1Longer else str1
+    similarityIndex = 0
+    for i in range(len(strToCheck)):
+        if strToCheck[i] == otherString[i]:
+            similarityIndex +=1
+    return 100 * (similarityIndex/len(otherString))
 
 if __name__ == "__main__":
     start = time.time()
