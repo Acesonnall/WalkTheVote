@@ -13,6 +13,190 @@ from pymongo import WriteConcern
 
 from lib.definitions import LOCAL_DB_ALIAS
 
+VALIDATION_RULES = {
+    "county": {
+        "validator": {
+            "$jsonSchema": {
+                "bsonType": "object",
+                "required": ["parent_state"],
+                "properties": {
+                    "parent_state": {
+                        "bsonType": "string"
+                    },
+                    "election_office": {
+                        "bsonType": "object",
+                        "required": ["county_name", "phone_number", "website"],
+                        "properties": {
+                            "county_name": {
+                                "bsonType": "string"
+                            },
+                            "physical_address": {
+                                "bsonType": "object",
+                                "required": ["state", "city", "zip_code", "location_name", "street"],
+                                "properties": {
+                                    "state": {
+                                        "bsonType": "string"
+                                    },
+                                    "city": {
+                                        "bsonType": "string"
+                                    },
+                                    "zip_code": {
+                                        "bsonType": "string"
+                                    },
+                                    "location_name": {
+                                        "bsonType": "string"
+                                    },
+                                    "street": {
+                                        "bsonType": "string"
+                                    },
+                                    "apt_unit": {
+                                        "bsonType": ["string", "null"]
+                                    },
+                                    "po_box": {
+                                        "bsonType": ["string", "null"]
+                                    }
+                                }
+                            },
+                            "mailing_address": {
+                                "bsonType": "object",
+                                "required": ["state", "city", "zip_code",
+                                             "location_name", "street"],
+                                "properties": {
+                                    "state": {
+                                        "bsonType": "string"
+                                    },
+                                    "city": {
+                                        "bsonType": "string"
+                                    },
+                                    "zip_code": {
+                                        "bsonType": "string"
+                                    },
+                                    "location_name": {
+                                        "bsonType": "string"
+                                    },
+                                    "street": {
+                                        "bsonType": ["string", "null"]
+                                    },
+                                    "apt_unit": {
+                                        "bsonType": ["string", "null"]
+                                    },
+                                    "po_box": {
+                                        "bsonType": ["string", "null"]
+                                    }
+                                }
+                            },
+                            "phone_number": {
+                                "bsonType": "string"
+                            },
+                            "email_address": {
+                                "bsonType": ["string", "null"]
+                            },
+                            "office_supervisor": {
+                                "bsonType": ["string", "null"]
+                            },
+                            "supervisor_title": {
+                                "bsonType": ["string", "null"]
+                            },
+                            "website": {
+                                "bsonType": "string"
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    },
+    "city": {
+        "validator": {
+            "$jsonSchema": {
+                "bsonType": "object",
+                "required": ["parent_county"],
+                "properties": {
+                    "parent_county": {
+                        "bsonType": "string"
+                    },
+                    "election_office": {
+                        "bsonType": "object",
+                        "required": ["phone_number", "website"],
+                        "properties": {
+                            "physical_address": {
+                                "bsonType": "object",
+                                "required": ["state", "city", "zip_code", "location_name", "street"],
+                                "properties": {
+                                    "state": {
+                                        "bsonType": "string"
+                                    },
+                                    "city": {
+                                        "bsonType": "string"
+                                    },
+                                    "zip_code": {
+                                        "bsonType": "string"
+                                    },
+                                    "location_name": {
+                                        "bsonType": "string"
+                                    },
+                                    "street": {
+                                        "bsonType": "string"
+                                    },
+                                    "apt_unit": {
+                                        "bsonType": ["string", "null"]
+                                    },
+                                    "po_box": {
+                                        "bsonType": ["string", "null"]
+                                    }
+                                }
+                            },
+                            "mailing_address": {
+                                "bsonType": "object",
+                                "required": ["state", "city", "zip_code",
+                                             "location_name", "street"],
+                                "properties": {
+                                    "state": {
+                                        "bsonType": "string"
+                                    },
+                                    "city": {
+                                        "bsonType": "string"
+                                    },
+                                    "zip_code": {
+                                        "bsonType": "string"
+                                    },
+                                    "location_name": {
+                                        "bsonType": "string"
+                                    },
+                                    "street": {
+                                        "bsonType": "string"
+                                    },
+                                    "apt_unit": {
+                                        "bsonType": ["string", "null"]
+                                    },
+                                    "po_box": {
+                                        "bsonType": ["string", "null"]
+                                    }
+                                }
+                            },
+                            "phone_number": {
+                                "bsonType": "string"
+                            },
+                            "email_address": {
+                                "bsonType": ["string", "null"]
+                            },
+                            "office_supervisor": {
+                                "bsonType": ["string", "null"]
+                            },
+                            "supervisor_title": {
+                                "bsonType": ["string", "null"]
+                            },
+                            "website": {
+                                "bsonType": "string"
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+}
+
 
 class PhysicalAddress(EmbeddedMongoModel):
     state = CharField(verbose_name="Name of state", required=True)

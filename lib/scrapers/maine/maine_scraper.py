@@ -3,7 +3,6 @@ import os
 import time
 
 import aiohttp
-import requests
 from bs4 import BeautifulSoup
 import re
 import json
