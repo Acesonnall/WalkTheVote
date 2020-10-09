@@ -26,24 +26,11 @@ def formatAddressData(address, countyName):
         address = address.replace('Courthouse', '')
     if countyName == 'Borden':
         address = '117 Wasson Rd, Gail, TX 79738'
-<<<<<<< HEAD
-<<<<<<< HEAD
-        
-=======
 
->>>>>>> 5600ab1... removed lib in git ignore and putting scrapers in lib...?
     parsedDataDict = usaddress.tag(address, tag_mapping=mapping)[0]
 
     finalAddress = {
         "state": "Texas"
-=======
-
-    parsedDataDict = usaddress.tag(address, tag_mapping=mapping)[0]
-
-    finalAddress = {
-        "state": "Texas",
-        "is_mailing": False
->>>>>>> 5600ab1... removed lib in git ignore and putting scrapers in lib...?
     }
     if 'streetNumberName' in parsedDataDict:
         finalAddress['streetNumberName'] = parsedDataDict['streetNumberName']
@@ -69,13 +56,7 @@ async def get_election_offices():
         ['Mailing Address', 'Secondary Email', 'Fax', 'County Email Addresses',
          'Primary Email '], axis=1)
 
-<<<<<<< HEAD
     county_names = texas_boe['County'].str.replace(' COUNTY', '').str.title()
-=======
-    county_names = []
-    for i in texas_boe['County']:
-        county_names.append(i.replace(' COUNTY', '').capitalize())
->>>>>>> 5600ab1... removed lib in git ignore and putting scrapers in lib...?
 
     location_names = []
     for i in county_names:

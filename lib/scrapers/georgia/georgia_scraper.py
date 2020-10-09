@@ -1,4 +1,3 @@
-<<<<<<< HEAD
 # import context
 import asyncio
 import os
@@ -72,13 +71,6 @@ def format_address_data(address_data, county_name, is_physical, mailing_addr={})
 
 
 def format_address_html(info_str):
-=======
-import requests
-from bs4 import BeautifulSoup
-
-
-def format_address(info_str):
->>>>>>> 5600ab1... removed lib in git ignore and putting scrapers in lib...?
     info_str = info_str.replace("\n<br/>", " ")
     info_str = info_str.replace("<br/>\n", " ")
     info_str = info_str.replace("<br/>", " ")
@@ -104,7 +96,6 @@ def get_phone_number(info_str):
             phone_num.append(c)
         else:
             break
-<<<<<<< HEAD
 
     return "".join(phone_num)
 
@@ -134,47 +125,12 @@ async def scrape_one_county(session, county_id, county_name):
 
     # Get mailing and physical addresses
     phys_address, mail_address = "", ""
-=======
-    print(phone_num)
-    return "".join(phone_num)
-
-
-f = open("./log.txt", "w")
-
-# Get list of county names from registrar to populate form
-registrar_url = "https://elections.sos.ga.gov/Elections/countyregistrars.do"
-r = requests.get(registrar_url)
-soup = BeautifulSoup(r.content, "html5lib")
-county_option_list = soup.findAll(attrs={"name": "idTown"})[0].findAll("option")
-
-id_list = [county_option["value"] for county_option in county_option_list]
-county_list = [county_option.string for county_option in county_option_list]
-
-# Use list of counties and IDs to get county info for each county
-info_url = "https://elections.sos.ga.gov/Elections/contactinfo.do"
-
-county_info = {}
-
-for i in range(len(id_list)):
-    county_id = id_list[i]
-    county_name = county_list[i]
-    r = requests.post(
-        info_url,
-        data={"idTown": county_id, "SubmitCounty": "Submit", "contactType": "R"},
-    )
-    soup = BeautifulSoup(r.content, "html5lib")
-    table = soup.find("table", {"id": "Table1"})
-    rows = table.find_all("tr")
-
-    phys_info_str, mail_info_str, phone_number = "", "", ""
->>>>>>> 5600ab1... removed lib in git ignore and putting scrapers in lib...?
 
     if (
         "Physical Address:" in rows[0].getText()
         and "SAME AS ABOVE" not in rows[0].getText()
     ):
         phys_info_str = str(rows[0])
-<<<<<<< HEAD
         phys_address = format_address_html(phys_info_str)
 
     mail_info_str = str(rows[1])
@@ -305,13 +261,3 @@ if __name__ == "__main__":
     asyncio.get_event_loop().run_until_complete(get_election_offices())
     end = time.time()
     print(f"{bcolors.OKBLUE}Completed in {end - start} seconds.{bcolors.ENDC}")
-=======
-        phys_address = format_address(phys_info_str)
-
-    mail_info_str = str(rows[1])
-    mail_address = format_address(mail_info_str)
-
-    if "Telephone: " in rows[2].getText():
-        contact_info_str = rows[2].getText()
-        phone_number = get_phone_number(contact_info_str)
->>>>>>> 5600ab1... removed lib in git ignore and putting scrapers in lib...?
