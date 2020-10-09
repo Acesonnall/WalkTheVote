@@ -162,7 +162,7 @@ for i in clerk_names_0:
     else:
         clerk_names_real.append(name.group(1).split('<br/>')[0].replace('\xa0', '').split('<')[0])
 
-clerk_replace = ['None', 'Tina Kiger', 'None', 'Nadeen Manzoni', 'Ms. Lisa R. Rivett', 'Melanie R. Ostrander', 'Ms. Florence Kellett']
+clerk_replace = ['None', 'Tina Kiger', 'None', 'Shelby Witchilla', 'Nadeen Manzoni', 'Ms. Lisa R. Rivett', 'Melanie R. Ostrander', 'Ms. Florence Kellett']
 
 counter = 0
 for pos, i in enumerate(clerk_names_real):
@@ -214,7 +214,6 @@ def formatAddressData(address, countyName):
     if 'locationName' in parsedDataDict:
         finalAddress['locationName'] = parsedDataDict['locationName']
         if countyName == "Sullivan":
-            print(f'Sullivan county info is {parsedDataDict}')
             finalAddress['locationName'] = 'Sullivan Co. Courthouse'
         if countyName == "Montgomery":
             finalAddress['locationName'] = 'Montgomery County Voter Services'

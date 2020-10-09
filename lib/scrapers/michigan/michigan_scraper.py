@@ -35,6 +35,7 @@ def get_county_names(soup, county_data):
 
 
 async def request_data_for_one_county(session: ClientSession, county_data):
+    session = aiohttp.ClientSession(connector=aiohttp.TCPConnector(verify_ssl=False))
     async with session.post(NEW_URL, data=county_data) as req:
         text = await req.read()
     _soup = bS(text.decode("utf-8"), "html.parser")
@@ -124,6 +125,11 @@ def format_data_into_schema(county_name, post_response_data):
         mailing_address = format_address_data(mailing, cleaned_county_name)
         schema["mailingAddress"] = mailing_address
 
+    if cleaned_county_name == "Iosco":
+        temp = schema["physicalAddress"]
+        schema["physicalAddress"] = schema["mailingAddress"]
+        schema["mailingAddress"] = temp
+
     # print(schema)
     return schema
 
@@ -189,7 +195,7 @@ def format_address_data(address_data, county_name):
 
 
 async def get_election_offices():
-    async with aiohttp.ClientSession() as session:
+    async with aiohttp.ClientSession(connector=aiohttp.TCPConnector(verify_ssl=False)) as session:
         async with session.get(BASE_URL) as r:
             text = await r.read()
         soup = bS(text.decode("utf-8"), "html.parser")
@@ -225,7 +231,7 @@ async def get_election_offices():
             )
 
         # output to JSON
-        with open(os.path.join(ROOT_DIR, r"scrapers\michigan\michigan.json"), "w") as f:
+        with open(os.path.join(ROOT_DIR, "scrapers", "michigan", "michigan.json"), "w") as f:
             json.dump(master_list, f)
         return master_list
 
