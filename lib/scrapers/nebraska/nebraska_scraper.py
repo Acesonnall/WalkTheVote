@@ -37,6 +37,9 @@ def formatAddressData(addressData, countyName):
         finalAddress["aptNumber"] = parsedDataDict["aptNumber"]
     if "streetNumberName" in parsedDataDict:
         finalAddress["streetNumberName"] = parsedDataDict["streetNumberName"]
+    else:
+        if countyName == "Frontier":
+            finalAddress["streetNumberName"] = "1 Wellington St"
     if "locationName" in parsedDataDict:
         finalAddress["locationName"] = parsedDataDict["locationName"]
     if "poBox" in parsedDataDict:
@@ -117,7 +120,7 @@ async def get_election_offices():
 
             masterList.append(schema)
 
-    with open(os.path.join(ROOT_DIR, r"scrapers\nebraska\nebraska.json"), "w") as f:
+    with open(os.path.join(ROOT_DIR, "scrapers", "nebraska", "nebraska.json"), "w") as f:
         json.dump(masterList, f)
     return masterList
 

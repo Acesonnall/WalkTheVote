@@ -6,22 +6,41 @@ import aiohttp
 import pandas as pd
 import json
 import usaddress
+from bs4 import BeautifulSoup as bs
 
 from lib.ElectionSaver import electionsaver
 from lib.definitions import bcolors, ROOT_DIR
 
 BASE_URL = "https://www.sos.state.tx.us/elections/forms/election-duties-1.xlsx"
 
+EMAIL_URL = "https://www.sos.state.tx.us/elections/voter/county.shtml"
 
+emails = []
+async def getEmailAddresses():
+    async with aiohttp.ClientSession() as session:
+        async with session.get(EMAIL_URL) as r:
+            text = await r.read()
+            soup = bs(text.decode("utf-8"), 'html.parser')
+        alinks = soup.findAll('a')
+        for a in alinks:
+            if "County Email Address" in a.text:
+                href = a['href']
+                href = href.replace('mailto:', '')
+                href = href.replace('maito:', '') # bc ofc this is necessary
+                href = href.split(";")[0].strip()
+                emails.append(href)
+    
 def formatAddressData(address, countyName):
     mapping = electionsaver.addressSchemaMapping
 
     if countyName == 'Knox':
         address = '100 W Cedar St, Benjamin, TX 79505'
-    if countyName == 'Live oak':
+    if countyName == 'Live Oak':
         address = '301 E Houston St George West, TX 78022'
     if countyName == 'Kleberg':
         address = address + ' 78364'
+    if countyName == 'Parker':
+        address = "1112 Santa Fe Drive Weatherford, TX 76086"
     if countyName == 'Stephens':
         address = address.replace('Courthouse', '')
     if countyName == 'Borden':
@@ -53,7 +72,7 @@ async def get_election_offices():
             texas_boe = pd.read_excel(await r.read())
 
     texas_boe = texas_boe.drop(
-        ['Mailing Address', 'Secondary Email', 'Fax', 'County Email Addresses',
+        ['Mailing Address', 'Secondary Email', 'Fax',
          'Primary Email '], axis=1)
 
     county_names = texas_boe['County'].str.replace(' COUNTY', '').str.title()
@@ -85,17 +104,19 @@ async def get_election_offices():
         real_address = formatAddressData(real_add[i], county_names[i])
         if 'locationName' not in real_address:
             real_address['locationName'] = location_names[i]
+        #print(f'County Name: {county_names[i]} | Email: {emails[i]}')
         schema = {
             "countyName": county_names[i],
             "physicalAddress": real_address,
             "phone": texas_boe['Phone '][i],
+            "email": emails[i],
             "officeSupervisor": texas_boe['Name'][i],
             "supervisorTitle": texas_boe['Postion'][i],
             "website": websites[i]
         }
         masterList.append(schema)
 
-    with open(os.path.join(ROOT_DIR, r"scrapers\texas\texas.json"), 'w') as f:
+    with open(os.path.join(ROOT_DIR, "scrapers", "texas", "texas.json"), 'w') as f:
         json.dump(masterList, f)
     return masterList
 
@@ -104,6 +125,7 @@ if __name__ == "__main__":
     start = time.time()
     # Normally you'd start the event loop with asyncio.run() but there's a known issue
     # with aiohttp that causes the program to error at the end after completion
+    asyncio.get_event_loop().run_until_complete(getEmailAddresses())
     asyncio.get_event_loop().run_until_complete(get_election_offices())
     end = time.time()
     print(f"{bcolors.OKBLUE}Completed in {end - start} seconds.{bcolors.ENDC}")
