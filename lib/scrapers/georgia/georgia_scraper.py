@@ -32,6 +32,10 @@ def format_address_data(address_data, county_name, is_physical, mailing_addr={})
 
     final_address = {}
 
+    # Edge cases: add missing info.
+    if county_name == "SUMTER":
+        parsed_data_dict["city"] = "Americus"
+
     # Sometimes info is only in mailing address, if data is missing in physical, add the info from mailing
     if "city" in parsed_data_dict:
         final_address["city"] = parsed_data_dict["city"].title()

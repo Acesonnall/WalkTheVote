@@ -40,6 +40,10 @@ def clean_raw_file():
 def format_address_data(address_data, town_name):
     mapping = electionsaver.addressSchemaMapping
 
+    # Edge cases
+    if address_data == "20 PARK ST GORHAM":
+        address_data = "20 PARK ST GORHAM 03581"
+
     parsed_data_dict = {}
     try:
         parsed_data_dict = usaddress.tag(address_data, tag_mapping=mapping)[0]
