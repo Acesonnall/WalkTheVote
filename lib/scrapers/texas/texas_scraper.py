@@ -12,16 +12,25 @@ from lib.definitions import bcolors, ROOT_DIR
 
 BASE_URL = "https://www.sos.state.tx.us/elections/forms/election-duties-1.xlsx"
 
+EMAIL_URL = "https://www.sos.state.tx.us/elections/voter/county.shtml"
+
+async def getEmailAddresses():
+    async with aiohttp.ClientSession() as session:
+        async with session.get(EMAIL_URL) as r:
+            text = await r.read()
+    
 
 def formatAddressData(address, countyName):
     mapping = electionsaver.addressSchemaMapping
 
     if countyName == 'Knox':
         address = '100 W Cedar St, Benjamin, TX 79505'
-    if countyName == 'Live oak':
+    if countyName == 'Live Oak':
         address = '301 E Houston St George West, TX 78022'
     if countyName == 'Kleberg':
         address = address + ' 78364'
+    if countyName == 'Parker':
+        address = "1112 Santa Fe Drive Weatherford, TX 76086"
     if countyName == 'Stephens':
         address = address.replace('Courthouse', '')
     if countyName == 'Borden':
@@ -53,7 +62,7 @@ async def get_election_offices():
             texas_boe = pd.read_excel(await r.read())
 
     texas_boe = texas_boe.drop(
-        ['Mailing Address', 'Secondary Email', 'Fax', 'County Email Addresses',
+        ['Mailing Address', 'Secondary Email', 'Fax',
          'Primary Email '], axis=1)
 
     county_names = texas_boe['County'].str.replace(' COUNTY', '').str.title()
@@ -95,7 +104,7 @@ async def get_election_offices():
         }
         masterList.append(schema)
 
-    with open(os.path.join(ROOT_DIR, r"scrapers\texas\texas.json"), 'w') as f:
+    with open(os.path.join(ROOT_DIR, "scrapers", "texas", "texas.json"), 'w') as f:
         json.dump(masterList, f)
     return masterList
 
