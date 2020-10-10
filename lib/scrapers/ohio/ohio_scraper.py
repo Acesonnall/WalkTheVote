@@ -9,41 +9,41 @@ import json
 import usaddress
 
 from lib.ElectionSaver import electionsaver
-from lib.definitions import bcolors, ROOT_DIR
+from lib.definitions import Bcolors, ROOT_DIR
 
 URL = "https://www.sos.state.oh.us/elections/elections-officials/county-boards-of-elections-directory/"
 
 
-def formatAddressData(address, countyName):
+def format_address_data(address, county_name):
     mapping = electionsaver.addressSchemaMapping
-    parsedDataDict = usaddress.tag(address, tag_mapping=mapping)[0]
+    parsed_data_dict = usaddress.tag(address, tag_mapping=mapping)[0]
 
-    finalAddress = {
+    final_address = {
         "state": "Ohio",
-        "zipCode": parsedDataDict["zipCode"],
+        "zipCode": parsed_data_dict["zipCode"],
     }
-    if "streetNumberName" in parsedDataDict:
-        finalAddress["streetNumberName"] = parsedDataDict["streetNumberName"]
+    if "streetNumberName" in parsed_data_dict:
+        final_address["streetNumberName"] = parsed_data_dict["streetNumberName"]
     else:
-        if countyName == "Vinton":
-            finalAddress["streetNumberName"] = "31935 OH-93"
-        if countyName == "Brown":
-            finalAddress["streetNumberName"] = "800 Mt. Orab Pike"
-    if "city" in parsedDataDict:
-        finalAddress["city"] = parsedDataDict["city"]
-    if "poBox" in parsedDataDict:
-        finalAddress["poBox"] = parsedDataDict["poBox"]
-    if "locationName" in parsedDataDict:
-        finalAddress["locationName"] = parsedDataDict["locationName"]
-        if countyName == "Vinton":
-            finalAddress["locationName"] = "Community Building"
-        if countyName == "Brown":
-            finalAddress["locationName"] = "Administrative Building"
-    if "aptNumber" in parsedDataDict:
-        finalAddress["aptNumber"] = parsedDataDict["aptNumber"]
-        if countyName == "Vinton":
-            finalAddress.pop("aptNumber")
-    return finalAddress
+        if county_name == "Vinton":
+            final_address["streetNumberName"] = "31935 OH-93"
+        if county_name == "Brown":
+            final_address["streetNumberName"] = "800 Mt. Orab Pike"
+    if "city" in parsed_data_dict:
+        final_address["city"] = parsed_data_dict["city"]
+    if "poBox" in parsed_data_dict:
+        final_address["poBox"] = parsed_data_dict["poBox"]
+    if "locationName" in parsed_data_dict:
+        final_address["locationName"] = parsed_data_dict["locationName"]
+        if county_name == "Vinton":
+            final_address["locationName"] = "Community Building"
+        if county_name == "Brown":
+            final_address["locationName"] = "Administrative Building"
+    if "aptNumber" in parsed_data_dict:
+        final_address["aptNumber"] = parsed_data_dict["aptNumber"]
+        if county_name == "Vinton":
+            final_address.pop("aptNumber")
+    return final_address
 
 
 async def get_election_offices():
@@ -73,7 +73,7 @@ async def get_election_offices():
     for i in all_elems:
         office_hours = re.search('Office Hours: (.*) Telephone', i)
         phone_num = re.search('Telephone: (.*) Fax', i)
-        address = re.search('\nGet Directions  (.*) Office', i)
+        address = re.search('\nGet Directions {2}(.*) Office', i)
         website = re.search('Website:(.*)\n\t', i)
         if office_hours is None:
             ohours.append('None')
@@ -124,10 +124,10 @@ async def get_election_offices():
     email_add = [i.lower()[:8].replace(' ', '') + '@OhioSoS.gov' for i in county_names]
     loc_name = [i + ' County Election Office' for i in county_names]
 
-    masterList = []
+    master_list = []
 
     for i in range(len(county_names)):
-        real_address = formatAddressData(addies[i], county_names[i])
+        real_address = format_address_data(addies[i], county_names[i])
         if "locationName" not in real_address:
             real_address["locationName"] = loc_name[i]
 
@@ -139,15 +139,15 @@ async def get_election_offices():
             "website": websites[i],
         }
 
-        masterList.append(schema)
+        master_list.append(schema)
 
     with open(os.path.join(ROOT_DIR, "scrapers", "ohio", "ohio.json"), 'w') as f:
-        json.dump(masterList, f)
-    return masterList
+        json.dump(master_list, f)
+    return master_list
 
 
 if __name__ == "__main__":
     start = time.time()
     asyncio.get_event_loop().run_until_complete(get_election_offices())
     end = time.time()
-    print(f"{bcolors.OKBLUE}Completed in {end - start} seconds.{bcolors.ENDC}")
+    print(f"{Bcolors.OKBLUE}Completed in {end - start} seconds.{Bcolors.ENDC}")

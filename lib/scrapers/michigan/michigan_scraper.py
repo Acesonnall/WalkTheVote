@@ -13,7 +13,7 @@ import usaddress
 from aiohttp import ClientSession
 from bs4 import BeautifulSoup as bS
 
-from lib.definitions import ROOT_DIR, bcolors
+from lib.definitions import ROOT_DIR, Bcolors
 
 BASE_URL = "https://mvic.sos.state.mi.us/Clerk"
 
@@ -195,7 +195,9 @@ def format_address_data(address_data, county_name):
 
 
 async def get_election_offices():
-    async with aiohttp.ClientSession(connector=aiohttp.TCPConnector(verify_ssl=False)) as session:
+    async with aiohttp.ClientSession(
+        connector=aiohttp.TCPConnector(verify_ssl=False)
+    ) as session:
         async with session.get(BASE_URL) as r:
             text = await r.read()
         soup = bS(text.decode("utf-8"), "html.parser")
@@ -231,7 +233,9 @@ async def get_election_offices():
             )
 
         # output to JSON
-        with open(os.path.join(ROOT_DIR, "scrapers", "michigan", "michigan.json"), "w") as f:
+        with open(
+            os.path.join(ROOT_DIR, "scrapers", "michigan", "michigan.json"), "w"
+        ) as f:
             json.dump(master_list, f)
         return master_list
 
@@ -240,4 +244,4 @@ if __name__ == "__main__":
     start = time.time()
     asyncio.get_event_loop().run_until_complete(get_election_offices())
     end = time.time()
-    print(f"{bcolors.OKBLUE}Completed in {end - start} seconds.{bcolors.ENDC}")
+    print(f"{Bcolors.OKBLUE}Completed in {end - start} seconds.{Bcolors.ENDC}")

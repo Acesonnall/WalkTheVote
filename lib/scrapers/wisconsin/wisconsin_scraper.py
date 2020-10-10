@@ -3,15 +3,13 @@ import json
 import os
 import re
 import time
-from pprint import pprint
 
 import aiohttp
-import requests
 import usaddress
 from pdfreader import SimplePDFViewer, PDFDocument
 
 from lib.ElectionSaver import electionsaver
-from lib.definitions import ROOT_DIR, bcolors
+from lib.definitions import ROOT_DIR, Bcolors
 
 URL = (
     "https://elections.wi.gov/sites/elections.wi.gov/files/2020-08/WI%20County"
@@ -101,4 +99,4 @@ if __name__ == "__main__":
     start = time.time()
     asyncio.get_event_loop().run_until_complete(get_election_offices())
     end = time.time()
-    print(f"{bcolors.OKBLUE}Completed in {end - start} seconds.{bcolors.ENDC}")
+    print(f"{Bcolors.OKBLUE}Completed in {end - start} seconds.{Bcolors.ENDC}")

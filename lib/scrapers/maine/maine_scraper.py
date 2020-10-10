@@ -10,7 +10,7 @@ import pandas as pd
 import usaddress
 
 from lib.ElectionSaver import electionsaver
-from lib.definitions import bcolors, ROOT_DIR
+from lib.definitions import Bcolors, ROOT_DIR
 
 URL = "https://www.maine.gov/sos/cec/elec/munic.html"
 T_FILE = (
@@ -18,37 +18,38 @@ T_FILE = (
 )
 
 
-def formatAddressData(addressData, countyName):
-    if countyName == "Swans Island":
-        addressData = addressData.replace("Swan'S", "Swans")
-    if countyName == "Jackson":
-        addressData = "730 Moosehead Trail Hwy PO Box 393 Jackson, ME 04921"
+def format_address_data(address_data, county_name):
+    if county_name == "Swans Island":
+        address_data = address_data.replace("Swan'S", "Swans")
+    if county_name == "Jackson":
+        address_data = "730 Moosehead Trail Hwy PO Box 393 Jackson, ME 04921"
 
+    final_address = {}
     mapping = electionsaver.addressSchemaMapping
-    parsedDataDict = usaddress.tag(addressData, tag_mapping=mapping)[0]
-    
+    parsed_data_dict = usaddress.tag(address_data, tag_mapping=mapping)[0]
+
     try:
-        finalAddress = {
-            "city": parsedDataDict["city"],
+        final_address = {
+            "city": parsed_data_dict["city"],
             "state": "Maine",
-            "zipCode": parsedDataDict["zipCode"],
+            "zipCode": parsed_data_dict["zipCode"],
         }
-    except:
-        print(f"Error with data {parsedDataDict}")
+    except KeyError:
+        print(f"Error with data {parsed_data_dict}")
 
-    if "streetNumberName" in parsedDataDict:
-        finalAddress["streetNumberName"] = parsedDataDict["streetNumberName"]
-    if "locationName" in parsedDataDict:
-        finalAddress["locationName"] = parsedDataDict["locationName"]
-    if "aptNumber" in parsedDataDict:
-        finalAddress["aptNumber"] = parsedDataDict["aptNumber"]
-    if "poBox" in parsedDataDict:
-        finalAddress["poBox"] = parsedDataDict["poBox"]
-    return finalAddress
+    if "streetNumberName" in parsed_data_dict:
+        final_address["streetNumberName"] = parsed_data_dict["streetNumberName"]
+    if "locationName" in parsed_data_dict:
+        final_address["locationName"] = parsed_data_dict["locationName"]
+    if "aptNumber" in parsed_data_dict:
+        final_address["aptNumber"] = parsed_data_dict["aptNumber"]
+    if "poBox" in parsed_data_dict:
+        final_address["poBox"] = parsed_data_dict["poBox"]
+    return final_address
 
 
-def isMailingAddress(addressSchema):
-    if "poBox" in addressSchema and "streetNumberName" not in addressSchema:
+def is_mailing_address(address_schema):
+    if "poBox" in address_schema and "streetNumberName" not in address_schema:
         return True
     else:
         return False
@@ -112,11 +113,11 @@ async def get_election_offices():
     location_names = [i + " Municipality Election Office" for i in county_names]
     websites = ["https://www.maine.gov/sos/cec/elec/munic.html"] * len(county_names)
 
-    masterList = []
+    master_list = []
 
     tmp = 0
     for i in range(len(county_names)):
-        real_address = formatAddressData(address[i], county_names[i])
+        real_address = format_address_data(address[i], county_names[i])
         if "locationName" not in real_address:
             real_address["locationName"] = location_names[i]
 
@@ -128,44 +129,51 @@ async def get_election_offices():
             "website": websites[i],
         }
 
-        p = percentSimilarity(county_names[i], real_address["city"])
+        p = percent_similarity(county_names[i], real_address["city"])
         if county_names[i] != real_address["city"]:
             if p < 40.0:
-                print(f'Non-abbreviated mismatch detected: {county_names[i]} and {real_address["city"]} | adding {county_names[i]}')
-                schema['cityName'] = county_names[i]
+                print(
+                    f'Non-abbreviated mismatch detected: {county_names[i]} and '
+                    f'{real_address["city"]} | adding {county_names[i]}'
+                )
+                schema["cityName"] = county_names[i]
                 tmp += 1
 
-        ismailing = isMailingAddress(real_address)
+        ismailing = is_mailing_address(real_address)
         if ismailing:
             schema["mailingAddress"] = schema["physicalAddress"]
             schema.pop("physicalAddress")
         if county_names[i] == "Jackson":
-            mailing = formatAddressData("Town of Jackson PO Box 393 Brooks, ME 04921", "Jackson Mailing")
+            mailing = format_address_data(
+                "Town of Jackson PO Box 393 Brooks, ME 04921", "Jackson Mailing"
+            )
             schema["mailingAddress"] = mailing
             schema["cityName"] = "Jackson"
-        masterList.append(schema)
+        master_list.append(schema)
 
-    print(f'Replaced {tmp} discrepancies out of {len(county_names)}')
+    print(f"Replaced {tmp} discrepancies out of {len(county_names)}")
 
     with open(os.path.join(ROOT_DIR, "scrapers", "maine", "maine.json"), "w") as f:
-        json.dump(masterList, f)
-    return masterList
+        json.dump(master_list, f)
+    return master_list
 
-def percentSimilarity(str1, str2):
+
+def percent_similarity(str1, str2):
     if str1 == str2:
         return 100
-    str1 = str1.replace('Saint', 'St.')
-    isStr1Longer = len(str1) <= len(str2)
-    strToCheck = str1 if isStr1Longer else str2
-    otherString = str2 if isStr1Longer else str1
-    similarityIndex = 0
-    for i in range(len(strToCheck)):
-        if strToCheck[i] == otherString[i]:
-            similarityIndex +=1
-    return 100 * (similarityIndex/len(otherString))
+    str1 = str1.replace("Saint", "St.")
+    is_str1_longer = len(str1) <= len(str2)
+    str_to_check = str1 if is_str1_longer else str2
+    other_string = str2 if is_str1_longer else str1
+    similarity_index = 0
+    for i in range(len(str_to_check)):
+        if str_to_check[i] == other_string[i]:
+            similarity_index += 1
+    return 100 * (similarity_index / len(other_string))
+
 
 if __name__ == "__main__":
     start = time.time()
     asyncio.get_event_loop().run_until_complete(get_election_offices())
     end = time.time()
-    print(f"{bcolors.OKBLUE}Completed in {end - start} seconds.{bcolors.ENDC}")
+    print(f"{Bcolors.OKBLUE}Completed in {end - start} seconds.{Bcolors.ENDC}")
