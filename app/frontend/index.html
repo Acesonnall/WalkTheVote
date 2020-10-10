@@ -17,46 +17,67 @@
         <!-- JS, Popper.js, and jQuery -->
         <script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.1/dist/umd/popper.min.js" integrity="sha384-9/reFTGAW83EW2RDu2S0VKaIzap3H66lZH81PoYlFhbGU+6BZp6G7niu735Sk7lN" crossorigin="anonymous"></script>
         <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js" integrity="sha384-B4gt1jrGC7Jh4AgTPSdUtOBvfO8shuf57BaghqFfPlYxofvL8/KUEfYiJOMMV+rV" crossorigin="anonymous"></script>
+    
+        <!-- Custom Fonts-->
+        <link href="https://fonts.googleapis.com/css2?family=Roboto&display=swap" rel="stylesheet"> 
     </head>
     <body>
-        <h1 class="wtv-header">
-            Walk The Vote
-        </h1>
-        <div class="wtv-zip-wrapper">
-            <input required type="number" name="zip1" id="zip1">
-            <input type="number" name="zip2" id="zip2">
-            <input type="number" name="zip3" id="zip3">
-            <input type="number" name="zip4" id="zip4">
-            <input type="number" name="zip5" id="zip5">
-            <button class="btn btn-primary" onclick="consolidateZipInputs()">Test</button>
-        </div>
-        <div class="wtv-loader"></div>
-        <div class="wtv-results-wrapper card hidden">
-            <div class="card-body">
-                <h5 class="card-title">Election Office Lookup Results</h5>
-                <h6 class="card-subtitle mb-2 text-muted">
-                    Zip code: <span class="zip-text"></span>
-                </h6>
-                <div class="county-name"></div>
-                <div class="address-wrapper">
-                    <div class="location-name"></div>
-                    <div class="street-number-name"></div>
-                    <div class="apt-unit"></div>
-                    <div class="city-state-zip">
-                        <span class="city"></span>, <span class="state"></span> <span class="zipcode"></span>
-                    </div>
+        <div class="master-container shadow">
+            <h1 class="wtv-header">
+                Walk The Vote
+            </h1>
+            <h2 class="wtv-subheader">
+                ... Into the 2020 Election! 
+            </h2>
+            <h3 class="wtv-subsubheader text-muted">
+                Enter your US Zip Code below to find your local office of elections. This is where you can physically deliver your absentee or mail-in ballot.
+            </h3>
+            <div class="wtv-zip-wrapper">
+                <div class="zip-wrapper">
+                    <input type="number" name="zip1" id="zip1">
+                    <input type="number" name="zip2" id="zip2">
+                    <input type="number" name="zip3" id="zip3">
+                    <input type="number" name="zip4" id="zip4">
+                    <input type="number" name="zip5" id="zip5">
                 </div>
-                <div class="supervisor-info">
-                    <span class="super-name"></span>, <span class="super-title"></span>
-                </div>
-                <div class="phone-number"></div>
-                <div class="email-wrapper">
-                    <a href="" class="email"></a>
-                </div>
-                <div class="web-wrapper">
-                    Website: <a href="" class="website"></a>
+                <div class="btn-wrapper">
+                    <button class="btn btn-primary" onclick="consolidateZipInputs()">Lookup</button>
+                    <button class="btn btn-primary" onclick="clearZipFields()">Clear</button>
                 </div>
             </div>
+            <div class="wtv-loader"></div>
+            <div class="wtv-results-wrapper card shadow-sm hidden">
+                <h5 class="card-header">
+                    Your Election Office Jurisdiction
+                    <span class="results text-muted">
+                        Results for: <span class="zip-text"></span>
+                    </span>
+                </h5>
+                <div class="county-name-wrapper"><span class="county-name"></span></span></div>
+                <div class="card-body individual-result">
+                    <div class="address-wrapper">
+                        <div class="supervisor-info">
+                            <span class="super-name"></span>, <span class="super-title"></span>
+                        </div>
+                        <div class="location-name"></div>
+                        <div class="street-number-name"></div>
+                        <div class="apt-unit"></div>
+                        <div class="city-state-zip">
+                            <span class="city"></span>, <span class="state"></span> <span class="zipcode"></span>
+                        </div>
+                    </div>
+                    <div class="contact-info-wrapper">
+                        <div class="contact-header">Contact Info:</div>
+                        <div class="phone-number"></div>
+                        <div class="email-wrapper">
+                            <a href="" class="email"></a>
+                        </div>
+                        <div class="web-wrapper">
+                            Website: <a href="" class="website"></a>
+                        </div>
+                    </div>
+                </div>
+            </div> 
         </div>
     </body>
 </html>

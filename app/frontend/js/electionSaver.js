@@ -7,6 +7,12 @@ function consolidateZipInputs() {
     handleZipCode(res);
 }
 
+function clearZipFields() {
+    $("input").each(function() {
+        $(this).val("");
+    });
+}
+
 function hideLoader() {
     $(".loader").hide();
 }
