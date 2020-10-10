@@ -14,7 +14,7 @@ from aiocfscrape import CloudflareScraper
 from string import printable
 
 from lib.ElectionSaver import electionsaver
-from lib.definitions import ROOT_DIR, bcolors
+from lib.definitions import ROOT_DIR, Bcolors
 from lib.errors.wtv_errors import WalkTheVoteError
 
 BASE_URL = "https://dos.elections.myflorida.com/supervisors/"
@@ -73,7 +73,7 @@ def format_data_into_schema(cleaned_data, hex_email, county_name):
     website_result = "None" if phone is None else website.group(1).strip()
 
     # extract and decode email
-    email = electionsaver.decodeEmail(hex_email)
+    email = electionsaver.decode_email(hex_email)
 
     schema = {
         "countyName": county_name,
@@ -181,7 +181,7 @@ async def get_election_offices():
                 f"[{round((num_scraped / len(county_data)) * 100, 2)}%]"
             )
 
-    with open(os.path.join(ROOT_DIR, r"scrapers\florida\florida.json"), "w") as f:
+    with open(os.path.join(ROOT_DIR, "scrapers", "florida", "florida.json"), "w") as f:
         json.dump(master_list, f)
     return master_list
 
@@ -192,4 +192,4 @@ if __name__ == "__main__":
     # with aiohttp that causes the program to error at the end after completion
     asyncio.get_event_loop().run_until_complete(get_election_offices())
     end = time.time()
-    print(f"{bcolors.OKBLUE}Completed in {end - start} seconds.{bcolors.ENDC}")
+    print(f"{Bcolors.OKBLUE}Completed in {end - start} seconds.{Bcolors.ENDC}")

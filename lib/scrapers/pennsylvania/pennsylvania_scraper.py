@@ -3,67 +3,65 @@ import os
 import time
 
 import aiohttp
-import requests
 from bs4 import BeautifulSoup
 import re
 import json
-import sys
 import usaddress
 
 from lib.ElectionSaver import electionsaver
-from lib.definitions import bcolors, ROOT_DIR
+from lib.definitions import Bcolors, ROOT_DIR
 
 URL = "https://www.votespa.com/Resources/Pages/Contact-Your-Election-Officials.aspx"
 
 
-def formatAddressData(address, countyName):
+def format_address_data(address, county_name):
     mapping = electionsaver.addressSchemaMapping
 
-    if countyName == "Monroe":
+    if county_name == "Monroe":
         address = "Historic Courthouse 326 Laurel St Ste 22 Brainerd, MN 56401"
 
-    parsedDataDict = usaddress.tag(address, tag_mapping=mapping)[0]
+    parsed_data_dict = usaddress.tag(address, tag_mapping=mapping)[0]
 
-    finalAddress = {
+    final_address = {
         "state": "Pennsylvania",
-        "zipCode": parsedDataDict["zipCode"],
+        "zipCode": parsed_data_dict["zipCode"],
     }
 
-    if "streetNumberName" in parsedDataDict:
-        finalAddress["streetNumberName"] = parsedDataDict["streetNumberName"]
-        if countyName == "Monroe":
-            finalAddress["streetNumberName"] = "One Quaker Plaza"
-        if countyName == "Sullivan":
-            finalAddress["streetNumberName"] = "Main and Muncy Streets"
+    if "streetNumberName" in parsed_data_dict:
+        final_address["streetNumberName"] = parsed_data_dict["streetNumberName"]
+        if county_name == "Monroe":
+            final_address["streetNumberName"] = "One Quaker Plaza"
+        if county_name == "Sullivan":
+            final_address["streetNumberName"] = "Main and Muncy Streets"
     else:
-        if countyName == "Montgomery":
-            finalAddress["streetNumberName"] = "425 Swede St."
-        if countyName == "Philadelphia":
-            finalAddress["streetNumberName"] = "1400 John F Kennedy Blvd"
-        print(f"{countyName} County might be a mailing address...")
+        if county_name == "Montgomery":
+            final_address["streetNumberName"] = "425 Swede St."
+        if county_name == "Philadelphia":
+            final_address["streetNumberName"] = "1400 John F Kennedy Blvd"
+        print(f"{county_name} County might be a mailing address...")
 
-    if "city" in parsedDataDict:
-        finalAddress["city"] = parsedDataDict["city"]
-        if countyName == "Philadelphia":
-            finalAddress["city"] = "Philadelphia"
-    if "poBox" in parsedDataDict:
-        finalAddress["poBox"] = parsedDataDict["poBox"]
-    if "locationName" in parsedDataDict:
-        finalAddress["locationName"] = parsedDataDict["locationName"]
-        if countyName == "Sullivan":
-            finalAddress["locationName"] = "Sullivan Co. Courthouse"
-        if countyName == "Montgomery":
-            finalAddress["locationName"] = "Montgomery County Voter Services"
+    if "city" in parsed_data_dict:
+        final_address["city"] = parsed_data_dict["city"]
+        if county_name == "Philadelphia":
+            final_address["city"] = "Philadelphia"
+    if "poBox" in parsed_data_dict:
+        final_address["poBox"] = parsed_data_dict["poBox"]
+    if "locationName" in parsed_data_dict:
+        final_address["locationName"] = parsed_data_dict["locationName"]
+        if county_name == "Sullivan":
+            final_address["locationName"] = "Sullivan Co. Courthouse"
+        if county_name == "Montgomery":
+            final_address["locationName"] = "Montgomery County Voter Services"
     else:
-        if countyName == "Philadelphia":
-            finalAddress["locationName"] = "City Hall"
-    if "aptNumber" in parsedDataDict:
-        finalAddress["aptNumber"] = parsedDataDict["aptNumber"]
-        if countyName == "Monroe":
-            finalAddress["aptNumber"] = "Rm. 105"
-        if countyName == "Montgomery":
-            finalAddress["aptNumber"] = "Suite 602"
-    return finalAddress
+        if county_name == "Philadelphia":
+            final_address["locationName"] = "City Hall"
+    if "aptNumber" in parsed_data_dict:
+        final_address["aptNumber"] = parsed_data_dict["aptNumber"]
+        if county_name == "Monroe":
+            final_address["aptNumber"] = "Rm. 105"
+        if county_name == "Montgomery":
+            final_address["aptNumber"] = "Suite 602"
+    return final_address
 
 
 async def get_election_offices():
@@ -99,17 +97,17 @@ async def get_election_offices():
     emails = []
     phone_nums = []
     for i in county_info_text:
-        emailRegex = re.search("[a-zA-Z0-9_.+-]+@[a-zA-Z0-9-]+\.[a-zA-Z0-9-.]+", i)
-        phoneRegex = re.search(r"(\d{3})\D*(\d{3})\D*(\d{4})\D*(\d*)$", i)
-        if emailRegex is None:
+        email_regex = re.search(r"[a-zA-Z0-9_.+-]+@[a-zA-Z0-9-]+\.[a-zA-Z0-9-.]+", i)
+        phone_regex = re.search(r"(\d{3})\D*(\d{3})\D*(\d{4})\D*(\d*)$", i)
+        if email_regex is None:
             emails.append("None")
         else:
-            emails.append(emailRegex.group(0))
-        if phoneRegex is None:
+            emails.append(email_regex.group(0))
+        if phone_regex is None:
             phone_nums.append("None")
         else:
             phone_nums.append(
-                "(" + phoneRegex.group(0)[:13].split("<br/>")[0].strip("<")
+                "(" + phone_regex.group(0)[:13].split("<br/>")[0].strip("<")
             )
 
     phone_replace = ["(610) 891-4673", "(570) 278-4600", "(814) 432-9508"]
@@ -119,18 +117,18 @@ async def get_election_offices():
             phone_nums[pos] = phone_replace[counter]
             counter += 1
 
-    all = []
+    everything = []
 
     for i in county_info_text:
         info = re.search("<br/>(.*)<br/>", i)
         if info is None:
-            all.append("None")
+            everything.append("None")
         else:
-            all.append(info.group(0))
+            everything.append(info.group(0))
 
     name_remove = ["Chief", "Director", "Government"]
     address_2 = []
-    for i in all:
+    for i in everything:
         lists = i.split("<br/>")
         for j in lists:
             if "PA" in j:
@@ -138,7 +136,7 @@ async def get_election_offices():
 
     address_2 = address_2[:-1]
     address_2_ind = []
-    for i in all:
+    for i in everything:
         lists = i.split("<br/>")
         for j in lists:
             if "PA" in j:
@@ -156,17 +154,17 @@ async def get_election_offices():
     address_0 = []
     clerk_pos_init_0 = []
     all_lists = []
-    for i in all:
+    for i in everything:
         lists = i.split("<br/>")
         all_lists.append(lists)
 
     for index, lst in enumerate(all_lists):
-        indexToFind_1 = address_1_ind[index]
-        indexToFind_0 = address_0_ind[index]
-        clerkInd = clerk_pos_ind[index]
-        address_1.append(lst[indexToFind_1])
-        address_0.append(lst[indexToFind_0])
-        clerk_pos_init_0.append(lst[clerkInd])
+        index_to_find_1 = address_1_ind[index]
+        index_to_find_0 = address_0_ind[index]
+        clerk_ind = clerk_pos_ind[index]
+        address_1.append(lst[index_to_find_1])
+        address_0.append(lst[index_to_find_0])
+        clerk_pos_init_0.append(lst[clerk_ind])
 
     for pos, i in enumerate(address_0):
         if (
@@ -189,8 +187,8 @@ async def get_election_offices():
     clerk_pos_real = []
 
     for index, lst in enumerate(all_lists):
-        indexToFind_0 = address_0_ind[index]
-        clerk_pos_init.append(lst[indexToFind_0])
+        index_to_find_0 = address_0_ind[index]
+        clerk_pos_init.append(lst[index_to_find_0])
 
     for i in clerk_pos_init:
         if "Director" in i or "Clerk" in i or "Director" in i or "Chief" in i:
@@ -271,10 +269,10 @@ async def get_election_offices():
 
     loc_name = [i + " County Election Office" for i in county_names]
 
-    masterList = []
+    master_list = []
 
     for i in range(len(county_names)):
-        real_address = formatAddressData(full_address[i], county_names[i])
+        real_address = format_address_data(full_address[i], county_names[i])
         if "locationName" not in real_address:
             real_address["locationName"] = loc_name[i]
         schema = {
@@ -292,13 +290,13 @@ async def get_election_offices():
             schema.pop("supervisorTitle")
         if clerk_names_real[i] == "None":
             schema.pop("officeSupervisor")
-        masterList.append(schema)
+        master_list.append(schema)
 
     with open(
         os.path.join(ROOT_DIR, "scrapers", "pennsylvania", "pennsylvania.json"), "w"
     ) as f:
-        json.dump(masterList, f)
-    return masterList
+        json.dump(master_list, f)
+    return master_list
 
 
 if __name__ == "__main__":
@@ -307,4 +305,4 @@ if __name__ == "__main__":
     # with aiohttp that causes the program to error at the end after completion
     asyncio.get_event_loop().run_until_complete(get_election_offices())
     end = time.time()
-    print(f"{bcolors.OKBLUE}Completed in {end - start} seconds.{bcolors.ENDC}")
+    print(f"{Bcolors.OKBLUE}Completed in {end - start} seconds.{Bcolors.ENDC}")

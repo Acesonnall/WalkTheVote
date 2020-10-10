@@ -22,7 +22,7 @@ from tqdm import tqdm
 
 from lib.definitions import (
     ROOT_DIR,
-    bcolors,
+    Bcolors,
     TEST_DB_URI,
     TEST_DB_ALIAS,
     TEST_DB_NAME,
@@ -38,7 +38,8 @@ from lib.handler.wtv_db_schema import (
     ZipCode,
     ElectionOffice,
     MailingAddress,
-    PhysicalAddress, VALIDATION_RULES,
+    PhysicalAddress,
+    VALIDATION_RULES,
 )
 from lib.handler.zip_county_mapping.zip_to_county import create_mapping
 
@@ -122,7 +123,8 @@ class WtvDbHandler:
             ):
                 yield val
 
-    def _get_mapping(self):
+    @staticmethod
+    def _get_mapping():
         """Loads zip, state, county, city mapping from file or directly from funcition
 
         @return: DataFrame loaded with the mapping information
@@ -133,22 +135,24 @@ class WtvDbHandler:
         while mapping_df is None:
             try:
                 print(
-                    f"{bcolors.OKBLUE}Attempt {tries}: Loading mapping data.{bcolors.ENDC}"
+                    f"{Bcolors.OKBLUE}Attempt {tries}: Loading mapping data."
+                    f"{Bcolors.ENDC}"
                 )
                 mapping_df = pd.read_csv(
                     os.path.join(ROOT_DIR, r"handler\zip_county_mapping\mapping.csv")
                 )
-                print(f"{bcolors.OKBLUE}Mapping data loaded.{bcolors.ENDC}\n")
+                print(f"{Bcolors.OKBLUE}Mapping data loaded.{Bcolors.ENDC}\n")
             except FileNotFoundError as e:
                 if tries <= 3:
                     print(
-                        f"{bcolors.OKBLUE}Attempt {tries}: Mapping data file not "
-                        f"found. Creaing mapping.{bcolors.ENDC} "
+                        f"{Bcolors.OKBLUE}Attempt {tries}: Mapping data file not "
+                        f"found. Creaing mapping.{Bcolors.ENDC} "
                     )
                     mapping_df = create_mapping()
                     tries += 1
                     print(
-                        f"{bcolors.OKBLUE}Retrying in {wait_seconds} seconds.{bcolors.ENDC}"
+                        f"{Bcolors.OKBLUE}Retrying in {wait_seconds} seconds."
+                        f"{Bcolors.ENDC}"
                     )
                     time.sleep(wait_seconds)
                 else:
@@ -173,8 +177,8 @@ class WtvDbHandler:
         """Preload the database with the zip, city, county, state mapping"""
         if not self.preloaded:
             print(
-                f"{bcolors.OKBLUE}Database is not yet preloaded. Creating zip code to "
-                f"county mappings.{bcolors.ENDC} "
+                f"{Bcolors.OKBLUE}Database is not yet preloaded. Creating zip code to "
+                f"county mappings.{Bcolors.ENDC} "
             )
             mapping_df = self._get_mapping()
             total_rows = len(mapping_df.index)
@@ -219,8 +223,8 @@ class WtvDbHandler:
         else:
             tasks: List[Task] = []
             print(
-                f"{bcolors.OKBLUE}Loading scraper data for "
-                f'{"all" if not states else len(states)} states...{bcolors.ENDC}'
+                f"{Bcolors.OKBLUE}Loading scraper data for "
+                f'{"all" if not states else len(states)} states...{Bcolors.ENDC}'
             )
             for scraper in self.scrapers:
                 state_name = " ".join(
@@ -234,21 +238,21 @@ class WtvDbHandler:
                         )
                     ) as scraper_results_file:
                         print(
-                            f"{bcolors.OKBLUE}Pre-existing data file found for "
-                            f"{state_name}{bcolors.ENDC}."
+                            f"{Bcolors.OKBLUE}Pre-existing data file found for "
+                            f"{state_name}{Bcolors.ENDC}."
                         )
                         scraper.data = json.load(scraper_results_file)
-                except FileNotFoundError as e:
+                except FileNotFoundError:
                     print(
-                        f"{bcolors.OKBLUE}Pre-existing data file not found for "
-                        f"{state_name}. Loading from scraper.{bcolors.ENDC}"
+                        f"{Bcolors.OKBLUE}Pre-existing data file not found for "
+                        f"{state_name}. Loading from scraper.{Bcolors.ENDC}"
                     )
                     tasks.append(asyncio.create_task(self._get_scraper_data(scraper)))
             if tasks:
                 future: Future
                 for future in asyncio.as_completed(tasks):
                     await future
-            print(f"{bcolors.OKBLUE}Scraper data loaded into memory{bcolors.ENDC}")
+            print(f"{Bcolors.OKBLUE}Scraper data loaded into memory{Bcolors.ENDC}")
 
     def load_election_office_info(self):
         """Insert election office information gathered from scrapers into the
@@ -263,9 +267,11 @@ class WtvDbHandler:
                 mailing_address = s_data.get("mailingAddress", {})
                 county_name = s_data.get("countyName")
                 # Try to get city name from physical first, default to mailing
-                city_name = physical_address.get("city", mailing_address.get("city"))
+                city_name = s_data.get(
+                    "cityName",
+                    physical_address.get("city", mailing_address.get("city")),
+                )
                 state_name = physical_address.get("state", mailing_address.get("state"))
-                election_office = None
                 try:
                     # Try to get zip code from physical first, default to mailing
                     zip_code = physical_address.get(
@@ -314,33 +320,53 @@ class WtvDbHandler:
                         )
                 except ZipCode.DoesNotExist as e:
                     print(
-                        f"{bcolors.OKBLUE}\nCould not load "
+                        f"{Bcolors.OKBLUE}\nCould not load "
                         f"{county_name if not None else city_name}, {state_name} data: "
-                        f"{type(e).__name__}{bcolors.ENDC}"
+                        f"{type(e).__name__}{Bcolors.ENDC}"
                     )
-                    issues.append({"county": county_name, "city": city_name, "election_office": s_data})
+                    issues.append(
+                        {
+                            "county": county_name,
+                            "city": city_name,
+                            "election_office": s_data,
+                        }
+                    )
                 except (WriteError, TypeError) as e:
                     print(
-                        f"{bcolors.OKBLUE}\nCould not load "
+                        f"{Bcolors.OKBLUE}\nCould not load "
                         f"{county_name if county_name is not None else city_name}, "
-                        f"{state_name} data: {e}{bcolors.ENDC}"
+                        f"{state_name} data: {e}{Bcolors.ENDC}"
                     )
-                    issues.append({"county": county_name, "city": city_name, "election_office": s_data})
+                    issues.append(
+                        {
+                            "county": county_name,
+                            "city": city_name,
+                            "election_office": s_data,
+                        }
+                    )
                 except ValidationError as e:
                     print(
-                        f"{bcolors.OKBLUE}\nCould not load "
+                        f"{Bcolors.OKBLUE}\nCould not load "
                         f"{county_name if not None else city_name}, {state_name} data: "
-                        f"{e}{bcolors.ENDC}"
+                        f"{e}{Bcolors.ENDC}"
                     )
-                    issues.append({"county": county_name, "city": city_name, "election_office": s_data})
-        with open(os.path.join(ROOT_DIR, "issues.json"), 'w') as f:
+                    issues.append(
+                        {
+                            "county": county_name,
+                            "city": city_name,
+                            "election_office": s_data,
+                        }
+                    )
+        with open(os.path.join(ROOT_DIR, "issues.json"), "w") as f:
             json.dump(issues, f)
 
     @staticmethod
     def set_validation_rules():
         client = MongoClient(LOCAL_DB_URI)
         db = client[LOCAL_DB_NAME]
-        db.create_collection("county", validator=VALIDATION_RULES["county"]["validator"])
+        db.create_collection(
+            "county", validator=VALIDATION_RULES["county"]["validator"]
+        )
         db.create_collection("city", validator=VALIDATION_RULES["city"]["validator"])
 
 
@@ -360,4 +386,4 @@ if __name__ == "__main__":
     start = time.time()
     asyncio.get_event_loop().run_until_complete(main())
     end = time.time()
-    print(f"{bcolors.OKBLUE}Completed in {end - start} seconds.{bcolors.ENDC}")
+    print(f"{Bcolors.OKBLUE}Completed in {end - start} seconds.{Bcolors.ENDC}")
