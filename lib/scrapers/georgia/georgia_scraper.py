@@ -12,14 +12,16 @@ import usaddress
 from aiocfscrape import CloudflareScraper
 
 from lib.ElectionSaver import electionsaver
-from lib.definitions import ROOT_DIR, bcolors
+from lib.definitions import ROOT_DIR, Bcolors
 from lib.errors.wtv_errors import WalkTheVoteError
 
 REGISTRAR_URL = "https://elections.sos.ga.gov/Elections/countyregistrars.do"
 INFO_URL = "https://elections.sos.ga.gov/Elections/contactinfo.do"
 
 
-def format_address_data(address_data, county_name, is_physical, mailing_addr={}):
+def format_address_data(address_data, county_name, is_physical, mailing_addr=None):
+    if mailing_addr is None:
+        mailing_addr = {}
     mapping = electionsaver.addressSchemaMapping
 
     parsed_data_dict = {}
@@ -31,6 +33,10 @@ def format_address_data(address_data, county_name, is_physical, mailing_addr={})
         ) from e
 
     final_address = {}
+
+    # Edge cases: add missing info.
+    if county_name == "SUMTER":
+        parsed_data_dict["city"] = "Americus"
 
     # Sometimes info is only in mailing address, if data is missing in physical, add the info from mailing
     if "city" in parsed_data_dict:
@@ -147,7 +153,7 @@ async def scrape_one_county(session, county_id, county_name):
     email = soup.find("span", class_="__cf_email__")
     if email is not None:
         hex_email = email["data-cfemail"]
-        email_address = electionsaver.decodeEmail(hex_email)
+        email_address = electionsaver.decode_email(hex_email)
 
     return (
         registrar_name,
@@ -249,7 +255,7 @@ async def get_election_offices():
                 f"[{round((num_scraped / len(county_list)) * 100, 2)}%]"
             )
 
-    with open(os.path.join(ROOT_DIR, r"scrapers\georgia\georgia.json"), "w") as f:
+    with open(os.path.join(ROOT_DIR, "scrapers", "georgia", "georgia.json"), "w") as f:
         json.dump(master_list, f)
     return master_list
 
@@ -260,4 +266,4 @@ if __name__ == "__main__":
     # with aiohttp that causes the program to error at the end after completion
     asyncio.get_event_loop().run_until_complete(get_election_offices())
     end = time.time()
-    print(f"{bcolors.OKBLUE}Completed in {end - start} seconds.{bcolors.ENDC}")
+    print(f"{Bcolors.OKBLUE}Completed in {end - start} seconds.{Bcolors.ENDC}")

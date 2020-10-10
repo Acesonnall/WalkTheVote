@@ -128,8 +128,8 @@ dmypy.json
 .pyre/
 
 # Any JSON files
-*.json
-.json
+lib/scrapers/*/*.json
+
 
 # For those who use PyCharm
 *.idea

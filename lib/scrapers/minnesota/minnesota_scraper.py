@@ -1,22 +1,21 @@
 import asyncio
+import json
 import os
+import re
 import time
 
 import aiohttp
-import requests
-from bs4 import BeautifulSoup
-import re
-import json
 import usaddress
+from bs4 import BeautifulSoup
 
 from lib.ElectionSaver import electionsaver
-from lib.definitions import bcolors, ROOT_DIR
+from lib.definitions import Bcolors, ROOT_DIR
 
 URL = "https://www.sos.state.mn.us/elections-voting/find-county-election-office/#"
 
 
 # regex to find urls in strings
-def Find(string):
+def find(string):
     # findall() has been used
     # with valid conditions for urls in string
     regex = r"(?i)\b((?:https?://|www\d{0,3}[.]|[a-z0-9.\-]+[.][a-z]{2,4}/)(?:[^\s()<>]+|\(([^\s()<>]+|(\([^\s()<>]+\)))*\))+(?:\(([^\s()<>]+|(\([^\s()<>]+\)))*\)|[^\s`!()\[\]{};:'\".,<>?«»“”‘’]))"
@@ -24,56 +23,56 @@ def Find(string):
     return [x[0] for x in url]
 
 
-def formatAddressData(address, countyName):
+def format_address_data(address, county_name):
     mapping = electionsaver.addressSchemaMapping
 
-    if countyName == "Crow Wing":
+    if county_name == "Crow Wing":
         address = "Historic Courthouse 326 Laurel St Ste 22 Brainerd, MN 56401"
-    if countyName == "Saint Louis":
+    if county_name == "Saint Louis":
         address = address.replace("St. Louis", "Saint Louis")
-    if countyName == "Marshall":
+    if county_name == "Marshall":
         address = "208 E Colvin Ave, Ste 11 Warren, MN 56762"
-    if countyName == "Anoka":
+    if county_name == "Anoka":
         address = "2100 3rd Ave, Suite W130 Anoka, MN 55303-5031"
 
-    parsedDataDict = usaddress.tag(address, tag_mapping=mapping)[0]
+    parsed_data_dict = usaddress.tag(address, tag_mapping=mapping)[0]
 
-    finalAddress = {
+    final_address = {
         "state": "Minnesota",
-        "zipCode": parsedDataDict["zipCode"],
+        "zipCode": parsed_data_dict["zipCode"],
     }
-    if "streetNumberName" in parsedDataDict:
-        finalAddress["streetNumberName"] = parsedDataDict["streetNumberName"]
-        if countyName == "Mower":
-            finalAddress["streetNumberName"] = "500 4th Ave NE"
-        if countyName == "Sherburne":
-            finalAddress["streetNumberName"] = "13880 Business Center Drive NW"
-        if countyName == "Watonwan":
-            finalAddress["streetNumberName"] = "710 2nd Ave S"
-    if "city" in parsedDataDict:
-        finalAddress["city"] = parsedDataDict["city"]
-        if countyName == "Mower":
-            finalAddress["city"] = "Austin"
-        if countyName == "Watonwan":
-            finalAddress["city"] = "Saint James"
+    if "streetNumberName" in parsed_data_dict:
+        final_address["streetNumberName"] = parsed_data_dict["streetNumberName"]
+        if county_name == "Mower":
+            final_address["streetNumberName"] = "500 4th Ave NE"
+        if county_name == "Sherburne":
+            final_address["streetNumberName"] = "13880 Business Center Drive NW"
+        if county_name == "Watonwan":
+            final_address["streetNumberName"] = "710 2nd Ave S"
+    if "city" in parsed_data_dict:
+        final_address["city"] = parsed_data_dict["city"]
+        if county_name == "Mower":
+            final_address["city"] = "Austin"
+        if county_name == "Watonwan":
+            final_address["city"] = "Saint James"
     else:
-        if countyName == "Lincoln":
-            finalAddress["city"] = "Ivanhoe"
-    if "poBox" in parsedDataDict:
-        finalAddress["poBox"] = parsedDataDict["poBox"]
-        if countyName == "Lincoln":
-            finalAddress["poBox"] = "PO Box 29"
-    if "locationName" in parsedDataDict:
-        finalAddress["locationName"] = parsedDataDict["locationName"]
-        if countyName == "Marshall":
-            finalAddress["locationName"] = "Marshall County Election Office"
-        if countyName == "Sherburne":
-            finalAddress["locationName"] = "Sherburne County Government Center"
-        if countyName == "Watonwan":
-            finalAddress["locationName"] = "Watonwan County Courthouse"
-    if "aptNumber" in parsedDataDict:
-        finalAddress["aptNumber"] = parsedDataDict["aptNumber"]
-    return finalAddress
+        if county_name == "Lincoln":
+            final_address["city"] = "Ivanhoe"
+    if "poBox" in parsed_data_dict:
+        final_address["poBox"] = parsed_data_dict["poBox"]
+        if county_name == "Lincoln":
+            final_address["poBox"] = "PO Box 29"
+    if "locationName" in parsed_data_dict:
+        final_address["locationName"] = parsed_data_dict["locationName"]
+        if county_name == "Marshall":
+            final_address["locationName"] = "Marshall County Election Office"
+        if county_name == "Sherburne":
+            final_address["locationName"] = "Sherburne County Government Center"
+        if county_name == "Watonwan":
+            final_address["locationName"] = "Watonwan County Courthouse"
+    if "aptNumber" in parsed_data_dict:
+        final_address["aptNumber"] = parsed_data_dict["aptNumber"]
+    return final_address
 
 
 async def get_election_offices():
@@ -138,13 +137,13 @@ async def get_election_offices():
 
     loc_name = [i + " County Election Office" for i in name]
 
-    websites = [Find(i) for i in county_info_text]
+    websites = [find(i) for i in county_info_text]
     websites = [item for sublist in websites for item in sublist]
 
-    masterList = []
+    master_list = []
 
     for i in range(len(name)):
-        real_address = formatAddressData(addies[i], name[i])
+        real_address = format_address_data(addies[i], name[i])
         if "locationName" not in real_address:
             real_address["locationName"] = loc_name[i]
 
@@ -156,15 +155,17 @@ async def get_election_offices():
             "officeSupervisor": off_name[i],
             "website": websites[i],
         }
-        masterList.append(schema)
+        master_list.append(schema)
 
-    with open(os.path.join(ROOT_DIR, r"scrapers\minnesota\minnesota.json"), "w") as f:
-        json.dump(masterList, f)
-    return masterList
+    with open(
+        os.path.join(ROOT_DIR, "scrapers", "minnesota", "minnesota.json"), "w"
+    ) as f:
+        json.dump(master_list, f)
+    return master_list
 
 
 if __name__ == "__main__":
     start = time.time()
     asyncio.get_event_loop().run_until_complete(get_election_offices())
     end = time.time()
-    print(f"{bcolors.OKBLUE}Completed in {end - start} seconds.{bcolors.ENDC}")
+    print(f"{Bcolors.OKBLUE}Completed in {end - start} seconds.{Bcolors.ENDC}")

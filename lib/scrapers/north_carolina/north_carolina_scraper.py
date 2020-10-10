@@ -9,49 +9,49 @@ import usaddress
 
 
 from lib.ElectionSaver import electionsaver
-from lib.definitions import bcolors, ROOT_DIR
+from lib.definitions import Bcolors, ROOT_DIR
 
 
-def formatAddressData(addressData, countyName):
+def format_address_data(address_data, county_name):
     mapping = electionsaver.addressSchemaMapping
-    if countyName == "MITCHELL":
-        addressData = addressData.replace("108BAKERSVILLE", "108 BAKERSVILLE")
-    if countyName == "BURKE":
-        addressData = addressData.replace("100MORGANTON", "100 MORGANTON")
-    if countyName == "JACKSON":
-        addressData = addressData.replace("1SYLVA", "1 SYLVA")
-    if countyName == "ROWAN":
-        addressData = addressData.replace("D10SALISBURY", "D10 SALISBURY")
-    if countyName == "SAMPSON":
-        addressData = addressData.replace("110CLINTON", "110 CLINTON")
-    if countyName == "YANCEY":
-        addressData = addressData.replace("2BURNSVILLE", "2 BURNSVILLE")
+    if county_name == "MITCHELL":
+        address_data = address_data.replace("108BAKERSVILLE", "108 BAKERSVILLE")
+    if county_name == "BURKE":
+        address_data = address_data.replace("100MORGANTON", "100 MORGANTON")
+    if county_name == "JACKSON":
+        address_data = address_data.replace("1SYLVA", "1 SYLVA")
+    if county_name == "ROWAN":
+        address_data = address_data.replace("D10SALISBURY", "D10 SALISBURY")
+    if county_name == "SAMPSON":
+        address_data = address_data.replace("110CLINTON", "110 CLINTON")
+    if county_name == "YANCEY":
+        address_data = address_data.replace("2BURNSVILLE", "2 BURNSVILLE")
 
-    parsedDataDict = usaddress.tag(addressData, tag_mapping=mapping)[0]
+    parsed_data_dict = usaddress.tag(address_data, tag_mapping=mapping)[0]
 
-    finalAddress = {
-        "city": parsedDataDict["city"],
-        "state": parsedDataDict["state"],
-        "zipCode": parsedDataDict["zipCode"],
+    final_address = {
+        "city": parsed_data_dict["city"],
+        "state": parsed_data_dict["state"],
+        "zipCode": parsed_data_dict["zipCode"],
     }
 
-    if "streetNumberName" in parsedDataDict:
-        finalAddress["streetNumberName"] = parsedDataDict["streetNumberName"]
+    if "streetNumberName" in parsed_data_dict:
+        final_address["streetNumberName"] = parsed_data_dict["streetNumberName"]
 
-    finalAddress["locationName"] = parsedDataDict.get(
-        "locationName", f"{countyName} County Election Office"
+    final_address["locationName"] = parsed_data_dict.get(
+        "locationName", f"{county_name} County Election Office"
     )
-    if "aptNumber" in parsedDataDict:
-        finalAddress["aptNumber"] = parsedDataDict["aptNumber"]
-    if "poBox" in parsedDataDict:
-        finalAddress["poBox"] = parsedDataDict["poBox"]
-    return finalAddress
+    if "aptNumber" in parsed_data_dict:
+        final_address["aptNumber"] = parsed_data_dict["aptNumber"]
+    if "poBox" in parsed_data_dict:
+        final_address["poBox"] = parsed_data_dict["poBox"]
+    return final_address
 
 
 URL = "https://vt.ncsbe.gov/BOEInfo/PrintableVersion/"
 
 
-def renameKey(src, dest, all_elems_js):
+def rename_key(src, dest, all_elems_js):
     for element in all_elems_js:
         element[dest] = element[src]
         element.pop(src)
@@ -78,26 +78,26 @@ async def get_election_offices():
     ]
     for element in all_elems_js:
         [element.pop(key) for key in to_del]
-        newAddy = (
+        new_addy = (
             element["PhysicalAddr1"]
             + " "
             + element["PhysicalAddr2"]
             + element["PhysicalAddrCSZ"]
         )
-        cleanedData = formatAddressData(newAddy, element["Name"])
-        element["newAddress"] = cleanedData
-    renameKey("Name", "countyName", all_elems_js)
-    renameKey("newAddress", "physicalAddress", all_elems_js)
-    renameKey("OfficePhoneNum", "phone", all_elems_js)
-    renameKey("Email", "email", all_elems_js)
-    renameKey("OfficeHours", "officeHours", all_elems_js)
-    renameKey("DirectorName", "officeSupervisor", all_elems_js)
-    renameKey("WebsiteAddr", "website", all_elems_js)
+        cleaned_data = format_address_data(new_addy, element["Name"])
+        element["newAddress"] = cleaned_data
+    rename_key("Name", "countyName", all_elems_js)
+    rename_key("newAddress", "physicalAddress", all_elems_js)
+    rename_key("OfficePhoneNum", "phone", all_elems_js)
+    rename_key("Email", "email", all_elems_js)
+    rename_key("OfficeHours", "officeHours", all_elems_js)
+    rename_key("DirectorName", "officeSupervisor", all_elems_js)
+    rename_key("WebsiteAddr", "website", all_elems_js)
     addr_del = ["PhysicalAddr1", "PhysicalAddr2", "PhysicalAddrCSZ", "FaxNum"]
     for element in all_elems_js:
         [element.pop(key) for key in addr_del]
     with open(
-        os.path.join(ROOT_DIR, r"scrapers\north_carolina\north_carolina.json"), "w"
+        os.path.join(ROOT_DIR, "scrapers", "north_carolina", "north_carolina.json"), "w"
     ) as f:
         json.dump(all_elems_js, f)
     return all_elems_js
@@ -107,4 +107,4 @@ if __name__ == "__main__":
     start = time.time()
     asyncio.get_event_loop().run_until_complete(get_election_offices())
     end = time.time()
-    print(f"{bcolors.OKBLUE}Completed in {end - start} seconds.{bcolors.ENDC}")
+    print(f"{Bcolors.OKBLUE}Completed in {end - start} seconds.{Bcolors.ENDC}")
