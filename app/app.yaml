@@ -1,0 +1,19 @@
+runtime: nodejs
+api_version: 1
+env: flex
+
+manual_scaling:
+  instances: 1
+
+resources:
+  cpu: .5
+  memory_gb: 0.5
+  disk_size_gb: 10
+
+handlers: 
+  - url: /
+    static_files: client/index.html
+    upload: client/index.html
+  - url: /(.*)
+    static_dir: client/\1
+    upload: client/(.*)
