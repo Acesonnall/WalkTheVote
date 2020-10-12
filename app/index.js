@@ -9,7 +9,7 @@ const express = require('express');
 const mongoose = require('mongoose');
 const path = require('path');
 const cors = require('cors');
-const { json } = require('express');
+const yes = require('yes-https');
 require('dotenv').config();
 
 const Schema = mongoose.Schema;
@@ -22,6 +22,7 @@ const State = require(path.resolve(_modelsdir, 'state.js')).State;
 
 const app = express();
 app.use(cors());
+app.use(yes());
 const PORT = process.env.PORT || 8080;
 
 mongoose.connect(process.env.PROD_DB_URL, {
@@ -124,5 +125,5 @@ app.get("/:zipcode", (req, res) => {
     }
 });
 
-app.listen(PORT, () => console.log(`Server started on port: http://localhost:${PORT}`));
+app.listen(PORT, () => console.log(`Server started on port: http(s)://localhost:${PORT}`));
 app.use(express.static('client'));

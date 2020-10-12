@@ -2,8 +2,6 @@ runtime: nodejs
 api_version: 1
 env: flex
 
-secure: always
-
 manual_scaling:
   instances: 1
 
@@ -15,8 +13,14 @@ resources:
 handlers: 
 - url: /
   static_files: client/index.html
+  secure: always
   upload: client/index.html
+  http_headers:
+    Strict-Transport-Security: max-age=31536000; includeSubDomains
 
 - url: /(.*)
   static_files: client/\1
+  secure: always
   upload: client/(.*)
+  http_headers:
+    Strict-Transport-Security: max-age=31536000; includeSubDomains

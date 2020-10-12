@@ -65,8 +65,8 @@ function handleDbData(dbJson) {
 
 function handleZipCode(zip) {  
     $.ajax({
-        // url: 'https://pog-the-vote.ue.r.appspot.com/' + zip,
-        url: 'http://localhost:8080/' + zip,
+        url: 'https://pog-the-vote.ue.r.appspot.com/' + zip,
+        //url: 'http://localhost:8080/' + zip,
         type: 'GET',
         dataType: 'json',
         success: function(data){ 
@@ -75,7 +75,6 @@ function handleZipCode(zip) {
             $(".zip-text").text(zip);
 
             try {
-                // electionOfficeData = data.parent_city.parent_county.election_office;
                 handleDbData(data);
             } catch (error) {
                 console.error(error);
@@ -105,7 +104,7 @@ $(document).ready(function() {
         if (evt.which == 9) {
             nextInput.focus();
         }
-        if (numericOnly === ''&& evt.which != 37 && evt.which != 39 && evt.which != 8) {
+        if (numericOnly === '' && evt.which != 37 && evt.which != 39 && evt.which != 8) {
             return false;
         }
         if (value.length > 1 && evt.which != 37 && evt.which != 39 && evt.which != 8) {
