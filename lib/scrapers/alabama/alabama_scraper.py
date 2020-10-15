@@ -20,6 +20,7 @@ def formatSchema(phone, county, person, p_address, m_address):
         "phone": phone,
         "officeSupervisor": person,
         "physicalAddress": p_address,
+        "website": URL
     }
     if m_address != {}:
         schema["mailingAddress"] = m_address
