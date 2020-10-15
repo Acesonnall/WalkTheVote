@@ -42,7 +42,7 @@ def format_address_data(address_data, county_name):
         final_address["locationName"] = parsed_data_dict["locationName"]
     if "poBox" in parsed_data_dict:
         final_address["poBox"] = parsed_data_dict["poBox"]
-
+        
     return final_address
 
 
@@ -118,13 +118,12 @@ async def get_election_offices():
                 ]
 
             master_list.append(schema)
-
+            
     with open(
         os.path.join(ROOT_DIR, "scrapers", "nebraska", "nebraska.json"), "w"
     ) as f:
         json.dump(master_list, f)
     return master_list
-
 
 if __name__ == "__main__":
     start = time.time()
