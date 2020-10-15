@@ -181,7 +181,7 @@ async def get_election_offices():
                 f"[{round((num_scraped / len(county_data)) * 100, 2)}%]"
             )
 
-    with open(os.path.join(ROOT_DIR, r"scrapers\florida\florida.json"), "w") as f:
+    with open(os.path.join(ROOT_DIR, "scrapers", "florida", "florida.json"), "w") as f:
         json.dump(master_list, f)
     return master_list
 
