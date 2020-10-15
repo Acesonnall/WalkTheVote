@@ -241,7 +241,7 @@ _UpgradeReport_Files/
 /node_modules
 /tools/doc/node_modules
 /tools/clang-format/node_modules
-*/*/node_modules
+*/node_modules
 
 # === Rules for test artifacts ===
 /*.tap
