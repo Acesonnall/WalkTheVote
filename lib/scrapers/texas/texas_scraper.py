@@ -17,7 +17,6 @@ EMAIL_URL = "https://www.sos.state.tx.us/elections/voter/county.shtml"
 
 emails = []
 
-
 async def get_email_addresses():
     async with aiohttp.ClientSession() as session:
         async with session.get(EMAIL_URL) as r:
@@ -65,7 +64,6 @@ def format_address_data(address, county_name):
     if "aptNumber" in parsed_data_dict:
         final_address["aptNumber"] = parsed_data_dict["aptNumber"]
     return final_address
-
 
 async def get_election_offices():
     # Moved the below function call here since the db handler needs the everything to be
@@ -131,6 +129,7 @@ if __name__ == "__main__":
     start = time.time()
     # Normally you'd start the event loop with asyncio.run() but there's a known issue
     # with aiohttp that causes the program to error at the end after completion
+    asyncio.get_event_loop().run_until_complete(getEmailAddresses())
     asyncio.get_event_loop().run_until_complete(get_election_offices())
     end = time.time()
     print(f"{Bcolors.OKBLUE}Completed in {end - start} seconds.{Bcolors.ENDC}")
