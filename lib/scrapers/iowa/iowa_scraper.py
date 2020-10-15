@@ -5,7 +5,6 @@ import json
 import logging
 import os
 import unicodedata
-from pprint import pprint
 from typing import Dict, List
 
 import usaddress
@@ -55,7 +54,6 @@ class IowaScraper(BaseScraper):
 
         This code will only work on Windows as it stands now.
         """
-        exit_code = 0
 
         # Using selenium webdriver over requests due to needing a more sophisticated
         # way to bypass captcha for gov websites that use it. Only works on Windows

@@ -1,51 +1,49 @@
 import asyncio
+import json
 import os
 import re
 import time
 from string import printable
 
-import json
-
 import aiohttp
-import requests
 import usaddress
 from bs4 import BeautifulSoup as bS
 
 # emailRegex = re.search('[a-zA-Z0-9_.+-]+@[a-zA-Z0-9-]+\.[a-zA-Z0-9-.]+', cleanedData)
 from lib.ElectionSaver import electionsaver
-from lib.definitions import bcolors, ROOT_DIR
+from lib.definitions import Bcolors, ROOT_DIR
 
 BASE_URL = "https://sos.nebraska.gov/elections/election-officials-contact-information"
 
 
-def formatAddressData(addressData, countyName):
+def format_address_data(address_data, county_name):
     mapping = electionsaver.addressSchemaMapping
 
-    locationName = f"{countyName} County Election Office"
+    location_name = f"{county_name} County Election Office"
 
-    if countyName == "Banner":
-        addressData = "204 State St, PO Box 67"
-        locationName = "Banner County Courthouse"
-    if countyName == "Box Butte":
-        addressData = "515 Box Butte Avenue #203, PO Box 678"
+    if county_name == "Banner":
+        address_data = "204 State St, PO Box 67"
+        location_name = "Banner County Courthouse"
+    if county_name == "Box Butte":
+        address_data = "515 Box Butte Avenue #203, PO Box 678"
 
-    parsedDataDict = usaddress.tag(addressData, tag_mapping=mapping)[0]
+    parsed_data_dict = usaddress.tag(address_data, tag_mapping=mapping)[0]
 
-    finalAddress = {"locationName": locationName}
+    final_address = {"locationName": location_name}
 
-    if "aptNumber" in parsedDataDict:
-        finalAddress["aptNumber"] = parsedDataDict["aptNumber"]
-    if "streetNumberName" in parsedDataDict:
-        finalAddress["streetNumberName"] = parsedDataDict["streetNumberName"]
+    if "aptNumber" in parsed_data_dict:
+        final_address["aptNumber"] = parsed_data_dict["aptNumber"]
+    if "streetNumberName" in parsed_data_dict:
+        final_address["streetNumberName"] = parsed_data_dict["streetNumberName"]
     else:
-        if countyName == "Frontier":
-            finalAddress["streetNumberName"] = "1 Wellington St"
-    if "locationName" in parsedDataDict:
-        finalAddress["locationName"] = parsedDataDict["locationName"]
-    if "poBox" in parsedDataDict:
-        finalAddress["poBox"] = parsedDataDict["poBox"]
-
-    return finalAddress
+        if county_name == "Frontier":
+            final_address["streetNumberName"] = "1 Wellington St"
+    if "locationName" in parsed_data_dict:
+        final_address["locationName"] = parsed_data_dict["locationName"]
+    if "poBox" in parsed_data_dict:
+        final_address["poBox"] = parsed_data_dict["poBox"]
+        
+    return final_address
 
 
 async def get_election_offices():
@@ -56,56 +54,57 @@ async def get_election_offices():
 
     elems = soup.find_all(class_="col-sm-6")
 
-    masterList = []
+    master_list = []
 
     for e in elems:
-        cleanedData = re.sub("[^{}]+".format(printable), "", e.text)
+        cleaned_data = re.sub("[^{}]+".format(printable), "", e.text)
 
         # (.*) matches EVERYTHING between "Name: " and "Party"
         # the space is important
-        nameRegex = re.search("Name:(.*)Party Affiliation:", cleanedData)
-        name = "None" if nameRegex is None else nameRegex[1]
-        Names: str = name.strip()
+        name_regex = re.search("Name:(.*)Party Affiliation:", cleaned_data)
+        name = "None" if name_regex is None else name_regex[1]
+        names: str = name.strip()
 
-        addyRegex = re.search("Address:(.*)City", cleanedData)
-        Addy = "None" if addyRegex is None else addyRegex[1]
-        streetNumberName: str = Addy.strip()
+        addy_regex = re.search("Address:(.*)City", cleaned_data)
+        addy = "None" if addy_regex is None else addy_regex[1]
+        street_number_name: str = addy.strip()
 
-        cityRegex = re.search("City:(.*)Zip", cleanedData)
-        cities = "None" if cityRegex is None else cityRegex[1]
-        City: str = cities.strip()
+        city_regex = re.search("City:(.*)Zip", cleaned_data)
+        cities = "None" if city_regex is None else city_regex[1]
+        city: str = cities.strip()
 
-        countyRegex = re.search("County:(.*)Name:", cleanedData)
-        count = "None" if countyRegex is None else countyRegex[1]
-        noParens = count.split("(")[0]
-        County: str = noParens.strip()
+        county_regex = re.search("County:(.*)Name:", cleaned_data)
+        count = "None" if county_regex is None else county_regex[1]
+        no_parens = count.split("(")[0]
+        county: str = no_parens.strip()
 
-        zipRegex = re.search("Code:(.*)Phone", cleanedData)
-        z = "None" if zipRegex is None else zipRegex[1]
-        zipCode: str = z.strip()
+        zip_regex = re.search("Code:(.*)Phone", cleaned_data)
+        z = "None" if zip_regex is None else zip_regex[1]
+        zip_code: str = z.strip()
 
-        phoRegex = re.search("Number:(.*)Fax", cleanedData)
-        ph = "None" if phoRegex is None else phoRegex[1]
-        Phone: str = ph.strip()
+        pho_regex = re.search("Number:(.*)Fax", cleaned_data)
+        ph = "None" if pho_regex is None else pho_regex[1]
+        phone: str = ph.strip()
 
-        emRegex = re.search("Email Address: (.*)", cleanedData)
-        e = "None" if emRegex is None else emRegex[1]
-        Email: str = e.strip()
+        em_regex = re.search("Email Address: (.*)", cleaned_data)
+        e = "None" if em_regex is None else em_regex[1]
+        email: str = e.strip()
 
-        if County != "None":
-            subschema = formatAddressData(streetNumberName, County)
+        if county != "None":
+            subschema = format_address_data(street_number_name, county)
             schema = {
-                "countyName": County,
+                "countyName": county,
                 "physicalAddress": {
-                    "city": City,
+                    "city": city,
                     "state": "Nebraska",
-                    "zipCode": zipCode,
+                    "zipCode": zip_code,
                     "locationName": subschema["locationName"],
                 },
-                "phone": Phone,
-                "email": Email,
-                "officeSupervisor": Names,
-                "website": "https://sos.nebraska.gov/elections/election-officials-contact"
+                "phone": phone,
+                "email": email,
+                "officeSupervisor": names,
+                "website": "https://sos.nebraska.gov/elections/election-officials"
+                           "-contact"
                 "-information",
             }
 
@@ -118,15 +117,16 @@ async def get_election_offices():
                     "streetNumberName"
                 ]
 
-            masterList.append(schema)
-
-    with open(os.path.join(ROOT_DIR, "scrapers", "nebraska", "nebraska.json"), "w") as f:
-        json.dump(masterList, f)
-    return masterList
-
+            master_list.append(schema)
+            
+    with open(
+        os.path.join(ROOT_DIR, "scrapers", "nebraska", "nebraska.json"), "w"
+    ) as f:
+        json.dump(master_list, f)
+    return master_list
 
 if __name__ == "__main__":
     start = time.time()
     asyncio.get_event_loop().run_until_complete(get_election_offices())
     end = time.time()
-    print(f"{bcolors.OKBLUE}Completed in {end - start} seconds.{bcolors.ENDC}")
+    print(f"{Bcolors.OKBLUE}Completed in {end - start} seconds.{Bcolors.ENDC}")

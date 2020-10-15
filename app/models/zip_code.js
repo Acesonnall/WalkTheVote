@@ -5,25 +5,24 @@ const {Schema} = mongoose;
 const opts = {
     toObject: {virtuals: true},
     toJSON: {virtuals: true},
-    collection: 'county'
+    collection: 'zip_code'
 }
-const countySchema = new Schema({
+const zipCodeSchema = new Schema({
     _id: {
         type: String,
+        minLength: 5,
+        maxLength: 5,
         required: true
     },
-    parent_state: {
+    parent_city: {
         type: String,
-        ref: 'State',
+        ref: 'City',
         required: true
-    },
-    election_office: {
-        type: Map
     }
 }, opts)
 
-countySchema.virtual('county').get(() => {
+zipCodeSchema.virtual('zipCode').get(function () {
     return this._id
 })
 
-module.exports.County = mongoose.model(`County`, countySchema);
+module.exports.ZipCode = mongoose.model(`ZipCode`, zipCodeSchema);
