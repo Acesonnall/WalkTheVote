@@ -11,7 +11,7 @@ from pymodm import (
 )
 from pymongo import WriteConcern
 
-from lib.definitions import LOCAL_DB_ALIAS
+from lib.definitions import LOCAL_DB_ALIAS, TEST_DB_ALIAS
 
 VALIDATION_RULES = {
     "county": {
@@ -155,7 +155,8 @@ class MailingAddress(PhysicalAddress):
 
 
 class ElectionOffice(EmbeddedMongoModel):
-    county_name = CharField(verbose_name="Name of county", required=True)
+    county_name = CharField(verbose_name="Name of county")
+    city_name = CharField(verbose_name="Name of city")
     physical_address = EmbeddedDocumentField(
         PhysicalAddress, verbose_name="Phyiscal address information"
     )
@@ -170,7 +171,7 @@ class ElectionOffice(EmbeddedMongoModel):
 
     class Meta:
         write_concern = WriteConcern(j=True)
-        connection_alias = LOCAL_DB_ALIAS
+        connection_alias = TEST_DB_ALIAS
 
 
 class State(MongoModel):
@@ -180,7 +181,7 @@ class State(MongoModel):
 
     class Meta:
         write_concern = WriteConcern(j=True)
-        connection_alias = LOCAL_DB_ALIAS
+        connection_alias = TEST_DB_ALIAS
 
 
 class County(MongoModel):
@@ -194,7 +195,7 @@ class County(MongoModel):
 
     class Meta:
         write_concern = WriteConcern(j=True)
-        connection_alias = LOCAL_DB_ALIAS
+        connection_alias = TEST_DB_ALIAS
 
 
 class City(MongoModel):
@@ -208,7 +209,7 @@ class City(MongoModel):
 
     class Meta:
         write_concern = WriteConcern(j=True)
-        connection_alias = LOCAL_DB_ALIAS
+        connection_alias = TEST_DB_ALIAS
 
 
 class ZipCode(MongoModel):
@@ -225,4 +226,4 @@ class ZipCode(MongoModel):
 
     class Meta:
         write_concern = WriteConcern(j=True)
-        connection_alias = LOCAL_DB_ALIAS
+        connection_alias = TEST_DB_ALIAS

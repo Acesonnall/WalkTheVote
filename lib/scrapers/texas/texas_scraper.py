@@ -65,6 +65,7 @@ def format_address_data(address, county_name):
         final_address["aptNumber"] = parsed_data_dict["aptNumber"]
     return final_address
 
+
 async def get_election_offices():
     # Moved the below function call here since the db handler needs the everything to be
     # prepared by the time get_election_offices finishes.
@@ -129,7 +130,6 @@ if __name__ == "__main__":
     start = time.time()
     # Normally you'd start the event loop with asyncio.run() but there's a known issue
     # with aiohttp that causes the program to error at the end after completion
-    asyncio.get_event_loop().run_until_complete(getEmailAddresses())
     asyncio.get_event_loop().run_until_complete(get_election_offices())
     end = time.time()
     print(f"{Bcolors.OKBLUE}Completed in {end - start} seconds.{Bcolors.ENDC}")

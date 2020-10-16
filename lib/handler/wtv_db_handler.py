@@ -51,16 +51,14 @@ from lib.scrapers.north_carolina import north_carolina_scraper
 from lib.scrapers.texas import texas_scraper
 from lib.scrapers.minnesota import minnesota_scraper
 from lib.scrapers.arizona import arizona_scraper
-from lib.scrapers.maine import maine_scraper
 from lib.scrapers.nebraska import nebraska_scraper
 from lib.scrapers.georgia import georgia_scraper
 from lib.scrapers.california import california_scraper
-from lib.scrapers.new_hampshire import new_hampshire_scraper
 from lib.scrapers.ohio import ohio_scraper
 from lib.scrapers.iowa import iowa_scraper
-from lib.scrapers.wisconsin import wisconsin_scraper
 from lib.scrapers.pennsylvania import pennsylvania_scraper
-
+from lib.scrapers.illinois import illinois_scraper
+from lib.scrapers.wyoming import wyoming_scraper
 
 @dataclass
 class Scraper:
@@ -76,12 +74,6 @@ class Scraper:
     data: Dict = field(default_factory=dict)
 
 
-@dataclass
-class CountyLoadFailure:
-    county: str
-    reason: str
-
-
 class WtvDbHandler:
     """Walk The Vote database handler.
 
@@ -95,7 +87,6 @@ class WtvDbHandler:
     def __init__(self, db_uri, db_alias):
         self.preloaded = self._is_db_preloaded()
         self.scrapers = []
-        self.failures: List[CountyLoadFailure] = []
 
         try:
             connect(db_uri, alias=db_alias)
@@ -169,8 +160,8 @@ class WtvDbHandler:
         @rtype: bool
         """
 
-        client = MongoClient(LOCAL_DB_URI)
-        db = client[LOCAL_DB_NAME]
+        client = MongoClient(TEST_DB_URI)
+        db = client[TEST_DB_NAME]
         return not len(db.list_collection_names()) < 4
 
     async def preload_db(self):
@@ -362,8 +353,8 @@ class WtvDbHandler:
 
     @staticmethod
     def set_validation_rules():
-        client = MongoClient(LOCAL_DB_URI)
-        db = client[LOCAL_DB_NAME]
+        client = MongoClient(TEST_DB_URI)
+        db = client[TEST_DB_NAME]
         db.create_collection(
             "county", validator=VALIDATION_RULES["county"]["validator"]
         )
@@ -371,7 +362,7 @@ class WtvDbHandler:
 
 
 async def main():
-    wtv_db = WtvDbHandler(LOCAL_DB_URI, LOCAL_DB_ALIAS)
+    wtv_db = WtvDbHandler(TEST_DB_URI, TEST_DB_ALIAS)
     await wtv_db.preload_db()
     await wtv_db.get_election_office_info()
     try:
