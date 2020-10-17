@@ -1,21 +1,20 @@
 import asyncio
+import json
 import os
+import re
 import time
 
 import aiohttp
-import requests
-from bs4 import BeautifulSoup
-import re
-import json
 import usaddress
+from bs4 import BeautifulSoup
 
 from lib.ElectionSaver import electionsaver
-from lib.definitions import bcolors, ROOT_DIR
+from lib.definitions import Bcolors, ROOT_DIR
 
 URL = "https://azsos.gov/county-election-info"
 
 
-def Find(string):
+def find(string):
     # findall() has been used
     # with valid conditions for urls in string
     regex = r"(?i)\b((?:https?://|www\d{0,3}[.]|[a-z0-9.\-]+[.][a-z]{2,4}/)(?:[^\s()<>]+|\(([^\s()<>]+|(\([^\s()<>]+\)))*\))+(?:\(([^\s()<>]+|(\([^\s()<>]+\)))*\)|[^\s`!()\[\]{};:'\".,<>?«»“”‘’]))"
@@ -23,27 +22,27 @@ def Find(string):
     return [x[0] for x in url]
 
 
-def formatAddressData(address, countyName):
+def format_address_data(address, county_name):
     mapping = electionsaver.addressSchemaMapping
 
-    parsedDataDict = usaddress.tag(address, tag_mapping=mapping)[0]
+    parsed_data_dict = usaddress.tag(address, tag_mapping=mapping)[0]
 
-    finalAddress = {
+    final_address = {
         "state": "Arizona",
-        "zipCode": parsedDataDict["zipCode"],
+        "zipCode": parsed_data_dict["zipCode"],
     }
-    if "streetNumberName" in parsedDataDict:
-        finalAddress["streetNumberName"] = parsedDataDict["streetNumberName"]
-    if "city" in parsedDataDict:
-        finalAddress["city"] = parsedDataDict["city"]
-    if "poBox" in parsedDataDict:
-        finalAddress["poBox"] = parsedDataDict["poBox"]
-    finalAddress["locationName"] = parsedDataDict.get(
-        "locationName", f"{countyName} County Election Office"
+    if "streetNumberName" in parsed_data_dict:
+        final_address["streetNumberName"] = parsed_data_dict["streetNumberName"]
+    if "city" in parsed_data_dict:
+        final_address["city"] = parsed_data_dict["city"]
+    if "poBox" in parsed_data_dict:
+        final_address["poBox"] = parsed_data_dict["poBox"]
+    final_address["locationName"] = parsed_data_dict.get(
+        "locationName", f"{county_name} County Election Office"
     )
-    if "aptNumber" in parsedDataDict:
-        finalAddress["aptNumber"] = parsedDataDict["aptNumber"]
-    return finalAddress
+    if "aptNumber" in parsed_data_dict:
+        final_address["aptNumber"] = parsed_data_dict["aptNumber"]
+    return final_address
 
 
 async def get_election_offices():
@@ -100,31 +99,31 @@ async def get_election_offices():
 
     full_address = [a + ", " + b for a, b in zip(address_1, address_2)]
 
-    websites = [Find(i) for i in county_info_text]
+    websites = [find(i) for i in county_info_text]
     websites = [item for sublist in websites for item in sublist][::3]
     websites.remove("http://recorder.maricopa.gov/elections/")
 
-    masterList = []
+    master_list = []
 
     for i in range(len(county_names)):
-        addressSchema = formatAddressData(full_address[i], county_names[i])
+        address_schema = format_address_data(full_address[i], county_names[i])
         schema = {
             "countyName": county_names[i].strip(),
-            "physicalAddress": addressSchema,
+            "physicalAddress": address_schema,
             "phone": phone_num[i],
             "officeSupervisor": clerk_name[i],
             "supervisorTitle": building_name[i],
             "website": websites[i],
         }
-        masterList.append(schema)
+        master_list.append(schema)
 
-    with open(os.path.join(ROOT_DIR, r"scrapers\arizona\arizona.json"), "w") as f:
-        json.dump(masterList, f)
-    return masterList
+    with open(os.path.join(ROOT_DIR, "scrapers", "arizona", "arizona.json"), "w") as f:
+        json.dump(master_list, f)
+    return master_list
 
 
 if __name__ == "__main__":
     start = time.time()
     asyncio.get_event_loop().run_until_complete(get_election_offices())
     end = time.time()
-    print(f"{bcolors.OKBLUE}Completed in {end - start} seconds.{bcolors.ENDC}")
+    print(f"{Bcolors.OKBLUE}Completed in {end - start} seconds.{Bcolors.ENDC}")

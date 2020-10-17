@@ -11,7 +11,131 @@ from pymodm import (
 )
 from pymongo import WriteConcern
 
-from lib.definitions import LOCAL_DB_ALIAS
+from lib.definitions import LOCAL_DB_ALIAS, TEST_DB_ALIAS
+
+VALIDATION_RULES = {
+    "county": {
+        "validator": {
+            "$jsonSchema": {
+                "bsonType": "object",
+                "required": ["parent_state"],
+                "properties": {
+                    "parent_state": {"bsonType": "string"},
+                    "election_office": {
+                        "bsonType": "object",
+                        "required": ["county_name", "phone_number", "website"],
+                        "properties": {
+                            "county_name": {"bsonType": "string"},
+                            "physical_address": {
+                                "bsonType": "object",
+                                "required": [
+                                    "state",
+                                    "city",
+                                    "zip_code",
+                                    "location_name",
+                                    "street",
+                                ],
+                                "properties": {
+                                    "state": {"bsonType": "string"},
+                                    "city": {"bsonType": "string"},
+                                    "zip_code": {"bsonType": "string"},
+                                    "location_name": {"bsonType": "string"},
+                                    "street": {"bsonType": "string"},
+                                    "apt_unit": {"bsonType": ["string", "null"]},
+                                    "po_box": {"bsonType": ["string", "null"]},
+                                },
+                            },
+                            "mailing_address": {
+                                "bsonType": "object",
+                                "required": [
+                                    "state",
+                                    "city",
+                                    "zip_code",
+                                    "location_name",
+                                    "street",
+                                ],
+                                "properties": {
+                                    "state": {"bsonType": "string"},
+                                    "city": {"bsonType": "string"},
+                                    "zip_code": {"bsonType": "string"},
+                                    "location_name": {"bsonType": "string"},
+                                    "street": {"bsonType": ["string", "null"]},
+                                    "apt_unit": {"bsonType": ["string", "null"]},
+                                    "po_box": {"bsonType": ["string", "null"]},
+                                },
+                            },
+                            "phone_number": {"bsonType": "string"},
+                            "email_address": {"bsonType": ["string", "null"]},
+                            "office_supervisor": {"bsonType": ["string", "null"]},
+                            "supervisor_title": {"bsonType": ["string", "null"]},
+                            "website": {"bsonType": "string"},
+                        },
+                    },
+                },
+            }
+        }
+    },
+    "city": {
+        "validator": {
+            "$jsonSchema": {
+                "bsonType": "object",
+                "required": ["parent_county"],
+                "properties": {
+                    "parent_county": {"bsonType": "string"},
+                    "election_office": {
+                        "bsonType": "object",
+                        "required": ["phone_number", "website"],
+                        "properties": {
+                            "physical_address": {
+                                "bsonType": "object",
+                                "required": [
+                                    "state",
+                                    "city",
+                                    "zip_code",
+                                    "location_name",
+                                    "street",
+                                ],
+                                "properties": {
+                                    "state": {"bsonType": "string"},
+                                    "city": {"bsonType": "string"},
+                                    "zip_code": {"bsonType": "string"},
+                                    "location_name": {"bsonType": "string"},
+                                    "street": {"bsonType": "string"},
+                                    "apt_unit": {"bsonType": ["string", "null"]},
+                                    "po_box": {"bsonType": ["string", "null"]},
+                                },
+                            },
+                            "mailing_address": {
+                                "bsonType": "object",
+                                "required": [
+                                    "state",
+                                    "city",
+                                    "zip_code",
+                                    "location_name",
+                                    "street",
+                                ],
+                                "properties": {
+                                    "state": {"bsonType": "string"},
+                                    "city": {"bsonType": "string"},
+                                    "zip_code": {"bsonType": "string"},
+                                    "location_name": {"bsonType": "string"},
+                                    "street": {"bsonType": "string"},
+                                    "apt_unit": {"bsonType": ["string", "null"]},
+                                    "po_box": {"bsonType": ["string", "null"]},
+                                },
+                            },
+                            "phone_number": {"bsonType": "string"},
+                            "email_address": {"bsonType": ["string", "null"]},
+                            "office_supervisor": {"bsonType": ["string", "null"]},
+                            "supervisor_title": {"bsonType": ["string", "null"]},
+                            "website": {"bsonType": "string"},
+                        },
+                    },
+                },
+            }
+        }
+    },
+}
 
 
 class PhysicalAddress(EmbeddedMongoModel):
@@ -31,7 +155,8 @@ class MailingAddress(PhysicalAddress):
 
 
 class ElectionOffice(EmbeddedMongoModel):
-    county_name = CharField(verbose_name="Name of county", required=True)
+    county_name = CharField(verbose_name="Name of county")
+    city_name = CharField(verbose_name="Name of city")
     physical_address = EmbeddedDocumentField(
         PhysicalAddress, verbose_name="Phyiscal address information"
     )
@@ -46,7 +171,7 @@ class ElectionOffice(EmbeddedMongoModel):
 
     class Meta:
         write_concern = WriteConcern(j=True)
-        connection_alias = LOCAL_DB_ALIAS
+        connection_alias = TEST_DB_ALIAS
 
 
 class State(MongoModel):
@@ -56,7 +181,7 @@ class State(MongoModel):
 
     class Meta:
         write_concern = WriteConcern(j=True)
-        connection_alias = LOCAL_DB_ALIAS
+        connection_alias = TEST_DB_ALIAS
 
 
 class County(MongoModel):
@@ -70,7 +195,7 @@ class County(MongoModel):
 
     class Meta:
         write_concern = WriteConcern(j=True)
-        connection_alias = LOCAL_DB_ALIAS
+        connection_alias = TEST_DB_ALIAS
 
 
 class City(MongoModel):
@@ -84,7 +209,7 @@ class City(MongoModel):
 
     class Meta:
         write_concern = WriteConcern(j=True)
-        connection_alias = LOCAL_DB_ALIAS
+        connection_alias = TEST_DB_ALIAS
 
 
 class ZipCode(MongoModel):
@@ -101,4 +226,4 @@ class ZipCode(MongoModel):
 
     class Meta:
         write_concern = WriteConcern(j=True)
-        connection_alias = LOCAL_DB_ALIAS
+        connection_alias = TEST_DB_ALIAS

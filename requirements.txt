@@ -7,10 +7,12 @@ bitarray
 certifi
 chardet
 cloudscraper
+dnspython
 future
 html5lib
 idna
 Js2Py
+msedge-selenium-tools
 multidict
 numpy
 pandas
