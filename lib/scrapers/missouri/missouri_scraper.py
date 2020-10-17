@@ -1,6 +1,7 @@
 import json
 import os
 import time
+import shutil
 
 import usaddress
 from bs4 import BeautifulSoup as bS
@@ -10,7 +11,7 @@ from lib.ElectionSaver import electionsaver
 from lib.definitions import Bcolors, ROOT_DIR
 
 URL = "https://www.sos.mo.gov/elections/goVoteMissouri/localelectionauthority"
-PATH_CHROMEDRIVER = '\\Program Files\\chromedriver'
+PATH_CHROMEDRIVER = shutil.which("chromedriver")
 
 
 def format_address_data(address_data, county_name):
@@ -63,7 +64,7 @@ def get_election_offices():
         city = text[2].split(",")[0]
         zip_code = text[2].split()[-1]
         phone = text[3]
-        website = "None" if len(text) == 6 else text[-1]
+        website = URL if len(text) == 6 else text[-1]
 
         subschema = format_address_data(street_number_name, county)
 
@@ -76,8 +77,6 @@ def get_election_offices():
                 "locationName": subschema["locationName"],
             },
             "phone": phone,
-            "email": "None",
-            "officeSupervisor": "None",
             "website": website,
         }
 
@@ -93,7 +92,8 @@ def get_election_offices():
     with open(
         os.path.join(ROOT_DIR, "scrapers", "missouri", "missouri.json"), "w"
     ) as f:
-        json.dump(self.data, f)
+        json.dump(master_list, f)
+    return master_list
 
 
 if __name__ =='__main__':
