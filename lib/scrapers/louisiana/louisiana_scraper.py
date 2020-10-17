@@ -38,17 +38,18 @@ def format_address_data(address, county_name):
         "zipCode": parsed_data_dict["zipCode"]
     }
 
+    if "locationName" in parsed_data_dict:
+        addressSchema["locationName"] = parsed_data_dict["locationName"]
+    else:
+        addressSchema["locationName"] = county + " Parish Registrar of Voters"
     if "aptNumber" in parsed_data_dict:
         addressSchema["aptNumber"] = parsed_data_dict["aptNumber"]
     if "poBox" in parsed_data_dict:
         addressSchema["poBox"] = parsed_data_dict["poBox"]
-    if "locationName" in parsed_data_dict:
-        addressSchema["locationName"] = parsed_data_dict["locationName"]
     if "streetNumberName" in parsed_data_dict:
         addressSchema["streetNumberName"] = parsed_data_dict["streetNumberName"]
-    else:
-        print(f'county_name {county_name} is the culprit')
-    print()
+    # else:
+        # print(f'county_name {county_name} is the culprit')
     return addressSchema
 
 def formatSchema(county, phone, person, p_address, m_address):
@@ -60,7 +61,6 @@ def formatSchema(county, phone, person, p_address, m_address):
     }
     if m_address != {}:
         schema["mailingAddress"] = m_address
-    # print(schema)
     return schema
 
 
@@ -77,9 +77,9 @@ for i in baseList:
     county = cleaner[:remove.start()].replace("Parish ", "").strip()
     phone = datapoints1[2].text.split(",")[0].split("x")[0].strip()
     p_address = datapoints1[0].get_text(separator="\n").replace("\nGet directions", "").replace("\n", " ").strip()
-    remove2 = re.search("\\d", p_address)
-    p_address = p_address[remove2.start():].strip()
-    m_address = datapoints1[1].text.replace("'n", " ")
+    m_address = datapoints1[1].text.replace("\n", " ")
+    # print(p_address)
+    # print(m_address)
     if county == "Bienville":
         p_address = "100 COURTHOUSE DR STE 1400 ARCADIA, LA 71001-1001"
         m_address = "PO BOX 697 ARCADIA, LA 71001-0697"
@@ -91,11 +91,11 @@ for i in baseList:
         m_address = "PO BOX 543 GREENSBURG, LA 70441-0543"
     aschema = format_address_data(p_address, county)
     bschema = format_address_data(m_address, county)
+    if m_address == p_address:
+        print(f'Physical and mailing are the same for {county} county')
+        bschema = {}
     schema = formatSchema(county, phone, person, aschema, bschema)
     masterList.append(schema)
-
-print(masterList)
-
 
 with open(os.path.join(ROOT_DIR, "scrapers", "louisiana", "louisiana.json"), 'w') as f:
     json.dump(masterList, f)
