@@ -41,7 +41,7 @@ def format_address_data(address, county_name):
     if "locationName" in parsed_data_dict:
         addressSchema["locationName"] = parsed_data_dict["locationName"]
     else:
-        addressSchema["locationName"] = county + " Parish Registrar of Voters"
+        addressSchema["locationName"] = county_name + " Parish Registrar of Voters"
     if "aptNumber" in parsed_data_dict:
         addressSchema["aptNumber"] = parsed_data_dict["aptNumber"]
     if "poBox" in parsed_data_dict:
@@ -76,8 +76,16 @@ for i in baseList:
     person = cleaner[remove.start():].replace(": ", "").strip()
     county = cleaner[:remove.start()].replace("Parish ", "").strip()
     phone = datapoints1[2].text.split(",")[0].split("x")[0].strip()
-    p_address = datapoints1[0].get_text(separator="\n").replace("\nGet directions", "").replace("\n", " ").strip()
-    m_address = datapoints1[1].text.replace("\n", " ")
+    p_address_comp = datapoints1[0].get_text().split("\n")
+    # print(p_address_comp)
+    p_address = p_address_comp[1]
+
+    for j in p_address_comp[2:len(p_address)]:
+        p_address = p_address + " " + j
+    p_address = p_address.replace("Get directions", "").strip()
+    m_address = datapoints1[1].text.split("\n")
+    m_address = m_address[1] + " " + m_address[2]
+    m_address = m_address.strip()
     # print(p_address)
     # print(m_address)
     if county == "Bienville":
