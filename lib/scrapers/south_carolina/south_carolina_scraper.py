@@ -19,9 +19,7 @@ BASE_URL = "https://www.scvotes.gov/"
 
 def format_address_data(address_data, county_name):
     mapping = electionsaver.addressSchemaMapping
-
-    print(county_name, address_data)
-
+    
     parsed_data_dict = {}
     try:
         parsed_data_dict = usaddress.tag(address_data, tag_mapping=mapping)[0]

@@ -56,7 +56,7 @@ def format_address_data(address_data, county_name, zip_code, city_name):
 
 def data_to_json_schema():
     info_df = pd.read_csv(
-        os.path.join(ROOT_DIR, r"scrapers\washington\county-elections-departments.csv"),
+        os.path.join(ROOT_DIR, "scrapers", "washington", "county-elections-departments.csv"),
         index_col=False,
     )
 
@@ -94,16 +94,14 @@ def data_to_json_schema():
         master_list.append(schema)
 
     master_list = sorted(master_list, key=lambda county: county['countyName'])
-    
-    with open(
-        os.path.join(ROOT_DIR, r"scrapers\washington\washington.json"), "w"
-    ) as f:
+
+    with open(os.path.join(ROOT_DIR, "scrapers", "washington", "washington.json"), "w") as f:
         json.dump(master_list, f)
     return master_list
 
 async def get_election_offices():
     if not os.path.isfile(
-        os.path.join(ROOT_DIR, r"scrapers\washington\county-elections-departments.csv")
+        os.path.join(ROOT_DIR, "scrapers", "washington", "county-elections-departments.csv")
     ):
         raise Exception("Washington county info csv file not found!")
     return data_to_json_schema()
