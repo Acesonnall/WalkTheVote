@@ -1,4 +1,3 @@
-# import context
 import asyncio
 import os
 import json
@@ -15,6 +14,7 @@ from lib.errors.wtv_errors import WalkTheVoteError
 def format_address_data(address_data, county_name, zip_code, city_name):
     mapping = electionsaver.addressSchemaMapping
 
+    address_data = address_data.replace('<br />', ' ')
     print(county_name, address_data, city_name, zip_code)
 
     # Edge cases
@@ -93,6 +93,8 @@ def data_to_json_schema():
 
         master_list.append(schema)
 
+    master_list = sorted(master_list, key=lambda county: county['countyName'])
+    
     with open(
         os.path.join(ROOT_DIR, r"scrapers\washington\washington.json"), "w"
     ) as f:
