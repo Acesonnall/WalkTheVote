@@ -6,6 +6,7 @@ import shutil
 import usaddress
 from bs4 import BeautifulSoup as bS
 from selenium import webdriver
+from selenium.webdriver.chrome.options import Options
 
 from lib.ElectionSaver import electionsaver
 from lib.definitions import Bcolors, ROOT_DIR
@@ -42,22 +43,25 @@ def format_address_data(address_data, county_name):
         final_address["locationName"] = parsed_data_dict["locationName"]
     if "poBox" in parsed_data_dict:
         final_address["poBox"] = parsed_data_dict["poBox"]
-        
+
     return final_address
+
 
 def get_election_offices():
     # page is dynamic--use selenium to execute the javascript before extracting data
-    driver = webdriver.Chrome(PATH_CHROMEDRIVER)
+    chrome_options = Options()
+    chrome_options.add_argument("--headless")
+    driver = webdriver.Chrome(options=chrome_options, executable_path=PATH_CHROMEDRIVER)
     driver.get(URL)
     time.sleep(1)
 
     soup = bS(driver.page_source, "html.parser")
-    elems = soup.find_all(class_='group')
- 
+    elems = soup.find_all(class_="group")
+
     master_list = []
 
     for e in elems:
-        text = [i.strip() for i in e.get_text('\n').split('\n') if i.strip()]
+        text = [i.strip() for i in e.get_text("\n").split("\n") if i.strip()]
 
         county = text[0].split(",")[0].split(" County")[0].split(" Board")[0]
         street_number_name = text[1]
@@ -85,7 +89,9 @@ def get_election_offices():
         if "aptNumber" in subschema:
             schema["physicalAddress"]["aptNumber"] = subschema["aptNumber"]
         if "streetNumberName" in subschema:
-            schema["physicalAddress"]["streetNumberName"] = subschema["streetNumberName"]
+            schema["physicalAddress"]["streetNumberName"] = subschema[
+                "streetNumberName"
+            ]
 
         master_list.append(schema)
 
@@ -96,7 +102,7 @@ def get_election_offices():
     return master_list
 
 
-if __name__ =='__main__':
+if __name__ == "__main__":
     print(ROOT_DIR)
     start = time.time()
     get_election_offices()

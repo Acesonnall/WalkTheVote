@@ -4,6 +4,7 @@ import asyncio
 import json
 import logging
 import os
+import shutil
 import unicodedata
 from typing import Dict, List
 
@@ -34,7 +35,8 @@ ch.setFormatter(formatter)
 # add ch to logger
 LOG.addHandler(ch)
 
-webdriver_path = r"C:\Users\omarc\Downloads\edgedriver_win64\msedgedriver.exe"
+# Need to add path to MS Edge Driver to system path for this to work
+PATH_MSEDGEDRIVER = shutil.which("msedgedriver")
 
 
 class IowaScraper(BaseScraper):
@@ -47,7 +49,7 @@ class IowaScraper(BaseScraper):
         self.edge_options = EdgeOptions()
         self.edge_options.use_chromium = True
         self.edge_options.add_argument("--headless")
-        self.driver = Edge(executable_path=webdriver_path, options=self.edge_options)
+        self.driver = Edge(executable_path=PATH_MSEDGEDRIVER, options=self.edge_options)
 
     def scrape(self) -> List[Dict]:
         """TODO: Write documentation once purpose of method is further defined.
