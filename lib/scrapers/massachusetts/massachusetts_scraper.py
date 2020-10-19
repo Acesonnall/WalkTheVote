@@ -5,6 +5,7 @@ import json
 import logging
 import os
 import re
+import shutil
 from typing import Dict, List
 
 import usaddress
@@ -34,7 +35,7 @@ ch.setFormatter(formatter)
 # add ch to logger
 LOG.addHandler(ch)
 
-webdriver_path = r"C:\Users\omarc\Downloads\edgedriver_win64\msedgedriver.exe"
+PATH_MSEDGEDRIVER = shutil.which("msedgedriver")
 
 
 class MassachusettsScraper(BaseScraper):
@@ -50,7 +51,7 @@ class MassachusettsScraper(BaseScraper):
         self.edge_options = EdgeOptions()
         self.edge_options.use_chromium = True
         self.edge_options.add_argument("--headless")
-        self.driver = Edge(executable_path=webdriver_path, options=self.edge_options)
+        self.driver = Edge(executable_path=PATH_MSEDGEDRIVER, options=self.edge_options)
         self.phone_jurisdiction_map = self.create_juridiction_phone_mapping()
 
     def scrape(self) -> List[Dict]:

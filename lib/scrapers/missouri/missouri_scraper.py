@@ -1,3 +1,4 @@
+import asyncio
 import json
 import os
 import time
@@ -47,7 +48,7 @@ def format_address_data(address_data, county_name):
     return final_address
 
 
-def get_election_offices():
+async def get_election_offices():
     # page is dynamic--use selenium to execute the javascript before extracting data
     chrome_options = Options()
     chrome_options.add_argument("--headless")
@@ -105,6 +106,6 @@ def get_election_offices():
 if __name__ == "__main__":
     print(ROOT_DIR)
     start = time.time()
-    get_election_offices()
+    asyncio.get_event_loop().run_until_complete(get_election_offices())
     end = time.time()
     print(f"{Bcolors.OKBLUE}Completed in {end - start} seconds.{Bcolors.ENDC}")
