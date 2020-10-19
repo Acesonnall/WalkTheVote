@@ -28,7 +28,7 @@ def format_address_data(address_data, county_name):
             f"Error with data for {county_name} town, data is {parsed_data_dict}"
         ) from e
 
-    final_address = {"state": "NY"}
+    final_address = {"state": "SC"}
 
     if "city" in parsed_data_dict:
         final_address["city"] = parsed_data_dict["city"].title()
@@ -63,28 +63,45 @@ def format_data_into_schema(
 
     # Edge cases
     if county_name == 'Aiken':
-        schema["mailingAddress"] = format_address_data('Aiken County Government Center, 1930 University Parkway, Aiken, SC 29801', county_name)
-        schema["physicalAddress"] = format_address_data('Post Office Box 3127, Aiken, SC  29802', county_name)
+        schema["physicalAddress"] = format_address_data('Aiken County Government Center, 1930 University Parkway, Aiken, SC 29801', county_name)
+        schema["mailingAddress"] = format_address_data('Post Office Box 3127, Aiken, SC  29802', county_name)
         return schema
-    if county_name == 'Colleton':
-        schema["mailingAddress"] = format_address_data('2471 Jefferies Highway, Walterboro, SC  29488', county_name)
-        schema["physicalAddress"] = format_address_data('Post Office Box 97, Walterboro, SC 29488', county_name)
+    elif county_name == 'Beaufort':
+        schema["physicalAddress"] = format_address_data('15 John Galt Road, Beaufort, SC 29906-4290', county_name)
+        schema["mailingAddress"] = format_address_data('Post Office Drawer 1228, Beaufort, SC 29901-1228', county_name)
+    elif county_name == 'Colleton':
+        schema["physicalAddress"] = format_address_data('2471 Jefferies Highway, Walterboro, SC  29488', county_name)
+        schema["mailingAddress"] = format_address_data('Post Office Box 97, Walterboro, SC 29488', county_name)
         return schema
-    if county_name == 'Marion':
-        schema["mailingAddress"] = format_address_data('2523 E. Highway 76, Marion, S.C. 29571', county_name)
-        schema["physicalAddress"] = format_address_data('P.O. Box 1898, Marion, S.C. 29571', county_name)
+    elif county_name == 'Marion':
+        schema["physicalAddress"] = format_address_data('2523 E. Highway 76, Marion, S.C. 29571', county_name)
+        schema["mailingAddress"] = format_address_data('P.O. Box 1898, Marion, S.C. 29571', county_name)
         return schema
-    if county_name == 'Richland':
-        schema["mailingAddress"] = format_address_data('2020 Hampton Street, Columbia, SC  29202', county_name)
-        schema["physicalAddress"] = format_address_data('PO Box 5330, Columbia, SC  29250', county_name)
+    elif county_name == 'Richland':
+        schema["physicalAddress"] = format_address_data('2020 Hampton Street, Columbia, SC  29202', county_name)
+        schema["mailingAddress"] = format_address_data('PO Box 5330, Columbia, SC  29250', county_name)
+        schema["email"] = 'rcvoterapplication@rcgov.us'
         return schema
-
-    address_formatted = format_address_data(address, county_name)
-
-    if "poBox" in address_formatted:
-            schema["mailingAddress"] = address_formatted
+    elif county_name == 'Cherokee':
+        schema["physicalAddress"] = format_address_data('110 Railroad Avenue, Gaffney, SC  29340', county_name)
+    elif county_name == 'Oconee':
+        schema["physicalAddress"] = format_address_data('415 South Pine Street, Walhalla SC 29691', county_name)
+        schema["phone"] = '(864) 638-4196'
+        schema["officeSupervisor"] = 'Joy Scharich'
+    elif county_name == 'Pickens':
+        schema["physicalAddress"] = format_address_data('222 McDaniel Avenue B-9, Pickens SC 29671', county_name)
+        schema["phone"] = '864-898-5948'
+        schema['email'] = 'vote.Pickens@elections.sc.gov'
+    elif county_name == 'Spartanburg':
+        schema["physicalAddress"] = format_address_data('366 North Church Street, Room 1630 Spartanburg, SC  29303', county_name)
+        schema["mailingAddress"] = format_address_data('Post Office Box 1287, Spartanburg, SC  29304', county_name)
     else:
-        schema["physicalAddress"] = address_formatted
+        address_formatted = format_address_data(address, county_name)
+
+        if "poBox" in address_formatted:
+                schema["mailingAddress"] = address_formatted
+        else:
+            schema["physicalAddress"] = address_formatted
 
     return schema
 
@@ -109,7 +126,8 @@ async def scrape_one_county(session, county_name):
     # Variable to determine whether we are still scraping address.
     scraping_address = True
     for line in p_tags[3:]:
-        if phone_number == '' and '(' in line.text and ')' in line.text:
+        if (phone_number == '' and '(' in line.text and ')' in line.text and 
+        "Post" not in line.text and "John" not in line.text and "Room" not in line.text):
             raw_number = line.text
             phone_number = raw_number.replace('Phone', '').replace('Office', '').replace(':', '').strip()
 
@@ -121,7 +139,7 @@ async def scrape_one_county(session, county_name):
             director_name = line.text[:end_index].replace('-', '').strip()
         
         if email_address == '' and '@' in line.text:
-            email_address = line.text
+            email_address = line.text.strip()
         
         if 'Board of Voter Registration' in line.text:
             county_website = line.find('a')['href']
