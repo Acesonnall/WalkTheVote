@@ -17,9 +17,9 @@ def create_mapping():
     csv_path = os.path.join(DIRECTORY, "zip_code_database.csv")
     if not os.path.isfile(csv_path):
         raise WalkTheVoteError(
-            f'Prerequisite CSV file needed to create database mapping. Please go to '
-            f'https://www.unitedstateszipcodes.org/zip-code-database/ and download the '
-            f'free zip code database file to {DIRECTORY}. Make sure the downloaded '
+            f'Prerequisite CSV file needed to create database mapping.\n\nPlease go to '
+            f'https://www.unitedstateszipcodes.org/zip-code-database/ and download\nthe'
+            f' free zip code database file to {DIRECTORY}.\n\nMake sure the downloaded '
             f'file is named "zip_code_database.csv"'
         )
     mapping_df = pd.read_csv(csv_path)

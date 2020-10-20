@@ -13,7 +13,8 @@ from bs4 import BeautifulSoup, Tag
 from msedge.selenium_tools import Edge, EdgeOptions
 
 from lib.ElectionSaver import electionsaver
-from lib.definitions import ROOT_DIR
+from lib.definitions import ROOT_DIR, SupportedWebDrivers
+from lib.errors.wtv_errors import WalkTheVoteError
 from lib.scrapers.base_scraper import BaseScraper
 
 # create logger
@@ -35,7 +36,9 @@ ch.setFormatter(formatter)
 # add ch to logger
 LOG.addHandler(ch)
 
-PATH_MSEDGEDRIVER = shutil.which("msedgedriver")
+# Need to add path to a Webdriver to system path for this to work
+PATH_WEBDRIVER = None
+SUPPORTED_WEBDRIVERS = SupportedWebDrivers()
 
 
 class MassachusettsScraper(BaseScraper):
@@ -51,7 +54,15 @@ class MassachusettsScraper(BaseScraper):
         self.edge_options = EdgeOptions()
         self.edge_options.use_chromium = True
         self.edge_options.add_argument("--headless")
-        self.driver = Edge(executable_path=PATH_MSEDGEDRIVER, options=self.edge_options)
+
+        for webdriver in SUPPORTED_WEBDRIVERS.drivers:
+            PATH_WEBDRIVER = shutil.which(webdriver.driver)
+            if PATH_WEBDRIVER:
+                break
+        else:
+            raise WalkTheVoteError(
+                SUPPORTED_WEBDRIVERS.print_error(state="Massachusetts"))
+        self.driver = Edge(executable_path=PATH_WEBDRIVER, options=self.edge_options)
         self.phone_jurisdiction_map = self.create_juridiction_phone_mapping()
 
     def scrape(self) -> List[Dict]:
