@@ -12,6 +12,7 @@ future
 html5lib
 idna
 Js2Py
+lxml
 msedge-selenium-tools
 multidict
 numpy

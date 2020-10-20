@@ -1,3 +1,4 @@
+import asyncio
 import json
 import os
 import time
@@ -28,10 +29,10 @@ def format_address_data(address_data, county_name):
         final_address["locationName"] = parsed_data_dict["locationName"]
     if "poBox" in parsed_data_dict:
         final_address["poBox"] = parsed_data_dict["poBox"]
-        
+
     return final_address
 
-def get_election_offices():
+async def get_election_offices():
     df = pd.read_html(URL)[0]
     df.drop(35, inplace=True)
 
@@ -78,6 +79,6 @@ def get_election_offices():
 
 if __name__ == "__main__":
     start = time.time()
-    get_election_offices()
+    asyncio.get_event_loop().run_until_complete(get_election_offices())
     end = time.time()
     print(f"{Bcolors.OKBLUE}Completed in {end - start} seconds.{Bcolors.ENDC}")
