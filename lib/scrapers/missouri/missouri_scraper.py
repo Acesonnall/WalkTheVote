@@ -10,10 +10,10 @@ from selenium import webdriver
 from selenium.webdriver.chrome.options import Options
 
 from lib.ElectionSaver import electionsaver
-from lib.definitions import Bcolors, ROOT_DIR
+from lib.definitions import Bcolors, ROOT_DIR, WTVWebDriver
+from lib.errors.wtv_errors import WalkTheVoteError
 
 URL = "https://www.sos.mo.gov/elections/goVoteMissouri/localelectionauthority"
-PATH_CHROMEDRIVER = shutil.which("chromedriver")
 
 
 def format_address_data(address_data, county_name):
@@ -50,9 +50,7 @@ def format_address_data(address_data, county_name):
 
 async def get_election_offices():
     # page is dynamic--use selenium to execute the javascript before extracting data
-    chrome_options = Options()
-    chrome_options.add_argument("--headless")
-    driver = webdriver.Chrome(options=chrome_options, executable_path=PATH_CHROMEDRIVER)
+    driver = WTVWebDriver("Missouri").get_webdriver()
     driver.get(URL)
     time.sleep(1)
 

@@ -13,7 +13,8 @@ from bs4 import BeautifulSoup
 from msedge.selenium_tools import Edge, EdgeOptions
 
 from lib.ElectionSaver import electionsaver
-from lib.definitions import ROOT_DIR
+from lib.definitions import ROOT_DIR, WTVWebDriver
+from lib.errors.wtv_errors import WalkTheVoteError
 from lib.scrapers.base_scraper import BaseScraper
 
 # create logger
@@ -35,9 +36,6 @@ ch.setFormatter(formatter)
 # add ch to logger
 LOG.addHandler(ch)
 
-# Need to add path to MS Edge Driver to system path for this to work
-PATH_MSEDGEDRIVER = shutil.which("msedgedriver")
-
 
 class IowaScraper(BaseScraper):
     def __init__(self):
@@ -46,10 +44,7 @@ class IowaScraper(BaseScraper):
             "https://sos.iowa.gov/elections/auditors/auditor.asp?CountyID=00"
         )
         self.data = []
-        self.edge_options = EdgeOptions()
-        self.edge_options.use_chromium = True
-        self.edge_options.add_argument("--headless")
-        self.driver = Edge(executable_path=PATH_MSEDGEDRIVER, options=self.edge_options)
+        self.driver = WTVWebDriver("Iowa").get_webdriver()
 
     def scrape(self) -> List[Dict]:
         """TODO: Write documentation once purpose of method is further defined.
