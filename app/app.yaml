@@ -12,9 +12,9 @@ resources:
 
 handlers: 
 - url: /
-  static_files: client/index.html
+  static_files: client/views/index.html
   secure: always
-  upload: client/index.html
+  upload: client/views/index.html
   http_headers:
     Strict-Transport-Security: max-age=31536000; includeSubDomains
 
