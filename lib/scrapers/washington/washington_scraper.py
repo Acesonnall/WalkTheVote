@@ -4,17 +4,17 @@ import json
 import usaddress
 import pandas as pd
 
-# Downlaod CSV file from https://www.sos.wa.gov/elections/viewauditors.aspx (click 
-# Export to Excel) and place in same directory as this python file. 
-
 from lib.ElectionSaver import electionsaver
 from lib.definitions import ROOT_DIR
 from lib.errors.wtv_errors import WalkTheVoteError
 
+DIRECTORY = os.path.join(ROOT_DIR, "scrapers", "washington")
+
+
 def format_address_data(address_data, county_name, zip_code, city_name):
     mapping = electionsaver.addressSchemaMapping
 
-    address_data = address_data.replace('<br />', ' ')
+    address_data = address_data.replace("<br />", " ")
     print(county_name, address_data, city_name, zip_code)
 
     # Edge cases
@@ -54,9 +54,18 @@ def format_address_data(address_data, county_name, zip_code, city_name):
         final_address["aptNumber"] = parsed_data_dict["aptNumber"].title()
     return final_address
 
+
 def data_to_json_schema():
+    csv_path = os.path.join(DIRECTORY, "county-elections-departments.csv")
+    if not os.path.isfile(csv_path):
+        raise WalkTheVoteError(
+            f"Prerequisite CSV file needed to scrape Washington. Please go to "
+            f"https://www.sos.wa.gov/elections/viewauditors.aspx, click export to "
+            f"excel and download the CSV file to {DIRECTORY}. Make sure the downloaded "
+            f'file is named "county-elections-departments.csv".'
+        )
     info_df = pd.read_csv(
-        os.path.join(ROOT_DIR, "scrapers", "washington", "county-elections-departments.csv"),
+        os.path.join(DIRECTORY, "county-elections-departments.csv"),
         index_col=False,
     )
 
@@ -71,7 +80,9 @@ def data_to_json_schema():
     address_list_formatted = []
     for i in range(len(address_list)):
         address_list_formatted.append(
-            format_address_data(address_list[i], county_list[i], zip_list[i], city_list[i])
+            format_address_data(
+                address_list[i], county_list[i], zip_list[i], city_list[i]
+            )
         )
 
     master_list = []
@@ -93,19 +104,19 @@ def data_to_json_schema():
 
         master_list.append(schema)
 
-    master_list = sorted(master_list, key=lambda county: county['countyName'])
+    master_list = sorted(master_list, key=lambda county: county["countyName"])
 
-    with open(os.path.join(ROOT_DIR, "scrapers", "washington", "washington.json"), "w") as f:
+    with open(os.path.join(DIRECTORY, "washington.json"), "w") as f:
         json.dump(master_list, f)
     return master_list
 
+
 async def get_election_offices():
-    if not os.path.isfile(
-        os.path.join(ROOT_DIR, "scrapers", "washington", "county-elections-departments.csv")
-    ):
-        raise Exception("Washington county info csv file not found!")
     return data_to_json_schema()
 
 
 if __name__ == "__main__":
-    asyncio.get_event_loop().run_until_complete(get_election_offices())
+    try:
+        asyncio.get_event_loop().run_until_complete(get_election_offices())
+    except WalkTheVoteError as e:
+        print(e)

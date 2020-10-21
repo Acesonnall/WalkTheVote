@@ -13,7 +13,6 @@ from asyncio import Task, Future
 from dataclasses import dataclass, field
 from typing import Iterable, Callable, Dict, List
 
-import pandas as pd
 from pymodm import connect
 from pymodm.errors import ValidationError
 from pymongo import MongoClient
@@ -41,7 +40,7 @@ from lib.handler.wtv_db_schema import (
     PhysicalAddress,
     VALIDATION_RULES,
 )
-from lib.handler.zip_county_mapping.zip_to_county import create_mapping
+from lib.handler.zip_mapping.zip_mapping_v2 import create_mapping
 
 # Using the same naming scheme, import more scrapers here as they are ready and
 # formatted
@@ -56,9 +55,18 @@ from lib.scrapers.georgia import georgia_scraper
 from lib.scrapers.california import california_scraper
 from lib.scrapers.ohio import ohio_scraper
 from lib.scrapers.iowa import iowa_scraper
-from lib.scrapers.pennsylvania import pennsylvania_scraper
+# from lib.scrapers.pennsylvania import pennsylvania_scraper
 from lib.scrapers.illinois import illinois_scraper
 from lib.scrapers.wyoming import wyoming_scraper
+# from lib.scrapers.maine import maine_scraper
+from lib.scrapers.new_hampshire import new_hampshire_scraper
+# from lib.scrapers.wisconsin import wisconsin_scraper
+from lib.scrapers.missouri import missouri_scraper
+from lib.scrapers.massachusetts import massachusetts_scraper
+from lib.scrapers.washington import washington_scraper
+from lib.scrapers.new_york import new_york_scraper
+from lib.scrapers.south_carolina import south_carolina_scraper
+
 
 @dataclass
 class Scraper:
@@ -71,7 +79,7 @@ class Scraper:
 
     state_name: str
     get_election_office: Callable
-    data: Dict = field(default_factory=dict)
+    election_offices: Dict = field(default_factory=dict)
 
 
 class WtvDbHandler:
@@ -87,6 +95,7 @@ class WtvDbHandler:
     def __init__(self, db_uri, db_alias):
         self.preloaded = self._is_db_preloaded()
         self.scrapers = []
+        self.failed_scraper_data_retrieval_msgs = []
 
         try:
             connect(db_uri, alias=db_alias)
@@ -120,39 +129,29 @@ class WtvDbHandler:
 
         @return: DataFrame loaded with the mapping information
         """
-        tries = 1
-        wait_seconds = 2
-        mapping_df = None
-        while mapping_df is None:
+        mapping_dict = None
+        while mapping_dict is None:
             try:
-                print(
-                    f"{Bcolors.OKBLUE}Attempt {tries}: Loading mapping data."
-                    f"{Bcolors.ENDC}"
-                )
-                mapping_df = pd.read_csv(
-                    os.path.join(ROOT_DIR, r"handler\zip_county_mapping\mapping.csv")
-                )
+                with open(
+                    os.path.join(ROOT_DIR, "handler", "zip_mapping", "mapping.json"),
+                    "r",
+                ) as f:
+                    mapping_dict = json.load(f)
                 print(f"{Bcolors.OKBLUE}Mapping data loaded.{Bcolors.ENDC}\n")
             except FileNotFoundError as e:
-                if tries <= 3:
-                    print(
-                        f"{Bcolors.OKBLUE}Attempt {tries}: Mapping data file not "
-                        f"found. Creaing mapping.{Bcolors.ENDC} "
-                    )
-                    mapping_df = create_mapping()
-                    tries += 1
-                    print(
-                        f"{Bcolors.OKBLUE}Retrying in {wait_seconds} seconds."
-                        f"{Bcolors.ENDC}"
-                    )
-                    time.sleep(wait_seconds)
-                else:
-                    raise WalkTheVoteError(
-                        f"File not found after {tries} attempts"
-                    ) from e
+                print(
+                    f"{Bcolors.OKBLUE}Mapping data file not yet existent in directory. "
+                    f"Attempting to loading mapping from script instead. This could "
+                    f"""take a while so go grab some coffee.
+ ( 
+  )
+c[]{Bcolors.ENDC}"""
+                )
+                mapping_dict = create_mapping()
+                print(f"{Bcolors.OKBLUE}Load successful.{Bcolors.ENDC}")
             except Exception as e:
                 raise WalkTheVoteError("Unknown error loading mapping file") from e
-        return mapping_df
+        return mapping_dict
 
     @staticmethod
     def _is_db_preloaded():
@@ -160,37 +159,38 @@ class WtvDbHandler:
         @rtype: bool
         """
 
-        client = MongoClient(TEST_DB_URI)
-        db = client[TEST_DB_NAME]
+        client = MongoClient(LOCAL_DB_URI)
+        db = client[LOCAL_DB_NAME]
         return not len(db.list_collection_names()) < 4
 
-    async def preload_db(self):
+    async def _preload_db(self):
         """Preload the database with the zip, city, county, state mapping"""
         if not self.preloaded:
             print(
-                f"{Bcolors.OKBLUE}Database is not yet preloaded. Creating zip code to "
-                f"county mappings.{Bcolors.ENDC} "
+                f"{Bcolors.OKBLUE}Database is not yet preloaded. Creating zip code "
+                f"mappings.{Bcolors.ENDC} "
             )
-            mapping_df = self._get_mapping()
-            total_rows = len(mapping_df.index)
+            mapping_dict = self._get_mapping()
             self.set_validation_rules()
             # TODO: Only way to speed this up is with an async MongoDB driver
-            for row in tqdm(
-                mapping_df.itertuples(), desc="preloading db", total=total_rows
+            for zip_code, parent_city in tqdm(
+                mapping_dict.items(), desc="preloading db", total=len(mapping_dict)
             ):
-                State(state_name=row.State).save()
-                county_id = f"{row.State}.{row.County}"
+                parent_city, parent_county = list(parent_city.items())[0]
+                parent_county, parent_state = list(parent_county.items())[0]
+                State(state_name=parent_state).save()
+                county_id = f"{parent_state}.{parent_county}"
 
                 County.objects.raw({"_id": county_id}).update(
-                    {"$setOnInsert": {"_id": county_id, "parent_state": row.State}},
+                    {"$setOnInsert": {"_id": county_id, "parent_state": parent_state}},
                     upsert=True,
                 )
-                city_id = f"{row.State}.{row.County}.{row.Cities}"
+                city_id = f"{parent_state}.{parent_county}.{parent_city}"
                 City.objects.raw({"_id": city_id}).update(
                     {"$setOnInsert": {"_id": city_id, "parent_county": county_id}},
                     upsert=True,
                 )
-                padded_zip = f"{row.Zip:05}"
+                padded_zip = zip_code
                 ZipCode.objects.raw({"_id": padded_zip}).update(
                     {"$setOnInsert": {"_id": padded_zip, "parent_city": city_id}},
                     upsert=True,
@@ -203,55 +203,65 @@ class WtvDbHandler:
         """Run scraper function and assign results to data variable of scraper
         object
         """
-        scraper.data = await scraper.get_election_office()
+        try:
+            scraper.election_offices = await scraper.get_election_office()
+        except Exception as e:
+            raise WalkTheVoteError(f"Problem getting election office data from "
+                                   f"{scraper.state_name}_scraper.py: {e}")
 
     # TODO: Implement code to handle loading of select states rather than all of them
     #  (useful for if we need to issue targeted updates)
-    async def get_election_office_info(self, states=None):
+    async def _get_election_office_info(self, states=None):
         """Dynamically acquire data from scrapers in a non-IO blocking fashion"""
         if not self.preloaded:
-            await self.preload_db()
-        else:
-            tasks: List[Task] = []
-            print(
-                f"{Bcolors.OKBLUE}Loading scraper data for "
-                f'{"all" if not states else len(states)} states...{Bcolors.ENDC}'
-            )
-            for scraper in self.scrapers:
-                state_name = " ".join(
-                    s.capitalize() for s in scraper.state_name.split(sep="_")
-                )
-                try:
-                    with open(
-                        os.path.join(
-                            ROOT_DIR,
-                            rf"scrapers\{scraper.state_name}\{scraper.state_name}.json",
-                        )
-                    ) as scraper_results_file:
-                        print(
-                            f"{Bcolors.OKBLUE}Pre-existing data file found for "
-                            f"{state_name}{Bcolors.ENDC}."
-                        )
-                        scraper.data = json.load(scraper_results_file)
-                except FileNotFoundError:
-                    print(
-                        f"{Bcolors.OKBLUE}Pre-existing data file not found for "
-                        f"{state_name}. Loading from scraper.{Bcolors.ENDC}"
-                    )
-                    tasks.append(asyncio.create_task(self._get_scraper_data(scraper)))
-            if tasks:
-                future: Future
-                for future in asyncio.as_completed(tasks):
-                    await future
-            print(f"{Bcolors.OKBLUE}Scraper data loaded into memory{Bcolors.ENDC}")
+            await self._preload_db()
 
-    def load_election_office_info(self):
+        tasks: List[Task] = []
+        print(
+            f"{Bcolors.OKBLUE}Loading scraper data for "
+            f'{"all" if not states else len(states)} states...{Bcolors.ENDC}'
+        )
+        for scraper in self.scrapers:
+            state_name = " ".join(
+                s.capitalize() for s in scraper.state_name.split(sep="_")
+            )
+            try:
+                with open(
+                    os.path.join(
+                        ROOT_DIR,
+                        "scrapers",
+                        scraper.state_name,
+                        f"{scraper.state_name}.json",
+                    )
+                ) as scraper_results_file:
+                    print(
+                        f"{Bcolors.OKBLUE}Pre-existing data file found for "
+                        f"{state_name}{Bcolors.ENDC}."
+                    )
+                    scraper.election_offices = json.load(scraper_results_file)
+            except FileNotFoundError:
+                print(
+                    f"{Bcolors.OKBLUE}Pre-existing data file not found for "
+                    f"{state_name}. Loading from scraper.{Bcolors.ENDC}"
+                )
+                tasks.append(asyncio.create_task(self._get_scraper_data(scraper)))
+        if tasks:
+            future: Future
+            for future in asyncio.as_completed(tasks):
+                try:
+                    await future
+                except WalkTheVoteError as e:
+                    self.failed_scraper_data_retrieval_msgs.append(e)
+        print(f"{Bcolors.OKBLUE}Scraper data loaded into memory\n{Bcolors.ENDC}")
+
+    async def load_election_office_info(self):
         """Insert election office information gathered from scrapers into the
         database"""
+        await self._get_election_office_info()
         issues = []
         for scraper in tqdm(self.scrapers, desc="Loading office info into database"):
             s_data: Dict
-            for s_data in scraper.data:
+            for s_data in scraper.election_offices:
                 # Get addresses. If either don't exist, default to an empty dict so get
                 # methods below still work
                 physical_address = s_data.get("physicalAddress", {})
@@ -353,22 +363,29 @@ class WtvDbHandler:
 
     @staticmethod
     def set_validation_rules():
-        client = MongoClient(TEST_DB_URI)
-        db = client[TEST_DB_NAME]
-        db.create_collection(
-            "county", validator=VALIDATION_RULES["county"]["validator"]
-        )
-        db.create_collection("city", validator=VALIDATION_RULES["city"]["validator"])
+        client = MongoClient(LOCAL_DB_URI)
+        db = client[LOCAL_DB_NAME]
+        collection_names = db.list_collection_names()
+        if "county" not in collection_names:
+            db.create_collection(
+                "county", validator=VALIDATION_RULES["county"]["validator"]
+            )
+        if "city" not in collection_names:
+            db.create_collection(
+                "city", validator=VALIDATION_RULES["city"]["validator"]
+            )
 
 
 async def main():
-    wtv_db = WtvDbHandler(TEST_DB_URI, TEST_DB_ALIAS)
-    await wtv_db.preload_db()
-    await wtv_db.get_election_office_info()
+    os.path.exists(os.path.join(ROOT_DIR, "scrapers", "new_hamphsire"))
+    wtv_db = WtvDbHandler(LOCAL_DB_URI, LOCAL_DB_ALIAS)
     try:
-        wtv_db.load_election_office_info()
-    except WalkTheVoteError as wtv_e:
-        print(wtv_e)
+        await wtv_db.load_election_office_info()
+    except WalkTheVoteError as e:
+        print(e)
+
+    if wtv_db.failed_scraper_data_retrieval_msgs:
+        print(*wtv_db.failed_scraper_data_retrieval_msgs, sep="\n")
 
 
 if __name__ == "__main__":

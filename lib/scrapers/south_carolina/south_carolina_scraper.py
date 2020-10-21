@@ -95,6 +95,8 @@ def format_data_into_schema(
     elif county_name == 'Spartanburg':
         schema["physicalAddress"] = format_address_data('366 North Church Street, Room 1630 Spartanburg, SC  29303', county_name)
         schema["mailingAddress"] = format_address_data('Post Office Box 1287, Spartanburg, SC  29304', county_name)
+    elif county_name == "Williamsburg":
+        schema["physicalAddress"] = format_address_data("126 S. Jackson St., Kingstree, SC 29556", county_name)
     else:
         address_formatted = format_address_data(address, county_name)
 
