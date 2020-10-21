@@ -17,7 +17,6 @@ EMAIL_URL = "https://www.sos.state.tx.us/elections/voter/county.shtml"
 
 emails = []
 
-
 async def get_email_addresses():
     async with aiohttp.ClientSession() as session:
         async with session.get(EMAIL_URL) as r:
