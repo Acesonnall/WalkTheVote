@@ -93,6 +93,26 @@ function consolidateZipInputs() {
     handleZipCode(res);
 }
 
+function formValidation(){
+    let zipInputs = $('.zip-wrapper input');
+
+    console.log(zipInputs.val());
+
+        if(zipInputs.val() == ''){
+            //e.stopImmediatePropagation();
+
+            $(this).addClass('error');
+
+            console.log('ERROR!');
+        } else {
+            $(this).removeClass('error');
+
+            console.log('SUCCESS!');
+
+            consolidateZipInputs();
+        }
+}
+
 function clearZipFields() {
     $("input").each(function() {
         $(this).val("");
