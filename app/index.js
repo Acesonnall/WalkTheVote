@@ -1,3 +1,11 @@
+/*
+ * ===============================================
+ * ===============================================
+ *              Imports & declarations
+ * ===============================================
+ * ===============================================
+ */
+
 var chalk = require('chalk');
 
 var connected = chalk.bold.cyan;
@@ -10,6 +18,7 @@ const mongoose = require('mongoose');
 const path = require('path');
 const cors = require('cors');
 const yes = require('yes-https');
+const compression = require('compression');
 require('dotenv').config();
 
 const Schema = mongoose.Schema;
@@ -21,9 +30,21 @@ const City = require(path.resolve(_modelsdir, 'city.js')).City;
 const State = require(path.resolve(_modelsdir, 'state.js')).State;
 
 const app = express();
+const r = express.Router();
+
 app.use(cors());
 app.use(yes());
+app.use(compression());
+
 const PORT = process.env.PORT || 8080;
+
+/*
+ * ===============================================
+ * ===============================================
+ *               Mongo interactions
+ * ===============================================
+ * ===============================================
+ */
 
 mongoose.connect(process.env.PROD_DB_URL, {
     useNewUrlParser: true,
@@ -45,7 +66,7 @@ mongoose.connection.on('disconnected', function(){
 async function lookupByZip(zipCode) {
     const test = await ZipCode.find({_id: {$eq: zipCode}}, function(err, data) {
         if (err || data.length == 0) {
-            if (data &&     data.length == 0) {
+            if (data && data.length == 0) {
                 console.log(`[ERROR] No data found!`);
             }
             console.log(`[ERROR] Error finding value ${zipCode} in database: ${err}`);
@@ -58,6 +79,15 @@ async function lookupByZip(zipCode) {
     });
     return test[0];
 }
+
+
+/*
+ * ===============================================
+ * ===============================================
+ *                 Utility functions
+ * ===============================================
+ * ===============================================
+ */
 
 function validateZip(zipCode) {
     const regex = /^[0-9]{5}/g;
@@ -93,12 +123,41 @@ function cleanClsFromAddresses(addobj) {
     deleteClsFromAddressObject(addobj, 'mailing_address');
 }
 
-app.get("/:zipcode", (req, res) => {
+/*
+ * ===============================================
+ * ===============================================
+ *                  Express routing
+ * ===============================================
+ * ===============================================
+ */
+
+app.get('/faq', function(req, res) {
+    let tob = path.join(__dirname + '/client/views/faq.html');
+    res.sendFile(tob);
+});
+
+app.get('/maps', function(req, res) {
+    let tob = path.join(__dirname + '/client/views/maps.html');
+    res.sendFile(tob);
+});
+
+app.get('/help', function(req, res) {
+    let tob = path.join(__dirname + '/client/views/help.html');
+    res.sendFile(tob);
+});
+
+app.get('/', function(req, res) {
+    let tob = path.join(__dirname + '/client/views/index.html');
+    res.sendFile(tob);
+});
+
+app.get("/api/:zipcode", (req, res) => {
+    const zipCode = req.params.zipcode;
     console.log(" ====== NEW LOOKUP ======");
-    console.log(`Looking up data for zip code: ${req.params.zipcode}`);
-    if (validateZip) {
+    console.log(`Looking up data for zip code: ${zipCode}`);
+    if (validateZip(zipCode)) {
         res.setHeader('Content-Type', 'application/json');
-        lookupByZip(req.params.zipcode)
+        lookupByZip(zipCode)
             .then((jsonData) => {
                 console.log("======= RESULTS ======")
                 let finalres = null;
@@ -115,6 +174,19 @@ app.get("/:zipcode", (req, res) => {
                         finalres.delete('_cls');
                     } catch (error) {
                         console.log(`Error: ${error}`);
+                        if (jsonData === undefined) {
+                            return res.status(500).send({
+                                "message": `No data found for input ${zipCode}.  Not a valid US zip code.`
+                            });
+                        }
+                        else {
+                            let splitGeoData = jsonData.parent_city._id.split(".");
+                            return res.status(501).send({
+                                "message": `We're still under construction! Your state is not yet supported. We're adding new states to the datbase every day, so check back soon!`,
+                                "county": splitGeoData[1],
+                                "state": splitGeoData[0]
+                            });
+                        }
                     }
                 }
 
@@ -126,4 +198,5 @@ app.get("/:zipcode", (req, res) => {
 });
 
 app.listen(PORT, () => console.log(`Server started on port: http(s)://localhost:${PORT}`));
+
 app.use(express.static('client'));
