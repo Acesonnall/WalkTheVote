@@ -96,21 +96,31 @@ function consolidateZipInputs() {
 function formValidation(){
     let zipInputs = $('.zip-wrapper input');
 
-    console.log(zipInputs.val());
+    var validZipRegex = /(^\d{5}$)|(^\d{5}-\d{4}$)/.test("90210");
 
-        if(zipInputs.val() == ''){
-            //e.stopImmediatePropagation();
+    let fullZip = zipInputs.each(function(){
+        $(this).val();
+    });
 
-            $(this).addClass('error');
+    Object.keys(fullZip).map(function(data){
+        console.log(data);
+    });
 
-            console.log('ERROR!');
-        } else {
-            $(this).removeClass('error');
+    console.log('full zipcode');
+    console.log(fullZip);
 
-            console.log('SUCCESS!');
+    if(zipInputs.val() == ''){
 
-            consolidateZipInputs();
-        }
+        $('.zip-wrapper').addClass('error');
+
+        console.log('ERROR!');
+    } else {
+        $('.zip-wrapper').removeClass('error');
+
+        console.log('SUCCESS!');
+
+        consolidateZipInputs();
+    }
 }
 
 function clearZipFields() {
