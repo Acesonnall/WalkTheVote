@@ -1,0 +1,242 @@
+<html lang="en"><head>
+    <meta charset="utf-8">
+    <title>Walk the Vote - Early in-person voting made easy!</title>
+    <link rel="shortcut icon" type="image/x-icon" href="images/favicon.ico">
+
+    <!-- Global site tag (gtag.js) - Google Analytics -->
+    <script async="" src="https://connect.facebook.net/en_US/fbevents.js"></script><script async="" src="https://www.googletagmanager.com/gtag/js?id=UA-147602341-1"></script>
+    <script>
+        window.dataLayer = window.dataLayer || [];
+        function gtag(){dataLayer.push(arguments);}
+        gtag('js', new Date());
+
+        gtag('config', 'UA-147602341-1');
+    </script>
+
+
+    <meta name="author" content="WalkTheVote">
+    <meta name="description" content="Walk the Vote is an effort to help ensure people can hand-deliver their ballots to their local election offices. Use our app to look up where you need to go in less than 5 seconds. Beat the stress of worrying about the USPS or COVID-19 on Election Day, and let us help you Walk the Vote!">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    <meta property="og:title" content="Walk The Vote - Hand-Deliver Your Ballot and Beat the Stress!">
+    <meta property="og:image" content="https://scontent.xx.fbcdn.net/v/t1.0-9/121640460_118622423345805_8953910052293584880_o.png?_nc_cat=107&amp;_nc_sid=dd9801&amp;_nc_ohc=H5eZE1HSa_MAX8sC3MJ&amp;_nc_ht=scontent.xx&amp;_nc_log=1&amp;oh=cfed1b7ad7c07bc6f9419e49943d77da&amp;oe=5FAFD52E">
+
+    <meta name="twitter:card" content="summary">
+    <meta name="twitter:title" content="Walk The Vote - Hand-Deliver Your Ballot and Beat the Stress!">
+    <meta name="twitter:description" content="Walk the Vote is an effort to help ensure people can hand-deliver their ballots to their local election offices. Use our app to look up where you need to go in less than 5 seconds. Beat the stress of worrying about the USPS or COVID-19 on Election Day, and let us help you Walk the Vote!">
+    <meta name="twitter:image" content="https://scontent.xx.fbcdn.net/v/t1.0-9/121640460_118622423345805_8953910052293584880_o.png?_nc_cat=107&amp;_nc_sid=dd9801&amp;_nc_ohc=H5eZE1HSa_MAX8sC3MJ&amp;_nc_ht=scontent.xx&amp;_nc_log=1&amp;oh=cfed1b7ad7c07bc6f9419e49943d77da&amp;oe=5FAFD52E">
+
+    <link href="../css/styles.css" type="text/css" rel="stylesheet">
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+    <script src="js/electionSaver.js"></script>
+
+    <!-- CSS only -->
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" integrity="sha384-JcKb8q3iqJ61gNV9KGb8thSsNjpSL0n8PARn9HuZOnIxN0hoP+VmmDGMN5t9UJ0Z" crossorigin="anonymous">
+
+    <!-- JS, Popper.js, and jQuery -->
+    <script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.1/dist/umd/popper.min.js" integrity="sha384-9/reFTGAW83EW2RDu2S0VKaIzap3H66lZH81PoYlFhbGU+6BZp6G7niu735Sk7lN" crossorigin="anonymous"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js" integrity="sha384-B4gt1jrGC7Jh4AgTPSdUtOBvfO8shuf57BaghqFfPlYxofvL8/KUEfYiJOMMV+rV" crossorigin="anonymous"></script>
+
+    <!-- Custom Fonts-->
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@600&amp;display=swap" rel="stylesheet">
+    
+    <!-- Font Awesome -->
+    <script src="https://kit.fontawesome.com/35e6ed282f.js" crossorigin="anonymous"></script><link href="https://kit-free.fontawesome.com/releases/latest/css/free-v4-shims.min.css" media="all" rel="stylesheet"><link href="https://kit-free.fontawesome.com/releases/latest/css/free-v4-font-face.min.css" media="all" rel="stylesheet"><link href="https://kit-free.fontawesome.com/releases/latest/css/free.min.css" media="all" rel="stylesheet">
+
+    <!-- Facebook Pixel Code -->
+    <script>
+        !function(f,b,e,v,n,t,s)
+        {if(f.fbq)return;n=f.fbq=function(){n.callMethod?
+        n.callMethod.apply(n,arguments):n.queue.push(arguments)};
+        if(!f._fbq)f._fbq=n;n.push=n;n.loaded=!0;n.version='2.0';
+        n.queue=[];t=b.createElement(e);t.async=!0;
+        t.src=v;s=b.getElementsByTagName(e)[0];
+        s.parentNode.insertBefore(t,s)}(window, document,'script',
+        'https://connect.facebook.net/en_US/fbevents.js');
+        fbq('init', '2165396940376815');
+        fbq('track', 'PageView');
+    </script>
+    <noscript><img height="1" width="1" style="display:none"
+    src="https://www.facebook.com/tr?id=2165396940376815&ev=PageView&noscript=1"
+    /></noscript>
+    <!-- End Facebook Pixel Code -->
+
+</head>
+<body>
+    <header>
+        <nav role="navigation">
+            <div id="menuToggle">
+                <div>
+                    <input type="checkbox"/>
+                    <span></span>
+                    <span></span>
+                    <span></span>
+                    <ul id="menu">
+                        <li><a class="mobile-a" href="/">Home</a></li>
+                        <li><a class="mobile-a" href="/faq">FAQ</a></li>
+                        <li><a class="mobile-a" href="/help">Help</a></li>
+                        <li><a class="mobile-a" href="/maps">Maps</a></li>
+                    </ul>
+                </div>   
+            </div>
+        </nav>
+        <div class="header-wrapper" style="/*! background-color: #4fa6ab; */">
+            <div class="nav-bar" style="display: flex;align-items: center;justify-content: space-evenly;">
+                <div class="bruh"><a href="/">HOME</a></div>
+                <div class="bruh"><a href="/faq">FAQ</a></div>
+                <h1 class="wtv-header">
+                    Walk The <span class="master-container-header"> Vote</span>
+                </h1>
+                <div class="bruh"><a href="/help">HELP</a></div>
+                <div class="bruh"><a href="/maps">MAPS</a></div>
+            </div>
+            <h1 class="wtv-header mobile">
+                Walk The <span class="master-container-header"> Vote</span>
+            </h1>
+            <h2 class="wtv-subheader">
+                ... Into the 2020 Election! 
+            </h2>
+        </div>
+    </header>
+    <div class="master-container">
+        <div style="font-size: 36px;color: #46afab;font-weight: bold;display: none;">How to Use</div><h3 class="wtv-subsubheader text-muted">
+            Enter your US Zip Code below to find your local office of elections. This is where you can physically deliver your absentee or mail-in ballot. 
+            <br>
+            <br>
+        </h3>
+        <div class="wtv-zip-wrapper">
+            <div class="zip-wrapper">
+                <input type="number" class="desktop" id="zip1">
+                <input type="number" class="desktop" id="zip2">
+                <input type="number" class="desktop" id="zip3">
+                <input type="number" class="desktop" id="zip4">
+                <input type="number" class="desktop" id="zip5">
+                <input type="number" class="mobile" id="zipmobile">
+            </div>
+            <div class="btn-wrapper">
+                <button class="btn btn-primary bobert" onclick="consolidateZipInputs()">Find</button>
+                <button class="btn btn-primary bobert" onclick="clearZipFields()">Clear</button>
+            </div>
+        </div>
+        
+        <!-- <div class="wtv-steps-wrapper" style="padding-top: 5px;padding-bottom: 27px;font-size: 19px;position: fixed;top: 200px;right: 37px;width: 14%;"> -->
+            <!-- <div class="step"><span class="toby">1.</span> Make sure you're <a href="https://www.nass.org/can-I-vote/voter-registration-status">registered to vote</a></div>
+            <div class="step"><span class="toby">2.</span> Enter your zip code</div>
+            <div class="step"><span class="toby">3.</span> Smash that "Find" button</div>
+            <div class="step"><span class="toby">4.</span> Enter that address into your GPS</div>
+            <div class="step"><span class="toby">5.</span> Walk the vote!</div>
+        </div> -->
+        <div class="wtv-steps-wrapper">
+            <div class="step">1. Make sure you're <a href="https://www.nass.org/can-I-vote/voter-registration-status">registered to vote</a></div>
+            <div class="step">2. Enter your zip code</div>
+            <div class="step">3. Smash that "Find" button</div>
+            <div class="step">4. Enter that address into your GPS</div>
+            <div class="step">5. Walk the vote!</div>
+        </div>
+        <div class="wtv-loader" style="display: none;"></div>
+        <div class="wtv-results-wrapper card shadow-sm hidden">
+            <h5 class="card-header">
+                <span class="request-success">
+                    <i class="far fa-check-circle" style="color:green;" aria-hidden="true"></i>
+                    Your Election Office Jurisdiction
+                </span>
+                <span class="request-warning hidden">
+                    <i class="far fa-exclamation-triangle" style="color:gold;font-weight:bold;" aria-hidden="true"></i>
+                    Not Yet Available
+                </span>
+                <span class="request-error hidden">
+                    <i class="far fa-times-circle" style="color:red;" aria-hidden="true"></i>
+                    Error With Your Lookup
+                </span>
+                <!-- <span class="results text-muted">
+                    Results for: <span class="zip-text"></span>
+                </span> -->
+            </h5>
+            <div class="county-name-wrapper"><span class="county-name"></span></div>
+            <div class="card-body individual-result">
+                <div class="address-wrapper">
+                    <div class="contact-header cadd">Walk your vote to:</div>
+                    <div class="supervisor-info">
+                        <span class="super-name"></span> <span class="super-title"></span>
+                    </div>
+                    <div class="location-name"></div>
+                    <div class="street-number-name"></div>
+                    <div class="apt-unit"></div>
+                    <div class="city-state-zip">
+                        <span class="city"></span> <span class="state"></span> <span class="zipcode"></span>
+                    </div>
+                </div>
+                <div class="contact-info-wrapper">
+                    <div class="contact-header cinfo"></div>
+                    <div class="phone-number"></div>
+                    <div class="email-wrapper">
+                        <a href="mailto:sfvote@sfgov.org" class="email"></a>
+                    </div>
+                    <div class="web-wrapper"><a href="https://sfelections.sfgov.org/" class="website"></a>
+                    </div>
+                </div>
+                <div class="error-wrapper hidden"></div>
+            </div>
+        </div> 
+        <div class="below-results-note hidden">Most jurisdictions allow you to return your ballot to their offices by end of business day on Election Day 11/3. If you're unsure, please contact your local jurisdiction.</div>
+    </div>
+    <footer> 
+        <!-- <h2 class="wtv-footer-sub">Walk the Vote</h2> -->
+        <div class="footer-class">
+            <div class="states-supported">
+                <!-- Currently supporting: AL, AZ, CA, FL, GA, IA, IL, MI, MN, NC, NE, OH, PA, TX, WY -->
+                <div class="currently-supported-header">States Currently Supported</div>
+                <ul>
+                    <li>Alaska</li>
+                    <li>Arizona</li>
+                    <li>California</li>
+                    <li>Florida</li>
+                    <li>Georgia</li>
+                    <li>Iowa</li>
+                    <li>Illinois</li>
+                    <li>Massachusetts</li>
+                    <li>Michigan</li>
+                    <li>Minnesota</li>
+                    <li>Missouri</li>
+                    <li>Nebraska</li>
+                    <li>New Hampshire</li>
+                    <li>New York</li>
+                    <li>North Carolina</li>
+                    <li>Ohio</li>
+                    <li>Pennsylvania</li>
+                    <li>South Carolina</li>
+                    <li>Texas</li>
+                    <li>Utah</li>
+                    <li>Washington</li>
+                    <li>West Virginia</li>
+                    <li>Wyoming</li>
+                </ul>
+            </div>
+            <hr>
+            <div class="socials">
+                <div class="individual-social mobile-hidden">Like us!</div>
+                <div class="individual-social big-icon">
+                    <a href="http://facebook.com/walkthevote.us/">
+                        <i class="fab fa-facebook-f" aria-hidden="true"></i>
+                    </a>
+                </div>
+                <li class="individual-social"></li>
+                <div class="individual-social mobile-hidden">Follow us!</div>
+                <div class="individual-social big-icon">
+                    <a href="https://www.instagram.com/walkthevote.us/">
+                        <i class="fab fa-instagram" aria-hidden="true"></i>
+                    </a>
+                </div>
+                <li class="individual-social"></li>
+                <div class="individual-social mobile-hidden">Questions? Email us!</div>
+                <div class="individual-social big-icon">
+                    <a href="mailto:info@walkthevote.us">
+                        <i class="far fa-envelope" aria-hidden="true"></i>
+                    </a>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+
+</body><style type="text/css"></style></html>
