@@ -44,30 +44,33 @@ from lib.handler.zip_mapping.zip_mapping_v2 import create_mapping
 
 # Using the same naming scheme, import more scrapers here as they are ready and
 # formatted
-# from lib.scrapers.michigan import michigan_scraper
-# from lib.scrapers.florida import florida_scraper
-# from lib.scrapers.north_carolina import north_carolina_scraper
-# from lib.scrapers.texas import texas_scraper
-# from lib.scrapers.minnesota import minnesota_scraper
-# from lib.scrapers.arizona import arizona_scraper
-# from lib.scrapers.nebraska import nebraska_scraper
-# from lib.scrapers.georgia import georgia_scraper
-# from lib.scrapers.california import california_scraper
-# from lib.scrapers.ohio import ohio_scraper
+from lib.scrapers.michigan import michigan_scraper
+from lib.scrapers.florida import florida_scraper
+from lib.scrapers.north_carolina import north_carolina_scraper
+from lib.scrapers.texas import texas_scraper
+from lib.scrapers.minnesota import minnesota_scraper
+from lib.scrapers.arizona import arizona_scraper
+from lib.scrapers.nebraska import nebraska_scraper
+from lib.scrapers.georgia import georgia_scraper
+from lib.scrapers.california import california_scraper
+from lib.scrapers.ohio import ohio_scraper
 from lib.scrapers.iowa import iowa_scraper
 
 # from lib.scrapers.pennsylvania import pennsylvania_scraper
-# from lib.scrapers.illinois import illinois_scraper
-# from lib.scrapers.wyoming import wyoming_scraper
+from lib.scrapers.illinois import illinois_scraper
+from lib.scrapers.wyoming import wyoming_scraper
+
 # from lib.scrapers.maine import maine_scraper
-# from lib.scrapers.new_hampshire import new_hampshire_scraper
+from lib.scrapers.new_hampshire import new_hampshire_scraper
+
 # from lib.scrapers.wisconsin import wisconsin_scraper
 from lib.scrapers.missouri import missouri_scraper
 from lib.scrapers.massachusetts import massachusetts_scraper
-
-# from lib.scrapers.washington import washington_scraper
-# from lib.scrapers.new_york import new_york_scraper
-# from lib.scrapers.south_carolina import south_carolina_scraper
+from lib.scrapers.washington import washington_scraper
+from lib.scrapers.new_york import new_york_scraper
+from lib.scrapers.south_carolina import south_carolina_scraper
+from lib.scrapers.utah import utah_scraper
+from lib.scrapers.west_virginia import west_virginia_scraper
 
 
 @dataclass
@@ -102,7 +105,9 @@ class WtvDbHandler:
         try:
             connect(db_uri, alias=db_alias)
         except Exception as e:
-            raise WalkTheVoteError(f"{Bcolors.FAIL}Problem connecting to database: {db_alias}{Bcolors.ENDC}") from e
+            raise WalkTheVoteError(
+                f"{Bcolors.FAIL}Problem connecting to database: {db_alias}{Bcolors.ENDC}"
+            ) from e
 
         # Map get_election_office() function of scrapers to corresponding state name
         for imported_scraper_module in self._get_imported_scrapers():
@@ -155,7 +160,9 @@ c[]{Bcolors.ENDC}"""
                     raise WalkTheVoteError(f"{Bcolors.FAIL}{e}{Bcolors.ENDC}")
                 print(f"{Bcolors.OKBLUE}Load successful.{Bcolors.ENDC}")
             except Exception as e:
-                raise WalkTheVoteError(f"{Bcolors.FAIL}Unknown error loading mapping file{Bcolors.ENDC}") from e
+                raise WalkTheVoteError(
+                    f"{Bcolors.FAIL}Unknown error loading mapping file{Bcolors.ENDC}"
+                ) from e
         return mapping_dict
 
     @staticmethod
@@ -204,7 +211,7 @@ c[]{Bcolors.ENDC}"""
         self.preloaded = True
 
     @staticmethod
-    async def _get_scraper_data(scraper):
+    async def _get_scraper_data(scraper) -> str:
         """Run scraper function and assign results to data variable of scraper
         object
         """
@@ -215,6 +222,8 @@ c[]{Bcolors.ENDC}"""
                 f"{Bcolors.WARNING}Problem getting election office data from "
                 f"{scraper.state_name}_scraper.py: {e}{Bcolors.ENDC}"
             )
+        else:
+            return scraper.state_name
 
     # TODO: Implement code to handle loading of select states rather than all of them
     #  (useful for if we need to issue targeted updates)
@@ -256,12 +265,13 @@ c[]{Bcolors.ENDC}"""
             future: Future
             for future in asyncio.as_completed(tasks):
                 try:
-                    await future
+                    scraper_states_name = await future
                 except WalkTheVoteError as e:
                     self.failed_scraper_data_retrieval_msgs.append(e)
                 else:
                     print(
-                        f"{Bcolors.OKBLUE}Scraper data loaded into memory\n"
+                        f"{Bcolors.OKBLUE}{scraper_states_name} scraper data loaded "
+                        f"into memory\n "
                         f"{Bcolors.ENDC}"
                     )
 
@@ -396,7 +406,7 @@ async def main():
         print(e)
 
     if wtv_db.failed_scraper_data_retrieval_msgs:
-        print(*wtv_db.failed_scraper_data_retrieval_msgs, sep="\n")
+        print(*wtv_db.failed_scraper_data_retrieval_msgs, sep="\n\n")
 
 
 if __name__ == "__main__":
