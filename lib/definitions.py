@@ -1,7 +1,14 @@
 """ Utility functions
 """
 import os
+import shutil
 from dataclasses import dataclass
+from typing import Union
+
+from selenium import webdriver
+from selenium.webdriver import chrome, firefox
+
+from lib.errors.wtv_errors import WalkTheVoteError
 
 
 class Bcolors:
@@ -17,34 +24,59 @@ class Bcolors:
 
 @dataclass
 class _Driver:
-    driver: str
+    name: str
+    driver_options: Union[
+        chrome.options.Options,
+        firefox.options.Options,
+    ]
+    driver: Union[
+        chrome.webdriver.WebDriver,
+        firefox.webdriver.WebDriver,
+    ]
     install_info: str
+    driver_path: str = ""
 
 
-class SupportedWebDrivers:
-    def __init__(self):
-        self.drivers = [
+class WTVWebDriver:
+    def __init__(self, state):
+        self._drivers = [
             _Driver(
-                "msedgedriver",
-                "https://developer.microsoft.com/en-us/microsoft-edge/tools/webdriver/",
+                name="chromedriver",
+                driver_options=chrome.options.Options(),
+                driver=webdriver.Chrome,
+                install_info="https://sites.google.com/a/chromium.org/chromedriver"
+                             "/downloads",
             ),
             _Driver(
-                "chromedriver",
-                "https://sites.google.com/a/chromium.org/chromedriver/downloads",
-            ),
-            _Driver("geckodriver", "https://github.com/mozilla/geckodriver/releases"),
-            _Driver(
-                "safaridriver",
-                "https://webkit.org/blog/6900/webdriver-support-in-safari-10/",
+                name="geckodriver",
+                driver_options=firefox.options.Options(),
+                driver=webdriver.Firefox,
+                install_info="https://github.com/mozilla/geckodriver/releases",
             ),
         ]
 
-    def print_error(self, state) -> str:
-        error_msg = f"{state} scraper requires selenium webdriver to run.\nPlease " \
-                    f"use the webdriver for the browser of your choice and add the " \
-                    f"path to them to your system PATH.\nSupported drivers: "
-        for driver in self.drivers:
-            error_msg += f"{driver.driver}:\n\tInstall info: {driver.install_info}\n"
+        for driver in self._drivers:
+            driver.driver_path = shutil.which(driver.name)
+            if driver.driver_path:
+                driver.driver_options.add_argument("--headless")
+                self._primary_driver = driver.driver(
+                    executable_path=driver.driver_path, options=driver.driver_options
+                )
+                break
+        else:
+            raise WalkTheVoteError(self._print_error(state=state))
+
+    def get_webdriver(self):
+        return self._primary_driver
+
+    def _print_error(self, state="State") -> str:
+        error_msg = (
+            f"{state} scraper requires selenium webdriver to run.\nPlease "
+            f"use the webdriver for the browser of your choice and add the "
+            f"path to them to your system PATH.\nSupported drivers:"
+        )
+        for driver in self._drivers:
+            error_msg += f"\n\t{driver.name}:\n\t\tInstall info: {driver.install_info}"
 
         return error_msg
 
