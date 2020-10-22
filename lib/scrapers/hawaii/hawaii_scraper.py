@@ -56,6 +56,8 @@ def format_address_data(address, county_name):
         addressSchema["poBox"] = parsed_data_dict["poBox"].lower()
     if "locationName" in parsed_data_dict:
         addressSchema["locationName"] = parsed_data_dict["locationName"].lower()
+    else:
+        addressSchema["locationName"] = (county_name+" County Registrar of Voters").lower()
     if "streetNumberName" in parsed_data_dict:
         addressSchema["streetNumberName"] = parsed_data_dict["streetNumberName"].lower()
     # else:
