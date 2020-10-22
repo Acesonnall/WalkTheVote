@@ -26,37 +26,36 @@ def format_address_data(address, county_name):
     mapping = electionsaver.addressSchemaMapping
     parsed_data_dict = usaddress.tag(address, tag_mapping=mapping)[0]
 
-    if "city" not in parsed_data_dict:
-        print(f'county_name {county_name} is the culprit')
-        print(parsed_data_dict["poBox"])
-
-
+    # if "city" not in parsed_data_dict:
+        # print(f'county_name {county_name} is the culprit')
+        # print(parsed_data_dict["poBox"])
 
     addressSchema = {
-        "city": parsed_data_dict["city"],
-        "state": parsed_data_dict["state"],
+        "city": parsed_data_dict["city"].title(),
+        "state": parsed_data_dict["state"].lower(),
         "zipCode": parsed_data_dict["zipCode"]
     }
 
     if "locationName" in parsed_data_dict:
-        addressSchema["locationName"] = parsed_data_dict["locationName"]
+        addressSchema["locationName"] = parsed_data_dict["locationName"].lower()
     else:
-        addressSchema["locationName"] = county_name + " Parish Registrar of Voters"
+        addressSchema["locationName"] = (county_name + " Parish Registrar of Voters").lower()
     if "aptNumber" in parsed_data_dict:
-        addressSchema["aptNumber"] = parsed_data_dict["aptNumber"]
+        addressSchema["aptNumber"] = parsed_data_dict["aptNumber"].lower()
     if "poBox" in parsed_data_dict:
         addressSchema["poBox"] = parsed_data_dict["poBox"]
     if "streetNumberName" in parsed_data_dict:
-        addressSchema["streetNumberName"] = parsed_data_dict["streetNumberName"]
+        addressSchema["streetNumberName"] = parsed_data_dict["streetNumberName"].lower()
     # else:
         # print(f'county_name {county_name} is the culprit')
     return addressSchema
 
 def formatSchema(county, phone, person, p_address, m_address):
     schema = {
-        "countyName": county,
+        "countyName": county.title(),
         "phone": phone,
         "officeSupervisor": person,
+        "website": URL,
         "physicalAddress": p_address,
     }
     if m_address != {}:
@@ -100,7 +99,7 @@ for i in baseList:
     aschema = format_address_data(p_address, county)
     bschema = format_address_data(m_address, county)
     if m_address == p_address:
-        print(f'Physical and mailing are the same for {county} county')
+        # print(f'Physical and mailing are the same for {county} county')
         bschema = {}
     schema = formatSchema(county, phone, person, aschema, bschema)
     masterList.append(schema)

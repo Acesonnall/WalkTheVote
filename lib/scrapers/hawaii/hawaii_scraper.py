@@ -25,9 +25,10 @@ for j in classList:
 
 def formatSchema(county, phone, person, p_address, m_address):
     schema = {
-        "countyName": county,
+        "countyName": county.title(),
         "phone": phone,
         "officeSupervisor": person,
+        "website": URL,
         "physicalAddress": p_address,
     }
     if m_address != {}:
@@ -44,21 +45,21 @@ def format_address_data(address, county_name):
     parsed_data_dict = usaddress.tag(address, tag_mapping=mapping)[0]
 
     addressSchema = {
-        "city": parsed_data_dict["city"],
-        "state": parsed_data_dict["state"],
-        "zipCode": parsed_data_dict["zipCode"]
+        "city": parsed_data_dict["city"].title(),
+        "state": parsed_data_dict["state"].lower(),
+        "zipCode": parsed_data_dict["zipCode"].lower()
     }
 
     if "aptNumber" in parsed_data_dict:
-        addressSchema["aptNumber"] = parsed_data_dict["aptNumber"]
+        addressSchema["aptNumber"] = parsed_data_dict["aptNumber"].lower()
     if "poBox" in parsed_data_dict:
-        addressSchema["poBox"] = parsed_data_dict["poBox"]
+        addressSchema["poBox"] = parsed_data_dict["poBox"].lower()
     if "locationName" in parsed_data_dict:
-        addressSchema["locationName"] = parsed_data_dict["locationName"]
+        addressSchema["locationName"] = parsed_data_dict["locationName"].lower()
     if "streetNumberName" in parsed_data_dict:
-        addressSchema["streetNumberName"] = parsed_data_dict["streetNumberName"]
-    else:
-        print(f'county_name {county_name} is the culprit')
+        addressSchema["streetNumberName"] = parsed_data_dict["streetNumberName"].lower()
+    # else:
+        # print(f'county_name {county_name} is the culprit')
 
     return addressSchema
 
@@ -76,11 +77,11 @@ for i in baseList:
     aschema = format_address_data(p_address, county)
     bschema = format_address_data(m_address, county)
     if m_address == p_address:
-        print(f'Physical and mailing are the same for {county} county')
+        # print(f'Physical and mailing are the same for {county} county')
         bschema = {}
     schema = formatSchema(county=county, phone=phone, person=person, p_address=aschema, m_address=bschema)
     masterList.append(schema)
-print(masterList)
+# print(masterList)
 
 with open(os.path.join(ROOT_DIR, "scrapers", "hawaii", "hawaii.json"), 'w') as f:
     json.dump(masterList, f)
