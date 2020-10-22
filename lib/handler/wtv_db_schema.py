@@ -11,7 +11,7 @@ from pymodm import (
 )
 from pymongo import WriteConcern
 
-from lib.definitions import LOCAL_DB_ALIAS
+from lib.definitions import LOCAL_DB_ALIAS, TEST_DB_ALIAS
 
 VALIDATION_RULES = {
     "county": {
@@ -32,8 +32,7 @@ VALIDATION_RULES = {
                                     "state",
                                     "city",
                                     "zip_code",
-                                    "location_name",
-                                    "street",
+                                    "location_name"
                                 ],
                                 "properties": {
                                     "state": {"bsonType": "string"},
@@ -111,15 +110,14 @@ VALIDATION_RULES = {
                                     "state",
                                     "city",
                                     "zip_code",
-                                    "location_name",
-                                    "street",
+                                    "location_name"
                                 ],
                                 "properties": {
                                     "state": {"bsonType": "string"},
                                     "city": {"bsonType": "string"},
                                     "zip_code": {"bsonType": "string"},
                                     "location_name": {"bsonType": "string"},
-                                    "street": {"bsonType": "string"},
+                                    "street": {"bsonType": ["string", "null"]},
                                     "apt_unit": {"bsonType": ["string", "null"]},
                                     "po_box": {"bsonType": ["string", "null"]},
                                 },
@@ -155,7 +153,8 @@ class MailingAddress(PhysicalAddress):
 
 
 class ElectionOffice(EmbeddedMongoModel):
-    county_name = CharField(verbose_name="Name of county", required=True)
+    county_name = CharField(verbose_name="Name of county")
+    city_name = CharField(verbose_name="Name of city")
     physical_address = EmbeddedDocumentField(
         PhysicalAddress, verbose_name="Phyiscal address information"
     )

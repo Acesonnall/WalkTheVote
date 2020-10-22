@@ -1,10 +1,11 @@
 import os
+import time
 
 import cloudscraper
 import pandas as pd
 from bs4 import BeautifulSoup
 
-from lib.definitions import ROOT_DIR
+from lib.definitions import ROOT_DIR, Bcolors
 
 
 def get_state_zip_info(scraper, url, name):
@@ -58,4 +59,7 @@ def create_mapping():
 
 
 if __name__ == "__main__":
+    start = time.time()
     create_mapping()
+    end = time.time()
+    print(f"{Bcolors.OKBLUE}Completed in {end - start} seconds.{Bcolors.ENDC}")

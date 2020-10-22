@@ -1,0 +1,26 @@
+runtime: nodejs
+api_version: 1
+env: flex
+
+manual_scaling:
+  instances: 1
+
+resources:
+  cpu: .5
+  memory_gb: 0.5
+  disk_size_gb: 10
+
+handlers: 
+- url: /
+  static_files: client/views/index.html
+  secure: always
+  upload: client/views/index.html
+  http_headers:
+    Strict-Transport-Security: max-age=31536000; includeSubDomains
+
+- url: /(.*)
+  static_files: client/\1
+  secure: always
+  upload: client/(.*)
+  http_headers:
+    Strict-Transport-Security: max-age=31536000; includeSubDomains
