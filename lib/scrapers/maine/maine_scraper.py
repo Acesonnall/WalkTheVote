@@ -17,7 +17,6 @@ T_FILE = (
     "https://www.maine.gov/tools/whatsnew/index.php?topic=cec_clerks_registrars&v=text"
 )
 
-
 def format_address_data(address_data, county_name):
     if county_name == "Swans Island":
         address_data = address_data.replace("Swan'S", "Swans")
@@ -140,6 +139,7 @@ async def get_election_offices():
                 tmp += 1
 
         ismailing = is_mailing_address(real_address)
+
         if ismailing:
             schema["mailingAddress"] = schema["physicalAddress"]
             schema.pop("physicalAddress")
@@ -171,6 +171,18 @@ def percent_similarity(str1, str2):
             similarity_index += 1
     return 100 * (similarity_index / len(other_string))
 
+def percentSimilarity(str1, str2):
+    if str1 == str2:
+        return 100
+    str1 = str1.replace('Saint', 'St.')
+    isStr1Longer = len(str1) <= len(str2)
+    strToCheck = str1 if isStr1Longer else str2
+    otherString = str2 if isStr1Longer else str1
+    similarityIndex = 0
+    for i in range(len(strToCheck)):
+        if strToCheck[i] == otherString[i]:
+            similarityIndex +=1
+    return 100 * (similarityIndex/len(otherString))
 
 if __name__ == "__main__":
     start = time.time()

@@ -16,7 +16,6 @@ info = soup.find_all('div', class_="official-info")
 
 def formatSchema(phone, county, person, p_address, m_address):
     schema = {
-
         "countyName": county.title(),
         "phone": phone,
         "officeSupervisor": person,

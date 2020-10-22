@@ -5,23 +5,15 @@ import json
 import usaddress
 import pandas as pd
 
-# Downlaod CSV file from https://app.sos.nh.gov/Public/Reports.aspx and place in same
-# directory as this python file. Once downloaded, you'll need to name the right-most
-# column that is currently unnamed because new hampshire SOS staff couldn't be asked
-# to do it
 from lib.ElectionSaver import electionsaver
 from lib.definitions import ROOT_DIR
 from lib.errors.wtv_errors import WalkTheVoteError
 
+DIRECTORY = os.path.join(ROOT_DIR, "scrapers", "new_hampshire")
 
-def clean_raw_file():
+def clean_raw_file(csv_path):
     # Open raw file to clean up
-    csv_file = open(
-        os.path.join(
-            ROOT_DIR, r"scrapers\new_hampshire\StateList-Clerks & PollingPlaces.csv"
-        ),
-        "r",
-    )
+    csv_file = open(os.path.join(csv_path), "r",)
     data = csv_file.read()
     csv_file.close()
 
@@ -30,9 +22,7 @@ def clean_raw_file():
     data = data.replace("ST., PO", "ST. PO")
     data = data.replace("STREET, PO", "STREET PO")
 
-    csv_file = open(
-        os.path.join(ROOT_DIR, r"scrapers\new_hampshire\NewHampshireInfo.csv"), "w"
-    )
+    csv_file = open(os.path.join(DIRECTORY, "NewHampshireInfo.csv"), "w")
     csv_file.write(data)
     csv_file.close()
 
@@ -71,10 +61,7 @@ def format_address_data(address_data, town_name):
 
 
 def data_to_json_schema():
-    info_df = pd.read_csv(
-        os.path.join(ROOT_DIR, r"scrapers\new_hampshire\NewHampshireInfo.csv"),
-        index_col=False,
-    )
+    info_df = pd.read_csv(os.path.join(DIRECTORY, "NewHampshireInfo.csv"), index_col=False)
 
     town_list = info_df["Town/City"].values
     clerk_list = info_df["Clerk"].values
@@ -112,20 +99,29 @@ def data_to_json_schema():
 
         master_list.append(schema)
 
-    with open(
-        os.path.join(ROOT_DIR, r"scrapers\new_hampshire\new_hampshire.json"), "w"
-    ) as f:
+    with open(os.path.join(DIRECTORY, "new_hampshire.json"), "w") as f:
         json.dump(master_list, f)
     return master_list
 
 
 async def get_election_offices():
-    if not os.path.isfile(
-        os.path.join(ROOT_DIR, r"scrapers\new_hampshire\NewHampshireInfo.csv")
-    ):
-        clean_raw_file()
+    csv_path = os.path.join(DIRECTORY, "StateList-Clerks & PollingPlaces.csv")
+    if not os.path.isfile(csv_path):
+        raise WalkTheVoteError(
+            f"Prerequisite CSV file needed to scrape New Hampshire. Please go to "
+            f"https://app.sos.nh.gov/Public/Reports.aspx and download the CSV file to "
+            f"{DIRECTORY}. Make sure the downloaded file is named "
+            f'"StateList-Clerks & PollingPlaces.csv". Once downloaded, you\'ll need '
+            f"to name the right-most column that is currently unnamed because new "
+            f"hampshire SOS staff couldn't be asked to do it."
+        )
+    if not os.path.isfile(os.path.join(DIRECTORY, "NewHampshireInfo.csv")):
+        clean_raw_file(csv_path)
     return data_to_json_schema()
 
 
 if __name__ == "__main__":
-    asyncio.get_event_loop().run_until_complete(get_election_offices())
+    try:
+        asyncio.get_event_loop().run_until_complete(get_election_offices())
+    except WalkTheVoteError as e:
+        print(e)
