@@ -352,7 +352,6 @@ input::-webkit-inner-spin-button {
 .bruh {
   font-size: 1.75rem;
   color: white;
-  border-bottom: 3px solid #46afab;
   font-weight: bold;
 }
 
@@ -503,6 +502,7 @@ li.individual-social {
   position: absolute;
   top: 0;
   right: 0;
+  z-index: -1;
 }
 
 .ribbon {
