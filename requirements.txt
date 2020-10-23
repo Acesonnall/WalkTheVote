@@ -35,6 +35,7 @@ soupsieve
 tqdm
 tzlocal
 urllib3
+us
 usaddress
 xlrd
 yarl

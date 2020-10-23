@@ -13,7 +13,6 @@ from lib.definitions import ROOT_DIR, Bcolors
 
 URL = "https://www.elections.il.gov/ElectionOperations/ElectionAuthoritiesPrint.aspx?T=637353549301694642"
 
-
 def formatAddressData(address, countyName):
     mapping = electionsaver.addressSchemaMapping
 

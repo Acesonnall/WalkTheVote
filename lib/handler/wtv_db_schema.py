@@ -32,8 +32,7 @@ VALIDATION_RULES = {
                                     "state",
                                     "city",
                                     "zip_code",
-                                    "location_name",
-                                    "street",
+                                    "location_name"
                                 ],
                                 "properties": {
                                     "state": {"bsonType": "string"},
@@ -111,15 +110,14 @@ VALIDATION_RULES = {
                                     "state",
                                     "city",
                                     "zip_code",
-                                    "location_name",
-                                    "street",
+                                    "location_name"
                                 ],
                                 "properties": {
                                     "state": {"bsonType": "string"},
                                     "city": {"bsonType": "string"},
                                     "zip_code": {"bsonType": "string"},
                                     "location_name": {"bsonType": "string"},
-                                    "street": {"bsonType": "string"},
+                                    "street": {"bsonType": ["string", "null"]},
                                     "apt_unit": {"bsonType": ["string", "null"]},
                                     "po_box": {"bsonType": ["string", "null"]},
                                 },
@@ -171,7 +169,7 @@ class ElectionOffice(EmbeddedMongoModel):
 
     class Meta:
         write_concern = WriteConcern(j=True)
-        connection_alias = TEST_DB_ALIAS
+        connection_alias = LOCAL_DB_ALIAS
 
 
 class State(MongoModel):
@@ -181,7 +179,7 @@ class State(MongoModel):
 
     class Meta:
         write_concern = WriteConcern(j=True)
-        connection_alias = TEST_DB_ALIAS
+        connection_alias = LOCAL_DB_ALIAS
 
 
 class County(MongoModel):
@@ -195,7 +193,7 @@ class County(MongoModel):
 
     class Meta:
         write_concern = WriteConcern(j=True)
-        connection_alias = TEST_DB_ALIAS
+        connection_alias = LOCAL_DB_ALIAS
 
 
 class City(MongoModel):
@@ -209,7 +207,7 @@ class City(MongoModel):
 
     class Meta:
         write_concern = WriteConcern(j=True)
-        connection_alias = TEST_DB_ALIAS
+        connection_alias = LOCAL_DB_ALIAS
 
 
 class ZipCode(MongoModel):
@@ -226,4 +224,4 @@ class ZipCode(MongoModel):
 
     class Meta:
         write_concern = WriteConcern(j=True)
-        connection_alias = TEST_DB_ALIAS
+        connection_alias = LOCAL_DB_ALIAS

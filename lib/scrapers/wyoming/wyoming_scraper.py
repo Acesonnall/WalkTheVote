@@ -9,7 +9,7 @@ import usaddress
 from lib.ElectionSaver import electionsaver
 from lib.definitions import Bcolors, ROOT_DIR
 
-CSV = "wyoming_clerk_offices.csv"
+CSV = os.path.join(ROOT_DIR, "scrapers", "wyoming", "wyoming_clerk_offices.csv")
 WEBSITE = "https://sos.wyo.gov/Elections/"
 
 

@@ -349,6 +349,13 @@ input::-webkit-inner-spin-button {
   display:none;
 }
 
+.bruh {
+  font-size: 1.75rem;
+  color: white;
+  border-bottom: 3px solid #46afab;
+  font-weight: bold;
+}
+
 @keyframes spin {
   0% { transform: rotate(0deg); }
   100% { transform: rotate(360deg); }
