@@ -7,10 +7,12 @@ bitarray
 certifi
 chardet
 cloudscraper
+dnspython
 future
 html5lib
 idna
 Js2Py
+lxml
 msedge-selenium-tools
 multidict
 numpy
@@ -33,6 +35,7 @@ soupsieve
 tqdm
 tzlocal
 urllib3
+us
 usaddress
 xlrd
 yarl

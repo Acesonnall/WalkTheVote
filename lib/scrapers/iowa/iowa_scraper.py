@@ -4,6 +4,7 @@ import asyncio
 import json
 import logging
 import os
+import shutil
 import unicodedata
 from typing import Dict, List
 
@@ -12,7 +13,8 @@ from bs4 import BeautifulSoup
 from msedge.selenium_tools import Edge, EdgeOptions
 
 from lib.ElectionSaver import electionsaver
-from lib.definitions import ROOT_DIR
+from lib.definitions import ROOT_DIR, WTVWebDriver
+from lib.errors.wtv_errors import WalkTheVoteError
 from lib.scrapers.base_scraper import BaseScraper
 
 # create logger
@@ -34,8 +36,6 @@ ch.setFormatter(formatter)
 # add ch to logger
 LOG.addHandler(ch)
 
-webdriver_path = r"C:\Users\omarc\Downloads\edgedriver_win64\msedgedriver.exe"
-
 
 class IowaScraper(BaseScraper):
     def __init__(self):
@@ -44,10 +44,7 @@ class IowaScraper(BaseScraper):
             "https://sos.iowa.gov/elections/auditors/auditor.asp?CountyID=00"
         )
         self.data = []
-        self.edge_options = EdgeOptions()
-        self.edge_options.use_chromium = True
-        self.edge_options.add_argument("--headless")
-        self.driver = Edge(executable_path=webdriver_path, options=self.edge_options)
+        self.driver = WTVWebDriver("Iowa").get_webdriver()
 
     def scrape(self) -> List[Dict]:
         """TODO: Write documentation once purpose of method is further defined.

@@ -1,4 +1,3 @@
-# import context
 import asyncio
 import os
 import time
@@ -113,8 +112,7 @@ def get_county_registrar(info_str):
     return info_str[registrar_index:].strip('\n " "').title()
 
 
-# function to decode hexadecimal email strings
-# lifted this off some stackoverflow post lol
+
 async def scrape_one_county(session, county_id, county_name):
     data = {"idTown": county_id, "SubmitCounty": "Submit", "contactType": "R"}
     async with session.post(INFO_URL, data=data) as s:
@@ -153,6 +151,9 @@ async def scrape_one_county(session, county_id, county_name):
     email = soup.find("span", class_="__cf_email__")
     if email is not None:
         hex_email = email["data-cfemail"]
+
+        # function to decode hexadecimal email strings
+        # lifted this off some stackoverflow post lol
         email_address = electionsaver.decode_email(hex_email)
 
     return (
