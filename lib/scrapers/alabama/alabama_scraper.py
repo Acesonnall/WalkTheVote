@@ -46,11 +46,11 @@ def format_address_data(address, county_name):
     if "aptNumber" in parsed_data_dict:
         addressSchema["aptNumber"] = parsed_data_dict["aptNumber"]
     if "poBox" in parsed_data_dict:
-        addressSchema["poBox"] = parsed_data_dict["poBox"]
+        addressSchema["poBox"] = parsed_data_dict["poBox"].lower()
     if "streetNumberName" in parsed_data_dict:
         addressSchema["streetNumberName"] = parsed_data_dict["streetNumberName"].title()
-    #else:
-        #print(f'county_name {county_name} is the culprit')
+    else:
+        print(f'county_name {county_name} is the culprit')
 
     return addressSchema
 
@@ -66,13 +66,17 @@ for i in info:
     cleaned_phone = cleaned_phone.split(",")[0].split("x")[0].strip()
 
     county = datapoints[0].text.replace("County:", "").strip()
+    # print(county)
     if county == "Coffee":
-        p_address = "1055 E McKinnon St New Brockton, Alabama 36351"
+        p_address = "1065 E McKinnon Street New Brockton, AL 36351"
+    else:
+        p_address = datapoints[2].text.replace("Physical Address:", "").strip()
+    # print(p_address)
     person = datapoints[1].text.replace("Absentee Election Manager", "").strip()
-    p_address = datapoints[2].text.replace("Physical Address:", "").strip()
     aschema = format_address_data(address=p_address, county_name=county)
     for j in aschema:
         j = j.upper()
+    # print(aschema)
     m_address = m_s.text.replace("Mailing Address:", "")
     m_address = m_address.replace("\n", " ")
     bschema = format_address_data(address=m_address, county_name=county)

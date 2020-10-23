@@ -75,6 +75,8 @@ for i in baseList:
     p_address = datapoints2[0] + " " + datapoints2[2] + " " + datapoints2[4]
     m_address = datapoints2[0] + " " + datapoints2[2] + " " + datapoints2[4]
     county = datapoints1[0].replace("County of ", "").strip()
+    if county == "City & Honolulu":
+        county = "Honolulu"
     person = datapoints1[4].strip()
     aschema = format_address_data(p_address, county)
     bschema = format_address_data(m_address, county)

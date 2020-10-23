@@ -1,6 +1,7 @@
 import cloudscraper
 import usaddress
 import os
+import re
 import json
 from bs4 import BeautifulSoup
 
@@ -41,8 +42,12 @@ def format_address_data(address, county_name):
         addressSchema["aptNumber"] = parsed_data_dict["aptNumber"].lower()
     if "poBox" in parsed_data_dict:
         addressSchema["poBox"] = parsed_data_dict["poBox"].lower()
+
     if "streetNumberName" in parsed_data_dict:
         addressSchema["streetNumberName"] = parsed_data_dict["streetNumberName"].lower()
+
+    if county_name == "Bergen":
+        addressSchema["streetNumberName"] = ("1 Bergen County Plaza").lower()
     # else:
         # print(f'county_name {county_name} is the culprit')
     return addressSchema
@@ -84,7 +89,7 @@ for i in info1:
     person = datapoint2[2].strip()
     # print(person)
 
-    # Getting P_address
+    # Getting m_address
     if county == "Camden":
         m_address = "P.O. Box 218, Blackwood, NJ 08012-0218"
     elif county == "Gloucester":
@@ -93,16 +98,25 @@ for i in info1:
         m_address = datapoint2[3].strip().replace("Address: ", "")
     bschema = format_address_data(address=m_address,county_name=county)
     # print(m_address)
-    # Fix this
+    # Getting p_address
     if county == "Camden":
         p_address = "Historic Court House Complex, 5903 Main Street, Mays Landing, NJ 08330"
     elif county == "Salem":
         p_address = "Fifth Street Complex, 110 Fifth St, Suite 1000, Salem, NJ 08079"
+    elif county == "Bergen":
+        p_address = "1 Bergen County Plaza, Room 310, Hackensack, NJ 07601"
+    elif county == "Gloucester":
+        p_address = "Court House, 1 North Broad Street, Woodbury, NJ 08096-7129"
     else:
         p_address = datapoint3[2].strip().replace("Address: ", "")
+    remove = re.search("P(\\.){,1}O(\\.){,1} Box \\d+,", p_address)
+    try:
+        p_address = p_address = p_address[:remove.start()] + p_address[remove.end():]
+    except Exception:
+        p_address = p_address
     # print(p_address)
     aschema = format_address_data(address=p_address, county_name=county)
-    # print(p_address)
+    # print(aschema)
     # getting phone
     if county == "Camden":
         phone = "856-225-7219"
