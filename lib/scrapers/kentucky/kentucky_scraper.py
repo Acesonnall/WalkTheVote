@@ -48,7 +48,7 @@ async def get_election_offices():
         button = driver.find_element_by_id("search-clerks")
         dropdown.select_by_visible_text(county)
         button.click()
-        # time.sleep(1)
+        time.sleep(2)
         soup = bS(driver.page_source, "html.parser")
 
         supervisor = soup.find(class_="panel-heading").span.text
