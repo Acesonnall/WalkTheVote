@@ -139,8 +139,8 @@ app.get('/maps', function(req, res) {
     res.sendFile(tob);
 });
 
-app.get('/help', function(req, res) {
-    let tob = path.join(__dirname + '/client/views/help.html');
+app.get('/team', function(req, res) {
+    let tob = path.join(__dirname + '/client/views/team.html');
     res.sendFile(tob);
 });
 
@@ -192,6 +192,10 @@ app.get("/api/:zipcode", (req, res) => {
 
                 return res.status(200).json(finalres);
             });
+    } else {
+        return res.status(500).send({
+            "message": "That isn't a valid 5 digit zip code!"
+        });
     }
 });
 

@@ -12,7 +12,14 @@ function handleDbData(dbJson) {
     $(".cinfo").text("Contact Info:");
     $(".cadd").text("Walk your vote to:");
 
-    $(".county-name").text(dbJson['county_name'] + " County");
+    if(dbJson['county_name']) {
+        $(".county-name").text(dbJson['county_name'] + " County");
+    } else if (dbJson['physical_address']) {
+        $(".county-name").text(dbJson['physical_address']['city'] + " Municipality");
+    } else if (dbJson['mailing_address']) {
+        $(".county-name").text(dbJson['mailing_address']['city'] + " Municipality");
+    }
+
     $('.phone-number').text(dbJson['phone_number']);
 
     $('.email').text(dbJson['email_address']);
@@ -217,6 +224,12 @@ function handleZipKeydown(evt) {
         //if (thisInputId !== 1) {
             //previousInput.focus();
         //}
+    }
+
+    if (evt.which == 13) { //enter key
+        if (thisInputId == 5) {
+            consolidateZipInputs();
+        }
     }
 
     if (numericOnly === '' && evt.which != 37 && evt.which != 39 && evt.which != 8) {
