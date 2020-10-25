@@ -129,6 +129,8 @@ function handleDbWarning(message, county="", state="") {
     $('.wtv-results-wrapper').removeClass("hidden");
     $(".error-wrapper").removeClass("hidden");
     $(".request-warning").removeClass("hidden");
+
+    $("html, body").animate({ scrollTop: $('.wtv-results-wrapper').offset().top - 45 }, 500);
 }
 
 function handleDbError(message) {
@@ -144,6 +146,8 @@ function handleDbError(message) {
     $(".wtv-results-wrapper").removeClass("hidden");
     $(".error-wrapper").removeClass("hidden");
     $(".request-error").removeClass("hidden");
+
+    $("html, body").animate({ scrollTop: $('.wtv-results-wrapper').offset().top - 45 }, 500);
 }
 
 function handleZipCode(zip) {  
