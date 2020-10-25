@@ -158,6 +158,7 @@ app.get("/api/:zipcode", (req, res) => {
         lookupByZip(zipCode)
             .then((jsonData) => {
                 console.log("======= RESULTS ======")
+                console.log(jsonData)
                 let finalres = null;
                 try {
                     finalres = jsonData.parent_city.parent_county.election_office
@@ -180,7 +181,7 @@ app.get("/api/:zipcode", (req, res) => {
                         else {
                             let splitGeoData = jsonData.parent_city._id.split(".");
                             return res.status(501).send({
-                                "message": `We're still under construction! Your state is not yet supported. We're adding new states to the datbase every day, so check back soon!`,
+                                "message": `We're still under construction! Your state is not yet supported. We're adding new states to the database every day, so check back soon!`,
                                 "county": splitGeoData[1],
                                 "state": splitGeoData[0]
                             });

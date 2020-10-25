@@ -1,4 +1,5 @@
-<html lang="en"><head>
+<html lang="en">
+<head>
     <meta charset="utf-8">
     <title>Walk the Vote - Early in-person voting made easy!</title>
     <link rel="shortcut icon" type="image/x-icon" href="images/favicon.ico">
@@ -13,6 +14,7 @@
         gtag('config', 'UA-147602341-1');
     </script>
 
+    <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyD8CgEOjajD3s5FtetONRxKyFnqzMXHgE8&callback=initMap&libraries=&v=weekly" defer></script>
 
     <meta name="author" content="WalkTheVote">
     <meta name="description" content="Walk the Vote is an effort to help ensure people can hand-deliver their ballots to their local election offices. Use our app to look up where you need to go in less than 5 seconds. Beat the stress of worrying about the USPS or COVID-19 on Election Day, and let us help you Walk the Vote!">
@@ -53,13 +55,13 @@
         t.src=v;s=b.getElementsByTagName(e)[0];
         s.parentNode.insertBefore(t,s)}(window,document,'script',
         'https://connect.facebook.net/en_US/fbevents.js');
-        fbq('init', '366875178081064'); 
+        fbq('init', '2165396940376815'); 
         fbq('track', 'PageView');
     </script>
     <noscript>
-     <img height="1" width="1" 
-    src="https://www.facebook.com/tr?id=366875178081064&ev=PageView
-    &noscript=1"/>
+        <img height="1" width="1" 
+        src="https://www.facebook.com/tr?id=2165396940376815&ev=PageView
+        &noscript=1"/>
     </noscript>
     <!-- End Facebook Pixel Code -->
 
@@ -117,7 +119,7 @@
                 <input type="number" class="desktop" id="zip3">
                 <input type="number" class="desktop" id="zip4">
                 <input type="number" class="desktop" id="zip5">
-                <input type="number" class="mobile" id="zipmobile">
+                <input type="tel" pattern="\d*" class="mobile" id="zipmobile">
             </div>
             <div class="btn-wrapper">
                 <button class="btn btn-primary bobert" onclick="consolidateZipInputs()">Find</button>
@@ -156,13 +158,13 @@
                 <div class="address-wrapper">
                     <div class="contact-header cadd">Walk your vote to:</div>
                     <div class="supervisor-info">
-                        <span class="super-name"></span> <span class="super-title"></span>
+                        <span class="super-name"></span><span class="super-title"></span>
                     </div>
                     <div class="location-name"></div>
                     <div class="street-number-name"></div>
                     <div class="apt-unit"></div>
                     <div class="city-state-zip">
-                        <span class="city"></span> <span class="state"></span> <span class="zipcode"></span>
+                        <span class="city"></span><span class="state"></span> <span class="zipcode"></span>
                     </div>
                 </div>
                 <div class="contact-info-wrapper">
@@ -176,6 +178,7 @@
                 </div>
                 <div class="error-wrapper hidden"></div>
             </div>
+            <div id="map" class="hidden"></div>
         </div> 
         <div class="below-results-note hidden">Most jurisdictions allow you to return your ballot to their offices by end of business day on Election Day 11/3. If you're unsure, please contact your local jurisdiction.</div>
     </div>
@@ -185,34 +188,7 @@
             <div class="states-supported">
                 <!-- Currently supporting: AL, AZ, CA, FL, GA, IA, IL, MI, MN, NC, NE, OH, PA, TX, WY -->
                 <div class="currently-supported-header">States Currently Supported</div>
-                <ul>
-                    <li>Arizona</li>
-                    <li>California</li>
-                    <li>Florida</li>
-                    <li>Georgia</li>
-                    <li>Hawaii</li>
-                    <li>Iowa</li>
-                    <li>Illinois</li>
-                    <li>Massachusetts</li>
-                    <li>Maryland</li>
-                    <li>Michigan</li>
-                    <li>Minnesota</li>
-                    <li>Missouri</li>
-                    <li>Nebraska</li>
-                    <li>New Hampshire</li>
-                    <li>New Jersey</li>
-                    <li>New York</li>
-                    <li>North Carolina</li>
-                    <li>Ohio</li>
-                    <li>Pennsylvania</li>
-                    <li>South Carolina</li>
-                    <li>Texas</li>
-                    <li>Utah</li>
-                    <li>Virginia</li>
-                    <li>Washington</li>
-                    <li>West Virginia</li>
-                    <li>Wyoming</li>
-                </ul>
+                <ul class="states-supported-list"></ul>
             </div>
             <hr>
             <div class="socials">
@@ -246,6 +222,5 @@
             </div>
         </div>
     </footer>
-
-
-</body><style type="text/css"></style></html>
+</body>
+</html>
