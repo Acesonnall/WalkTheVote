@@ -292,7 +292,7 @@ input[type=number] {
 
 input {
   outline: 0;
-  border-width:0 0 2px;
+  border-width:0 0 3px;
   border-color: gray;
   font-size: 60px !important;
   width: 80px;
@@ -301,6 +301,13 @@ input {
   padding-left: 25px;
   margin: 0 10px !important;
   color: white;
+  transition: 0.2s border ease-in;
+}
+
+input.desktop.active-input {
+  border-width: 0 0 5px;
+  border-color: #4fa6ab;
+  transition: 0.2s border ease-in;
 }
 
 .btn-wrapper {
@@ -366,7 +373,7 @@ input::-webkit-inner-spin-button {
 }
 
 .wtv-results-wrapper .card-header{
-  border-bottom: 2px solid #7ca6a0;
+  border-bottom: 3px solid #4fa6ab;
   background-color: white;
 }
 
@@ -399,6 +406,14 @@ input::-webkit-inner-spin-button {
   text-align: center;
 }
 
+.location-name {
+  text-transform: capitalize;
+}
+
+.state {
+  text-transform: uppercase;
+}
+
 .below-results-note {
   color: #d3d3d3;
   width: 40%;
@@ -428,9 +443,9 @@ input::-webkit-inner-spin-button {
 }
 
 ul {
-  columns: 3;
-  -webkit-columns: 3;
-  -moz-columns: 3;  
+  columns: 4;
+  -webkit-columns: 4;
+  -moz-columns: 4;  
   column-gap:30px;
 }
 
@@ -529,6 +544,11 @@ li.individual-social {
 .ribbon a:focus, a:active, a:hover {
   color: #ccc !important;
   text-decoration: none !important;
+}
+
+#map {
+  height: 300px;
+  width: 100%;
 }
 
 /*

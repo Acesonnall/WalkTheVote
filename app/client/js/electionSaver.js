@@ -1,3 +1,38 @@
+let gmaps = null;
+const GMAPS_ZOOM_AMOUNT = 17;
+const STATES_SUPPORTED = {
+    "Alabama": "AL",
+    "Arizona": "AZ",
+    "California": "CA",
+    "Delaware": "DE",
+    "Florida": "FL",
+    "Georgia": "GA",
+    "Hawaii": "HI",
+    "Illinois": "IL",
+    "Iowa": "IA",
+    "Kentucky": "KY",
+    "Louisiana": "LA",
+    "Maryland": "MD",
+    "Massachussetts": "MA",
+    "Michigan": "MI",
+    "Minnesota": "MN",
+    "Missouri": "MO",
+    "Nebraska": "NE",
+    "New Hampshire": "NH",
+    "New Jersey": "NJ",
+    "New York": "NY",
+    "North Carolina": "NC",
+    "Ohio": "OH",
+    "Pennsylvania": "PA",
+    "South Carolina": "SC",
+    "Texas": "TX",
+    "Utah": "UT",
+    "Virginia": "VA",
+    "Washington": "WA",
+    "West Virginia": "WV",
+    "Wyoming": "WY"
+};
+
 /*
  * ===============================================
  * ===============================================
@@ -7,75 +42,69 @@
  */
 
 function handleDbData(dbJson) {
-    console.log(`[client] data is ${JSON.stringify(dbJson)}`);
+    // console.log(`[client] data is ${JSON.stringify(dbJson)}`);
+    const countyName = dbJson['county_name'];
+    const physAd = dbJson['physical_address'];
+    const mailAd = dbJson['mailing_address'];
+    const email = dbJson['email_address'];
+    const phoneNumber = dbJson['phone_number'];
+    const website = dbJson['website'];
+    const officeSupervisor = dbJson['office_supervisor'] ? dbJson['office_supervisor'] : "";
+    const supervisorTitle = dbJson['supervisor_title'] ? `, ${dbJson['supervisor_title']}` : "";
+    let state = physAd ? physAd['state'] : (mailAd ? mailAd['state'] : "");
+    let city = physAd ? `${physAd['city']}, ` : (mailAd ? `${mailAd['city']}, ` : "");
+    let zip = physAd ? physAd['zip_code'] : (mailAd ? mailAd['zip_code'] : "");
+    let location = physAd ? physAd['location_name'] : (mailAd ? mailAd['location_name'] : "");
+    let street = (physAd && physAd['street']) ? physAd['street'] : ((mailAd && mailAd['street']) ? mailAd['street'] : "");
+    let apt = (physAd && physAd['apt_unit']) ? physAd['apt_unit'] : ((mailAd && mailAd['apt_unit']) ? mailAd['apt_unit'] : "");
 
-    $(".cinfo").text("Contact Info:");
-    $(".cadd").text("Walk your vote to:");
+    setTextClass("cinfo", "Contact Info:");
+    setTextClass("cadd", "Walk your vote to:");
 
-    if(dbJson['county_name']) {
-        $(".county-name").text(dbJson['county_name'] + " County");
-    } else if (dbJson['physical_address']) {
-        $(".county-name").text(dbJson['physical_address']['city'] + " Municipality");
-    } else if (dbJson['mailing_address']) {
-        $(".county-name").text(dbJson['mailing_address']['city'] + " Municipality");
-    }
-
-    $('.phone-number').text(dbJson['phone_number']);
-
-    $('.email').text(dbJson['email_address']);
-    $('.email').attr('href', 'mailto:' + dbJson['email_address']);
-
-    $('.website').text("Jurisdiction website");
-    $('.website').attr('href', dbJson['website']);
-
-    if (dbJson['office_supervisor']) {
-        console.log(`[client] Supervisor is ${dbJson['office_supervisor']}`);
-        $('.super-name').text(dbJson['office_supervisor'] + ",");
-    }
-
-    if (dbJson['supervisor_title']) {
-        $('.super-title').text(dbJson['supervisor_title']);
-    }
-
-    if (dbJson['physical_address']) {
-        let physAd = dbJson['physical_address'];
-
-        if (physAd['location_name']) {
-            $('.location-name').text(physAd['location_name']);
-        }
-    
-        if (physAd['street']) {
-            $('.street-number-name').text(physAd['street']);
-        }
-    
-        if (physAd['apt_unit']) {
-            $('.apt-unit').text(physAd['apt_unit']);
-        }
-        
-        $('.city').text(physAd['city'] + ",");
-        $('.state').text(physAd['state']);
-        $('.zipcode').text(physAd['zip_code']);
+    const countyObj = $(".county-name");
+    console.log(state);
+    if (state.length !== 2) {
+        caps = capitalizeFirstLetter(state);
+        state = lookup2digitStateCode(caps);
     } else {
-        if (dbJson['mailing_address']) {
-            let mailAd = dbJson['mailing_address'];
-
-            if (mailAd['location_name']) {
-                $('.location-name').text(mailAd['location_name']);
-            }
-        
-            if (mailAd['street']) {
-                $('.street-number-name').text(mailAd['street']);
-            }
-        
-            if (mailAd['apt_unit']) {
-                $('.apt-unit').text(mailAd['apt_unit']);
-            }
-            
-            $('.city').text(mailAd['city'] + ",");
-            $('.state').text(mailAd['state']);
-            $('.zipcode').text(mailAd['zip_code']);
-        }
+        state = state.toUpperCase();
     }
+
+    // handle title text displaying county/city/parish name
+    if(countyName) {
+        countyObj.text(`${countyName} County, ${state}`);
+        if (state === 'LA') {
+           countyObj.text(`${countyName} Parish, ${state}`);
+        }
+    } else if (physAd) {
+        countyObj.text(`${city} Municipality, ${state}`);
+    } else if (mailAd) {
+        countyObj.text(`${city} Municipality, ${state}`);
+    } 
+
+    setTextClass("phone-number", phoneNumber);
+
+    setTextClass("email", email);
+    $(".email").attr('href', `mailto:${email}`);
+
+    setTextClass("website", "Jurisdiction website");
+    $('.website').attr('href', website);
+
+    setTextClass("super-name", officeSupervisor);
+    setTextClass("super-title", supervisorTitle);
+
+    setTextClass("location-name", location);
+    setTextClass("street-number-name", street);
+    setTextClass("apt-unit", apt);
+    setTextClass("city", city);
+    setTextClass("state", state);
+    setTextClass("zipcode", zip);
+
+    let consolidatedAddress = `${street} ${apt} ${city}, ${state} ${zip}`;
+    if (!street) { // no street address, try google mapsing "<county> Office of Elections"
+        consolidatedAddress = `${location} ${apt} ${city}, ${state} ${zip}`;
+    }
+    updateMap(consolidatedAddress);
 
     $('.wtv-results-wrapper').removeClass("hidden");
     $(".request-success").removeClass("hidden");
@@ -83,7 +112,7 @@ function handleDbData(dbJson) {
     $(".address-wrapper").removeClass("hidden");
     $(".below-results-note").removeClass("hidden");
 
-    $("html, body").animate({ scrollTop: $('.wtv-results-wrapper').offset().top - 100 }, 500);
+    $("html, body").animate({ scrollTop: $('.wtv-results-wrapper').offset().top - 45 }, 500);
 }
 
 function handleDbWarning(message, county="", state="") {
@@ -125,25 +154,17 @@ function handleZipCode(zip) {
         dataType: 'json',
         success: function(data){ 
             hideLoader();
-
-            $(".zip-text").text(zip);
-
-            try {
-                handleDbData(data); 
-            } catch (error) {
-                console.error(error);
-            }
+            handleDbData(data);
         },
-        error: function(xhr, options, error) { // state is not in the database
+        error: function(xhr, options, error) {
             var errorData = JSON.parse(xhr.responseText);
             var errorMsg = "";
 
             hideLoader();    
-            if ('state' in errorData) {
+            if ('state' in errorData) { // zip exists, but no data yet
                 handleDbWarning(errorData["message"], errorData["county"], errorData["state"]);
-            }        
-            else { 
-                if ('message' in errorData) {
+            } else { 
+                if ('message' in errorData) { // zip is invalid/doesn't exist
                     errorMsg = errorData["message"];
                 } else {
                     errorMsg = `Error: ${xhr.status}: ${xhr.statusText}.\n Response is: ${xhr.responseText}`;
@@ -153,6 +174,57 @@ function handleZipCode(zip) {
             clearZipFields();
         }
     });   
+}
+
+ function initMap() {
+    let mapEl = document.getElementById("map");
+    const uluru = {
+        lat: -25.3,
+        lng: 131
+    }
+    gmaps = new google.maps.Map(mapEl, {
+        zoom: 6,
+        center: uluru
+    });
+    
+    // const marker = new google.maps.Marker({
+    //     position: uluru,
+    //     map: gmaps
+    // });
+}
+
+function updateMap(address) {
+    geocoder = new google.maps.Geocoder();
+    geocoder.geocode({address: address}, (results, status) => {
+        if (status === "OK") {
+            let loc = results[0].geometry.location;
+            gmaps.setCenter(loc);
+            var listener = google.maps.event.addListenerOnce(gmaps, "idle", function() {
+                gmaps.setZoom(GMAPS_ZOOM_AMOUNT);
+                new google.maps.Marker({
+                    map: gmaps,
+                    position: loc
+                });
+            })
+            $("#map").removeClass("hidden");
+        } else { // TODO: display error message here
+            console.log(`[ERROR] Failed geocoding address ${address} for reason ${status}`);
+        }
+    });
+    // console.log(address);
+}
+
+function populateStates() {
+    for (let state in STATES_SUPPORTED) {
+        let stateString = `<li>${state}</li>`;
+        $(".states-supported-list").append(stateString);
+    }
+
+    console.log(`# of states supported: ${Object.keys(STATES_SUPPORTED).length}`);
+}
+
+function lookup2digitStateCode(state) {
+    return STATES_SUPPORTED[state] ? STATES_SUPPORTED[state] : state;
 }
 
 /*
@@ -171,8 +243,6 @@ function handleZipCode(zip) {
  * ===============================================
  */
 
- 
-
 function consolidateZipInputs() {
     showLoader(); //* this is an example of an action that fires right when the AJAX request starts
                   //  just shows the fun little spinning loader :)
@@ -185,6 +255,8 @@ function consolidateZipInputs() {
     $(".contact-info-wrapper").addClass("hidden");
     $(".address-wrapper").addClass("hidden");
     $(".below-results-note").addClass("hidden");
+    $("#map").addClass("hidden");
+    handleUnfocus();
     
     let res = "";
     $(".desktop").each(function() {
@@ -199,12 +271,14 @@ function consolidateZipInputs() {
 function clearZipFields() {
     $("input").each(function() {
         $(this).val("");
+        $(this).removeClass("active-input");
     });
 }
 
 function handleZipKeydown(evt) {
     let char = String.fromCharCode(evt.which);
     let numericOnly = char.replace(/[^0-9\.]/g,'');
+    let valueBeforeInput = $(this).val();
     let value = $(this).val() + char;
 
     let thisInputId = $(this)[0].id.split('zip')[1]
@@ -217,9 +291,11 @@ function handleZipKeydown(evt) {
             }
         }, 50);
     }
+
     if (evt.which == 9) {
         nextInput.focus();
     }
+
     if (evt.which == 8){
         //if (thisInputId !== 1) {
             //previousInput.focus();
@@ -232,12 +308,37 @@ function handleZipKeydown(evt) {
         }
     }
 
+    if (evt.which == 8) { //backspace key
+        console.log("this is value: " + value);
+        if (valueBeforeInput === '') {
+            previousInput.focus();
+        }
+    }
+
     if (numericOnly === '' && evt.which != 37 && evt.which != 39 && evt.which != 8) {
         return false;
     }
     if (value.length > 1 && evt.which != 37 && evt.which != 39 && evt.which != 8) {
         return false;
     }
+}
+
+function handleZipFocus(e) {
+    let thisInputId = $(this)[0].id.split('zip')[1]
+    $(".desktop").each(function() {
+        let loopZipId = $(this)[0].id.split('zip')[1];
+        if (loopZipId == thisInputId) {
+            $(this).addClass("active-input");
+        } else {
+            $(this).removeClass("active-input");
+        }
+    });
+}
+
+function handleUnfocus() {
+    $(".desktop").each(function() {
+        $(this).removeClass("active-input");
+    })
 }
 
 /*
@@ -247,6 +348,14 @@ function handleZipKeydown(evt) {
  * ===============================================
  * ===============================================
  */
+
+function capitalizeFirstLetter(string) {
+    return string.charAt(0).toUpperCase() + string.slice(1);
+}
+
+function setTextClass(className, stringToSet) {
+    $(`.${className}`).text(stringToSet);
+}
 
 function hideLoader() {
     $(".wtv-loader").hide();
@@ -267,6 +376,9 @@ function showLoader() {
 $(document).ready(function() {
     if ($(window).width() >= 577) {
         $(".desktop").on('keydown', handleZipKeydown);
+        $(".desktop").on('focus', handleZipFocus);
+        $(".desktop").on('blur', handleUnfocus);
     }
+    populateStates();
 });
 
