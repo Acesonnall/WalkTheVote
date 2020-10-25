@@ -1,5 +1,5 @@
 let gmaps = null;
-const GMAPS_ZOOM_AMOUNT = 17;
+const GMAPS_ZOOM_AMOUNT = 18;
 const STATES_SUPPORTED = {
     "Alabama": "AL",
     "Arizona": "AZ",
@@ -94,15 +94,15 @@ function handleDbData(dbJson) {
     setTextClass("super-title", supervisorTitle);
 
     setTextClass("location-name", location);
-    setTextClass("street-number-name", street);
+    setTextClass("street-number-name", street.replace("Road", "Rd"));
     setTextClass("apt-unit", apt);
     setTextClass("city", city);
     setTextClass("state", state);
     setTextClass("zipcode", zip);
 
-    let consolidatedAddress = `${street} ${apt} ${city}, ${state} ${zip}`;
+    let consolidatedAddress = `${street.replace("Road", "Rd")} ${city} ${state} ${zip}`;
     if (!street) { // no street address, try google mapsing "<county> Office of Elections"
-        consolidatedAddress = `${location} ${apt} ${city}, ${state} ${zip}`;
+        consolidatedAddress = `${location} ${city} ${state} ${zip}`;
     }
     updateMap(consolidatedAddress);
 
