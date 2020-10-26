@@ -63,9 +63,9 @@ for i in info:
     data = i.findAll("tr")
     person = data[1].text.split("\n")[2]
     # print(county)
-    if re.match("(\\d){3}\\.(\\d){3}\\.(\\d){4}",data[3].text.split("\n")[2]):
+    if re.match("(\\d){3}((\\.)|-)?(\\d){3}((\\.)|-)?(\\d){4}",data[3].text.split("\n")[2]):
         phone = data[3].text.split("\n")[2]
-    elif re.match("(\\d){3}\\.(\\d){3}\\.(\\d){4}",data[4].text.split("\n")[2]):
+    elif re.match("(\\d){3}(\\.)?(\\d){3}(\\.)?(\\d){4}",data[4].text.split("\n")[2]):
         phone = data[4].text.split("\n")[2]
     # print(phone)
     if re.match("Address", data[2].text.replace("\n", "").strip()):
