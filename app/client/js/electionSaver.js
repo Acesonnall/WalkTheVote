@@ -88,8 +88,8 @@ function handleDbData(dbJson) {
     $(".email").attr('href', `mailto:${email}`);
 
     setTextClass("website", "Jurisdiction website");
-    if (!website.includes("https://")) {
-        website = `https://${website}`;
+    if (!website.includes("http")) {
+        website = `http://${website}`;
     }
     $('.website').attr('href', website);
 
