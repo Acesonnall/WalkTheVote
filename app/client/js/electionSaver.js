@@ -254,6 +254,8 @@ function consolidateZipInputs() {
     showLoader(); //* this is an example of an action that fires right when the AJAX request starts
                   //  just shows the fun little spinning loader :)
 
+    somedataLayerTrackingfunction();
+
     $('.wtv-results-wrapper').addClass("hidden");
     $(".request-success").addClass("hidden");
     $(".request-warning").addClass("hidden");
