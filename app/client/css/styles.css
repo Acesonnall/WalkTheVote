@@ -442,11 +442,20 @@ input::-webkit-inner-spin-button {
   font-size:24px;
 }
 
-ul {
+ul.states-supported-list {
   columns: 4;
   -webkit-columns: 4;
   -moz-columns: 4;  
   column-gap:30px;
+}
+
+ul.addl-thx li {
+  list-style-type: none;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  margin:15px;
 }
 
 .middle-line {
@@ -459,6 +468,56 @@ ul {
 
 li {
   text-align:left;
+}
+
+.individual-bio img {
+  height: 300px;
+  width: 300px;
+  border-radius: 150px;
+  padding: 15px;
+}
+
+.individual-bio {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 30px;
+  width: 28%;
+}
+
+.bio-wrapper {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-direction: row;
+  flex-wrap: wrap;
+  /* width: 75%; */
+}
+
+.caption {
+  color: #4fa6ab;
+  /* color: white; */
+  font-size: 20px;
+  font-weight: bold;
+  font-family: 'Poppins', sans-serif;
+  text-align: center;
+}
+
+.wtv-member-title {
+  color: white;
+  /* color: #4fa6ab; */
+  font-size: 16px;
+  font-family: 'Poppins', sans-serif;
+  text-align: center;
+}
+
+.subtitle {
+  color: white;
+  font-size: 14px;
+  width: 73%;
+  text-align: center;
+  padding-top: 15px;
 }
 
 .socials {
@@ -482,6 +541,10 @@ div.individual-social {
 li.individual-social {
   margin-left: 15px;
   margin-right: 10px;
+}
+
+.extra-wrapper h3 {
+
 }
 
 .faq-wrapper {
@@ -566,6 +629,10 @@ li.individual-social {
 }
 
 @media (max-width: 576px) { 
+  .master-container .bio-wrapper .individual-bio {
+    width: 100% !important;
+  }
+
   .wtv-header {
     line-height: 100px;
     padding-top: 45px;
@@ -582,7 +649,7 @@ li.individual-social {
     display: none;
   }
   
-  ul {
+  ul.states-supported-list {
     columns: 2;
     -webkit-columns: 2;
     -moz-columns: 2;  
@@ -615,6 +682,10 @@ li.individual-social {
 }
 
 @media (max-width: 768px) {
+  .bio-wrapper .individual-bio {
+    width: 72% !important;
+  }
+  
   nav {
     display: block !important;
   }
@@ -731,6 +802,12 @@ li.individual-social {
   }
 }
 
+@media(max-width: 950px) {
+  .individual-bio {
+    width: 45% !important;
+  }
+}
+
 @media(max-width: 980px) {
   .wtv-header {
     /* font-size: 65px !important; */
@@ -744,5 +821,11 @@ li.individual-social {
 @media(max-width: 1187px) {
   .wtv-header {
     /* font-size: 80px; */
+  }
+}
+
+@media(max-width: 1207px) {
+  .individual-bio {
+    width: 33%;
   }
 }
