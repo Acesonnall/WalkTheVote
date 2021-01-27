@@ -1,16 +1,41 @@
-runtime: nodejs
-api_version: 1
-env: flex
+runtime: nodejs14
 
-manual_scaling:
-  instances: 1
+instance_class: F2
 
 resources:
   cpu: .5
   memory_gb: 0.5
   disk_size_gb: 10
 
-handlers: 
+handlers:
+- url: /client/js/(.*)
+  static_files: client/js/\1
+  secure: always
+  upload: client/js/(.*)
+  http_headers:
+    Strict-Transport-Security: max-age=31536000; includeSubDomains
+
+- url: /client/css/(.*)
+  static_files: client/css/\1
+  secure: always
+  upload: client/css/(.*)
+  http_headers:
+    Strict-Transport-Security: max-age=31536000; includeSubDomains 
+
+- url: /(.*\.(json|ico))$
+  static_files: client/\1
+  secure: always
+  upload: client/.*\.(json|ico)$
+  http_headers:
+    Strict-Transport-Security: max-age=31536000; includeSubDomains 
+
+- url: /client/images/(.*)
+  static_files: client/images/\1
+  secure: always
+  upload: client/images/(.*)
+  http_headers:
+    Strict-Transport-Security: max-age=31536000; includeSubDomains     
+
 - url: /
   static_files: client/views/index.html
   secure: always
@@ -18,9 +43,9 @@ handlers:
   http_headers:
     Strict-Transport-Security: max-age=31536000; includeSubDomains
 
-- url: /(.*)
-  static_files: client/\1
+- url: /client/views/(.*)
+  static_files: client/views\1
   secure: always
-  upload: client/(.*)
+  upload: client/views/(.*)
   http_headers:
     Strict-Transport-Security: max-age=31536000; includeSubDomains
