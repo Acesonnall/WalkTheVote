@@ -1,5 +1,4 @@
-<html lang="en">
-<head>
+<html lang="en"><head>
     <meta charset="utf-8">
     <title>Walk the Vote - Early in-person voting made easy!</title>
     <link rel="shortcut icon" type="image/x-icon" href="images/favicon.ico">
@@ -14,15 +13,6 @@
         gtag('config', 'UA-147602341-1');
     </script>
 
-    <!-- Google Tag Manager -->
-    <script>(function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':
-    new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0],
-    j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
-    'https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefore(j,f);
-    })(window,document,'script','dataLayer','GTM-K9C5QPQ');</script>
-    <!-- End Google Tag Manager -->
-
-    <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyD8CgEOjajD3s5FtetONRxKyFnqzMXHgE8&callback=initMap&libraries=&v=weekly" defer></script>
 
     <meta name="author" content="WalkTheVote">
     <meta name="description" content="Walk the Vote is an effort to help ensure people can hand-deliver their ballots to their local election offices. Use our app to look up where you need to go in less than 5 seconds. Beat the stress of worrying about the USPS or COVID-19 on Election Day, and let us help you Walk the Vote!">
@@ -36,7 +26,7 @@
     <meta name="twitter:description" content="Walk the Vote is an effort to help ensure people can hand-deliver their ballots to their local election offices. Use our app to look up where you need to go in less than 5 seconds. Beat the stress of worrying about the USPS or COVID-19 on Election Day, and let us help you Walk the Vote!">
     <meta name="twitter:image" content="https://scontent.xx.fbcdn.net/v/t1.0-9/121640460_118622423345805_8953910052293584880_o.png?_nc_cat=107&amp;_nc_sid=dd9801&amp;_nc_ohc=H5eZE1HSa_MAX8sC3MJ&amp;_nc_ht=scontent.xx&amp;_nc_log=1&amp;oh=cfed1b7ad7c07bc6f9419e49943d77da&amp;oe=5FAFD52E">
 
-    <link href="../css/styles.css" type="text/css" rel="stylesheet">
+    <link href="css/styles.css" type="text/css" rel="stylesheet">
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
     <script src="js/electionSaver.js"></script>
 
@@ -75,19 +65,7 @@
 
 </head>
 <body>
-    <!-- Google Tag Manager (noscript) -->
-    <noscript><iframe src="https://www.googletagmanager.com/ns.html?id=GTM-K9C5QPQ"
-    height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
-    <script>function somedataLayerTrackingfunction() {
-        window.dataLayer = window.dataLayer || [];
-        window.dataLayer.push({ 'event': 'gtm.click', }); 
-        }
-    </script>
-    <!-- End Google Tag Manager (noscript) -->
     <header>
-        <div class="ribbon-wrapper">
-            <div class="ribbon"><a href="/faq">FAQ now available!</a></div>
-         </div>
         <nav role="navigation">
             <div id="menuToggle">
                 <div>
@@ -106,13 +84,13 @@
         </nav>
         <div class="header-wrapper">
             <div class="nav-bar">
-                <div class="bruh"><a class="active-link" href="/">HOME</a></div>
+                <div class="bruh"><a href="/">HOME</a></div>                
                 <div class="bruh"><a href="/faq">FAQ</a></div>
                 <h1 class="wtv-header">
                     Walk The <span class="master-container-header"> Vote</span>
                 </h1>
                 <div class="bruh"><a href="/team">TEAM</a></div>
-                <div class="bruh"><a href="/maps">MAPS</a></div>
+                <div class="bruh"><a class="active-link" href="/maps">MAPS</a></div>
             </div>
             <h1 class="wtv-header mobile">
                 Walk The <span class="master-container-header"> Vote</span>
@@ -123,87 +101,14 @@
         </div>
     </header>
     <div class="master-container">
-        <h1 class="faq-wrapper">Elections Office Lookup</h1>
-        <div style="font-size: 36px;color: #46afab;font-weight: bold;display: none;">How to Use</div><h3 class="wtv-subsubheader text-muted">
-            Enter your US Zip Code below to find your local office of elections. This is where you can physically deliver your absentee or mail-in ballot. 
-            <br>
-            <br>
-        </h3>
-        <div class="wtv-zip-wrapper">
-            <div class="zip-wrapper">
-                <input type="number" class="desktop" id="zip1">
-                <input type="number" class="desktop" id="zip2">
-                <input type="number" class="desktop" id="zip3">
-                <input type="number" class="desktop" id="zip4">
-                <input type="number" class="desktop" id="zip5">
-                <input type="tel" pattern="\d*" class="mobile" id="zipmobile">
-            </div>
-            <div class="btn-wrapper">
-                <button class="btn btn-primary bobert" onclick="consolidateZipInputs()">Find</button>
-                <button class="btn btn-primary bobert" onclick="clearZipFields()">Clear</button>
-            </div>
+        <div class="faq-wrapper">
+           404 bruh
         </div>
-        
-        <div class="wtv-steps-wrapper">
-            <div class="step">1. Make sure you're <a href="https://www.nass.org/can-I-vote/voter-registration-status">registered to vote</a></div>
-            <div class="step">2. Enter your zip code</div>
-            <div class="step">3. Smash that "Find" button</div>
-            <div class="step">4. Enter that address into your GPS</div>
-            <div class="step">5. Walk the vote!</div>
-        </div>
-        <div class="wtv-loader" style="display: none;"></div>
-        <div class="wtv-results-wrapper card shadow-sm hidden">
-            <h5 class="card-header">
-                <span class="request-success">
-                    <i class="far fa-check-circle" style="color:green;" aria-hidden="true"></i>
-                    Your Election Office Jurisdiction
-                </span>
-                <span class="request-warning hidden">
-                    <i class="far fa-exclamation-triangle" style="color:gold;font-weight:bold;" aria-hidden="true"></i>
-                    Not Yet Available
-                </span>
-                <span class="request-error hidden">
-                    <i class="far fa-times-circle" style="color:red;" aria-hidden="true"></i>
-                    Error With Your Lookup
-                </span>
-                <!-- <span class="results text-muted">
-                    Results for: <span class="zip-text"></span>
-                </span> -->
-            </h5>
-            <div class="county-name-wrapper"><span class="county-name"></span></div>
-            <div class="card-body individual-result">
-                <div class="address-wrapper">
-                    <div class="contact-header cadd">Walk your vote to:</div>
-                    <div class="supervisor-info">
-                        <span class="super-name"></span><span class="super-title"></span>
-                    </div>
-                    <div class="location-name"></div>
-                    <div class="street-number-name"></div>
-                    <div class="apt-unit"></div>
-                    <div class="city-state-zip">
-                        <span class="city"></span><span class="state"></span> <span class="zipcode"></span>
-                    </div>
-                </div>
-                <div class="contact-info-wrapper">
-                    <div class="contact-header cinfo"></div>
-                    <div class="phone-number"></div>
-                    <div class="email-wrapper">
-                        <a href="mailto:sfvote@sfgov.org" class="email"></a>
-                    </div>
-                    <div class="web-wrapper"><a href="https://sfelections.sfgov.org/" class="website"></a>
-                    </div>
-                </div>
-                <div class="error-wrapper hidden"></div>
-            </div>
-            <div id="map" class="hidden"></div>
-        </div> 
-        <div class="below-results-note hidden">Most jurisdictions allow you to return your ballot to their offices by end of business day on Election Day 11/3. If you're unsure, please contact your local jurisdiction.</div>
     </div>
     <footer> 
         <!-- <h2 class="wtv-footer-sub">Walk the Vote</h2> -->
         <div class="footer-class">
             <div class="states-supported">
-                <!-- Currently supporting: AL, AZ, CA, FL, GA, IA, IL, MI, MN, NC, NE, OH, PA, TX, WY -->
                 <div class="currently-supported-header">States Currently Supported</div>
                 <ul class="states-supported-list"></ul>
             </div>
@@ -239,5 +144,6 @@
             </div>
         </div>
     </footer>
-</body>
-</html>
+
+
+</body><style type="text/css"></style></html>

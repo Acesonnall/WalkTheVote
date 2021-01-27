@@ -149,6 +149,11 @@ app.get('/', function(req, res) {
     res.sendFile(tob);
 });
 
+app.get('/_ah/start', function(req, res) {
+    res.status(200).send("");
+});
+
+
 app.get("/api/:zipcode", (req, res) => {
     const zipCode = req.params.zipcode;
     console.log(" ====== NEW LOOKUP ======");
@@ -203,3 +208,7 @@ app.get("/api/:zipcode", (req, res) => {
 app.listen(PORT, () => console.log(`Server started on port: http(s)://localhost:${PORT}`));
 
 app.use(express.static('client'));
+
+app.use(function (req, res, next) {
+    res.status(404).send("Sorry can't find that!")
+  })

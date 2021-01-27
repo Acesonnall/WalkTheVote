@@ -48,7 +48,7 @@ function handleDbData(dbJson) {
     const mailAd = dbJson['mailing_address'];
     const email = dbJson['email_address'];
     const phoneNumber = dbJson['phone_number'];
-    const website = dbJson['website'];
+    let website = dbJson['website'];
     const officeSupervisor = dbJson['office_supervisor'] ? dbJson['office_supervisor'] : "";
     const supervisorTitle = dbJson['supervisor_title'] ? `, ${dbJson['supervisor_title']}` : "";
     let state = physAd ? physAd['state'] : (mailAd ? mailAd['state'] : "");
@@ -88,6 +88,9 @@ function handleDbData(dbJson) {
     $(".email").attr('href', `mailto:${email}`);
 
     setTextClass("website", "Jurisdiction website");
+    if (!website.includes("http")) {
+        website = `http://${website}`;
+    }
     $('.website').attr('href', website);
 
     setTextClass("super-name", officeSupervisor);
@@ -250,6 +253,8 @@ function lookup2digitStateCode(state) {
 function consolidateZipInputs() {
     showLoader(); //* this is an example of an action that fires right when the AJAX request starts
                   //  just shows the fun little spinning loader :)
+
+    somedataLayerTrackingfunction();
 
     $('.wtv-results-wrapper').addClass("hidden");
     $(".request-success").addClass("hidden");
