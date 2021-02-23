@@ -10,7 +10,7 @@ Most states are now open for early drop-off ballot voting! We can help you find 
 *NOTE: Some jurisdictions also allow you to drop off your ballots at individual polling place drop-off boxes. Our app doesn't quite list those locations, but perhaps this will be a future feature!*
 
 # Connecting to the Database (Internal Use)
-1. [Install MongoDB locally] (https://docs.mongodb.com/manual/administration/install-community/)
+1. [Install MongoDB locally](https://docs.mongodb.com/manual/administration/install-community/)
 2. Make sure MongoDB is started as per the installation for your OS
 3. Make sure [MongoDB Compass](https://www.mongodb.com/products/compass) is installed
 4. Message Omar for the URI connection credentials
