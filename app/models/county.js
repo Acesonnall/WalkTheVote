@@ -22,7 +22,7 @@ const countySchema = new Schema({
     }
 }, opts)
 
-countySchema.virtual('county').get(() => {
+countySchema.virtual('county').get(function () {
     return this._id
 })
 

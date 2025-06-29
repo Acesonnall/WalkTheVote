@@ -13,7 +13,7 @@ const STATES_SUPPORTED = {
     "Kentucky": "KY",
     "Louisiana": "LA",
     "Maryland": "MD",
-    "Massachussetts": "MA",
+    "Massachusetts": "MA",
     "Michigan": "MI",
     "Minnesota": "MN",
     "Missouri": "MO",

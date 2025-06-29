@@ -14,7 +14,7 @@ const stateSchema = new Schema({
     }
 }, opts)
 
-stateSchema.virtual('state').get(() => {
+stateSchema.virtual('state').get(function () {
     return this._id
 })
 

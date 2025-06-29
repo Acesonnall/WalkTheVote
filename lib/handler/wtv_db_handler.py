@@ -398,7 +398,7 @@ c[]{Bcolors.ENDC}"""
 
 
 async def main():
-    os.path.exists(os.path.join(ROOT_DIR, "scrapers", "new_hamphsire"))
+    os.path.exists(os.path.join(ROOT_DIR, "scrapers", "new_hampshire"))
     wtv_db = WtvDbHandler(LOCAL_DB_URI, LOCAL_DB_ALIAS)
     try:
         await wtv_db.load_election_office_info()
