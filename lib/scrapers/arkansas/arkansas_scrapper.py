@@ -86,7 +86,7 @@ def establish_uniformity(
 
 def get_county_election_office_info(strings_list: List[str]):
     """
-    Read strings on page and parser out the county, address, and phone numbers. Each
+    Read strings on page and parse out the county, address, and phone numbers. Each
     county clerk office's contact info is uniform so we can use a modulus operator
     too look up exact info.
     @param strings_list: List of strings to be parsed
