@@ -343,7 +343,7 @@ c[]{Bcolors.ENDC}"""
                 except ZipCode.DoesNotExist as e:
                     print(
                         f"{Bcolors.OKBLUE}\nCould not load "
-                        f"{county_name if not None else city_name}, {state_name} data: "
+                        f"{county_name if county_name is not None else city_name}, {state_name} data: "
                         f"{type(e).__name__}{Bcolors.ENDC}"
                     )
                     issues.append(
@@ -369,7 +369,7 @@ c[]{Bcolors.ENDC}"""
                 except ValidationError as e:
                     print(
                         f"{Bcolors.OKBLUE}\nCould not load "
-                        f"{county_name if not None else city_name}, {state_name} data: "
+                        f"{county_name if county_name is not None else city_name}, {state_name} data: "
                         f"{e}{Bcolors.ENDC}"
                     )
                     issues.append(
